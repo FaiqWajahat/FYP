@@ -1,7 +1,7 @@
-import DashboardPageHeader from '@/Components/DashboardPageHeader'
-import OrderDetailsTable from '@/Components/OrderDetailsTable'
-import OrderOtherDetails from '@/Components/OrderOtherDetails';
-import OrderSteps from '@/Components/OrderSteps';
+import DashboardPageHeader from '@/Components/common/DashboardPageHeader'
+import OrderDetailsTable from '@/Components/admin-dashboard/OrderDetailsTable'
+import OrderOtherDetails from '@/Components/admin-dashboard/OrderOtherDetails';
+import OrderSteps from '@/Components/site/OrderSteps';
 
 import React from 'react'
 

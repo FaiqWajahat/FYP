@@ -7,29 +7,23 @@ import { ArrowRight } from 'lucide-react';
 
 // === COMPONENT IMPORTS ===
 // Make sure these files exist in your /src/Components/ folder!
-import Navbar from '@/Components/Navbar';
-import Footer from '@/Components/Footer'; 
-import ChatWidget from '@/Components/ChatWidget';
-import CategoryHero from '@/Components/CategoryHero';
-import SidebarFilter from '@/Components/SidebarFilter';
-import ProductsToolbar from '@/Components/ProductsToolbar';
-import ProductCard from '@/Components/ProductCard';
-import Breadcrumbs from '@/Components/ShopBreadCrumps';
 
-// === DUMMY DATA ===
-const PRODUCTS = [
-  { id: 1, name: "Heavyweight Cotton Fleece Hoodie", category: "Hoodies", gsm: "400 GSM", moq: "20 Pcs", price: 18.50, image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=600&auto=format&fit=crop", status: "In Stock", colors: ["black", "navy", "grey", "olive"] },
-  { id: 2, name: "Performance Tech Tracksuit", category: "Tracksuits", gsm: "280 GSM", moq: "30 Pcs", price: 24.00, image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop", status: "Low Stock", colors: ["black", "blue"] },
-  { id: 3, name: "Varsity Letterman Jacket", category: "Jackets", gsm: "Wool/Leather", moq: "10 Pcs", price: 45.00, image: "https://images.unsplash.com/photo-1559551409-dadc959f76b8?q=80&w=600&auto=format&fit=crop", status: "Made to Order", colors: ["red", "black", "green"] },
-  { id: 4, name: "Oversized Streetwear Tee", category: "T-Shirts", gsm: "240 GSM", moq: "50 Pcs", price: 8.50, image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?q=80&w=600&auto=format&fit=crop", status: "In Stock", colors: ["white", "black", "beige", "charcoal"] },
-  { id: 5, name: "Waterproof Windbreaker", category: "Jackets", gsm: "Nylon Shell", moq: "25 Pcs", price: 22.00, image: "https://images.unsplash.com/photo-1620799140408-ed5341cd2431?q=80&w=600&auto=format&fit=crop", status: "In Stock", colors: ["black", "yellow", "orange"] },
-  { id: 6, name: "French Terry Joggers", category: "Bottoms", gsm: "350 GSM", moq: "30 Pcs", price: 16.00, image: "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?q=80&w=600&auto=format&fit=crop", status: "Made to Order", colors: ["grey", "black"] }
-];
+import CategoryHero from '@/Components/site/CategoryHero';
+import SidebarFilter, { FILTERS } from '@/Components/site/SidebarFilter';
+import ProductsToolbar from '@/Components/common/ProductsToolbar';
+import ProductCard from '@/Components/site/ProductCard';
+import Breadcrumbs from '@/Components/site/ShopBreadCrumps';
+import { PRODUCTS } from '@/data/mockProducts';
 
 export default function ShopPage() {
   const pathname = usePathname();
   const [viewMode, setViewMode] = useState('grid');
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
+  
+  // Filter States
+  const [activeCategory, setActiveCategory] = useState("All Products");
+  const [activeFabrics, setActiveFabrics] = useState([]);
+  const [activeGsm, setActiveGsm] = useState([]);
 
   // Dynamic Header Title
   const getCategoryTitle = () => {
@@ -44,12 +38,32 @@ export default function ShopPage() {
     { label: getCategoryTitle(), href: pathname },
   ];
 
+  // Derive filtered products
+  const filteredProducts = PRODUCTS.filter((product) => {
+    // Category match
+    const categoryMatch = 
+      activeCategory === "All Products" || 
+      product.category.toLowerCase() === activeCategory.toLowerCase();
+
+    // Fabrics match (if any specified)
+    const fabricMatch = 
+      activeFabrics.length === 0 || 
+      activeFabrics.includes(product.fabric);
+
+    // GSM match (if any specified)
+    const gsmMatch = 
+      activeGsm.length === 0 || 
+      activeGsm.includes(product.gsmWeight);
+
+    return categoryMatch && fabricMatch && gsmMatch;
+  });
+
   return (
     <>
      
       
       {/* pt-20 ensures Navbar doesn't overlap content */}
-      <main className="min-h-screen  pt-6 pb-8">
+      <div className="flex-1 pb-8 pt-20">
         
         {/* HEADER SECTION */}
         <div className="container max-w-7xl mx-auto px-4 md:px-8 mb-8">
@@ -58,7 +72,7 @@ export default function ShopPage() {
               <CategoryHero 
                 title={getCategoryTitle()} 
                 description="Browse our ready-to-deliver products. Order directly from the factory floor, customize fabrics, and add your branding." 
-                stats={{ count: PRODUCTS.length, priceStart: 8.50, fabric: "All Specs" }}
+                stats={{ count: filteredProducts.length, priceStart: 8.50, fabric: activeFabrics.length ? activeFabrics[0] : "All Specs" }}
               />
            </div>
         </div>
@@ -69,13 +83,21 @@ export default function ShopPage() {
             
             {/* DESKTOP SIDEBAR (Sticky) */}
             <aside className="hidden lg:block w-64 flex-shrink-0 h-full sticky top-32">
-              <SidebarFilter mobile={false} />
+              <SidebarFilter 
+                mobile={false} 
+                activeCategory={activeCategory}
+                setActiveCategory={setActiveCategory}
+                activeFabrics={activeFabrics}
+                setActiveFabrics={setActiveFabrics}
+                activeGsm={activeGsm}
+                setActiveGsm={setActiveGsm}
+              />
             </aside>
 
             {/* PRODUCT AREA */}
             <div className="flex-1 min-w-0">
               <ProductsToolbar 
-                totalProducts={PRODUCTS.length}
+                totalProducts={filteredProducts.length}
                 viewMode={viewMode}
                 setViewMode={setViewMode}
                 onFilterClick={() => setIsMobileFilterOpen(true)}
@@ -87,10 +109,23 @@ export default function ShopPage() {
                   ? 'grid-cols-1 sm:grid-cols-2 xl:grid-cols-3' 
                   : 'grid-cols-1'
               }`}>
-                {PRODUCTS.map((product) => (
+                {filteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
+
+              {filteredProducts.length === 0 && (
+                <div className="text-center py-24 bg-slate-50 border border-slate-100 rounded-2xl">
+                  <h3 className="text-xl font-bold text-slate-800 mb-2">No Products Found</h3>
+                  <p className="text-slate-500">Try adjusting your fabric or weight filters.</p>
+                  <button 
+                    className="mt-6 px-6 py-2 bg-slate-900 text-white font-bold rounded-lg text-sm transition-transform active:scale-95"
+                    onClick={() => { setActiveFabrics([]); setActiveGsm([]); setActiveCategory("All Products"); }}
+                  >
+                    Clear All Filters
+                  </button>
+                </div>
+              )}
 
               {/* Load More */}
               <div className="mt-20 flex justify-center pb-12">
@@ -102,7 +137,7 @@ export default function ShopPage() {
             </div>
           </div>
         </div>
-      </main>
+      </div>
 
       {/* MOBILE FILTER DRAWER */}
       <AnimatePresence>
@@ -122,7 +157,16 @@ export default function ShopPage() {
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
               className="fixed inset-y-0 right-0 w-full max-w-xs bg-white shadow-2xl z-[10001] lg:hidden overflow-y-auto"
             >
-              <SidebarFilter mobile={true} onClose={() => setIsMobileFilterOpen(false)} />
+              <SidebarFilter 
+                mobile={true} 
+                onClose={() => setIsMobileFilterOpen(false)} 
+                activeCategory={activeCategory}
+                setActiveCategory={setActiveCategory}
+                activeFabrics={activeFabrics}
+                setActiveFabrics={setActiveFabrics}
+                activeGsm={activeGsm}
+                setActiveGsm={setActiveGsm}  
+              />
             </motion.div>
           </>
         )}

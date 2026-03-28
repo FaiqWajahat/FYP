@@ -1,8 +1,9 @@
 'use client';
 import React, { useState } from "react";
-import DashboardHeader from "@/Components/DashboardHeader";
-import DashboardSidebar from "@/Components/DasboardSidebar";
+import DashboardHeader from "@/Components/common/DashboardHeader";
+import DashboardSidebar from "@/Components/admin-dashboard/DashboardSidebar";
 import { Inter } from "next/font/google";
+import { useConfigStore } from "@/store/useConfigStore";
 
 
 const inter = Inter({
@@ -11,13 +12,18 @@ const inter = Inter({
 });
 
 export default function AdminLayout({ children }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [theme, setTheme] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { isDarkMode } = useConfigStore();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
 
   return (
     <div
-      data-theme={theme ? "dark" : "light"}
+      data-theme={mounted && isDarkMode ? "dark" : "light"}
       className={`${inter.className} flex h-screen w-full overflow-hidden`}
     >
       {/* Sidebar */}
@@ -38,8 +44,6 @@ export default function AdminLayout({ children }) {
           <DashboardHeader
             sidebarOpen={sidebarOpen}
             setSidebarOpen={setSidebarOpen}
-            theme={theme}
-            setTheme={setTheme}
           />
         </header>
 
@@ -51,7 +55,7 @@ export default function AdminLayout({ children }) {
         {/* Footer */}
         <footer className="h-10 flex items-center justify-center bg-base-100 text-xs text-gray-500 shrink-0">
           Made with love by{" "}
-          <span className="text-primary ml-1 font-bold">Pixvion</span>
+          <span className="text-primary ml-1 font-bold">Factory Flow</span>
         </footer>
       </div>
     </div>

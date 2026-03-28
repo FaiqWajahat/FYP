@@ -4,9 +4,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <main>{children}</main>
+        {children}
       </body>
     </html>
   );
 }
+
 

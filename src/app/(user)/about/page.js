@@ -1,6 +1,6 @@
-import AboutHero from '@/Components/AboutHero'
-import AboutMission from '@/Components/AboutMission'
-import CTA from '@/Components/CTA'
+import AboutHero from '@/Components/site/AboutHero'
+import AboutMission from '@/Components/site/AboutMission'
+import CTA from '@/Components/site/CTA'
 import React from 'react'
 
 const AboutPage = () => {

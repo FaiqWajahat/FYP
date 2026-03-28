@@ -1,18 +1,18 @@
 
-import FeaturedProducts from "@/Components/FeaturedProduct";
-import LandingPage from "@/Components/LandingPage";
-import Process from "@/Components/Process";
-import ProductCategories from "@/Components/ProductCategries";
+import FeaturedProducts from "@/Components/site/FeaturedProduct";
+import LandingPage from "@/Components/site/LandingPage";
+import Process from "@/Components/site/Process";
+import ProductCategories from "@/Components/site/ProductCategries";
 
-import ServicesTimeline from "@/Components/Services";
-import StatsSection from "@/Components/Stats";
-import Testimonials from "@/Components/Testimonial";
+import ServicesTimeline from "@/Components/site/Services";
+import StatsSection from "@/Components/common/Stats";
+import Testimonials from "@/Components/site/Testimonial";
 
 export default function Home() {
   return (
     <>
       <LandingPage/>
-    <ProductCategories/>
+    {/* <ProductCategories/> */}
      
       {/* <ServicesTimeline/> */}
       <Process/>

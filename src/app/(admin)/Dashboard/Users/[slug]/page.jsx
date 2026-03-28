@@ -1,9 +1,9 @@
 "use client";
-import AddOrder from "@/Components/AddOrder";
-import AddUser from "@/Components/AddUser";
-import DashboardPageHeader from "@/Components/DashboardPageHeader";
-import DashboardSearch from "@/Components/DashboardSearch";
-import UsersTable from "@/Components/UserTable";
+import AddOrder from "@/Components/admin-dashboard/AddOrder";
+import AddUser from "@/Components/admin-dashboard/AddUser";
+import DashboardPageHeader from "@/Components/common/DashboardPageHeader";
+import DashboardSearch from "@/Components/admin-dashboard/DashboardSearch";
+import UsersTable from "@/Components/admin-dashboard/UserTable";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
 

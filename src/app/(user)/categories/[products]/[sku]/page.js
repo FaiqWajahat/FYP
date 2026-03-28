@@ -1,17 +1,17 @@
 'use client';
 
-import React, { useState, useMemo, useRef } from 'react';
-import Navbar from '@/Components/Navbar';
-import Footer from '@/Components/Footer';
-import Breadcrumbs from '@/Components/ShopBreadCrumps'; 
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+
+import Breadcrumbs from '@/Components/site/ShopBreadCrumps'; 
+import { useOrderStore } from '@/store/useOrderStore';
 
 // IMPORT OUR NEW SEPARATED COMPONENTS
-import ProductStudio from '@/Components/ProductStudio';
-import ProductHeader from '@/Components/ProductHeader';
-import BrandingOptions from '@/Components/BrandingOptions';
-import ColorSelector from '@/Components/ColorSelector';
-import SizingModule from '@/Components/SizingModule';
-import OrderSummary from '@/Components/OrderSummary';
+import ProductStudio from '@/Components/site/ProductStudio';
+import ProductHeader from '@/Components/site/ProductHeader';
+import BrandingOptions from '@/Components/site/BrandingOptions';
+import ColorSelector from '@/Components/common/ColorSelector';
+import SizingModule from '@/Components/site/SizingModule';
+import OrderSummary from '@/Components/common/OrderSummary';
 
 // --- CONSTANTS & MOCK DATA ---
 const BRANDING_FORMATS = [
@@ -73,8 +73,36 @@ export default function ProductDetailPage() {
   const [customRows, setCustomRows] = useState([{ id: 1, name: "Custom Size 1", qty: 20 }]); 
   const [uploadedSizeChart, setUploadedSizeChart] = useState(null);
   const sizeChartInputRef = useRef(null);
+  const studioRef = useRef(null);
 
-  // 3. Central Calculations
+  // 3. Hydrate from Store (Go Back and Make Changes)
+  const orderData = useOrderStore();
+  
+  useEffect(() => {
+    // If the store already has this product configured, restore it
+    if (orderData.product && orderData.product.sku === PRODUCT.sku) {
+      const { product, customization, sizing } = orderData;
+      
+      // Restore color
+      const savedColor = PRODUCT.colors.find(c => c.name === product.color);
+      if (savedColor) setSelectedColor(savedColor);
+      
+      // Restore customization
+      setIsCustomizing(customization.enabled);
+      const savedFormat = BRANDING_FORMATS.find(f => f.name === customization.format);
+      if (savedFormat) setSelectedFormat(savedFormat);
+      
+      // Restore sizing
+      setSizingMode(sizing.mode);
+      if (sizing.mode === 'standard') {
+        setStandardQuantities(sizing.breakdown);
+      } else {
+        setCustomRows(sizing.breakdown);
+      }
+    }
+  }, []); // Run once on mount
+
+  // 4. Central Calculations
   const totalQuantity = useMemo(() => {
     if (sizingMode === 'standard') {
       return Object.values(standardQuantities).reduce((a, b) => a + b, 0);
@@ -137,7 +165,7 @@ export default function ProductDetailPage() {
   return (
     <>
       
-      <main className="min-h-screen  pt-8 pb-20">
+      <main className="min-h-screen  pt-20 pb-20">
         <div className="container max-w-7xl mx-auto px-4 md:px-8 mb-6">
            <Breadcrumbs items={[
              { label: 'Catalog', href: '/' },
@@ -149,8 +177,8 @@ export default function ProductDetailPage() {
         <div className="container max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex flex-col lg:flex-row gap-12 lg:gap-16">
             
-            {/* LEFT: CANVAS STUDIO */}
             <ProductStudio 
+              ref={studioRef}
               images={PRODUCT.images}
               productTitle={PRODUCT.name}
               isCustomizing={isCustomizing}
@@ -203,12 +231,19 @@ export default function ProductDetailPage() {
               />
 
               <OrderSummary 
-                totalQuantity={totalQuantity}
-                activeTier={activeTier}
+                product={PRODUCT}
+                selectedColor={selectedColor}
                 isCustomizing={isCustomizing}
                 selectedFormat={selectedFormat}
+                sizingMode={sizingMode}
+                standardQuantities={standardQuantities}
+                customRows={customRows}
+                totalQuantity={totalQuantity}
+                activeTier={activeTier}
                 unitPrice={unitPrice}
                 totalEstimate={totalEstimate}
+                studioRef={studioRef}
+                logoProps={logoProps}
               />
 
             </div>

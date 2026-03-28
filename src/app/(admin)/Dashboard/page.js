@@ -1,12 +1,12 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import BrandLoader from '@/Components/BrandLoader';
-import BreadCrumps from '@/Components/BreadCrumps';
-import DashboardTopStats from '@/Components/DashboardTopStats';
-import SalesChart from '@/Components/SalesChart';
-import Calender from '@/Components/Calender';
-import RevenueChart from '@/Components/RevenueChart';
-import RecentOrders from '@/Components/RecentOrders';
+import BrandLoader from '@/Components/common/BrandLoader';
+import BreadCrumps from '@/Components/common/BreadCrumps';
+import DashboardTopStats from '@/Components/admin-dashboard/DashboardTopStats';
+import SalesChart from '@/Components/admin-dashboard/SalesChart';
+import Calender from '@/Components/common/Calender';
+import RevenueChart from '@/Components/admin-dashboard/RevenueChart';
+import RecentOrders from '@/Components/admin-dashboard/RecentOrders';
 
 const Page = () => {
   const breadData = [

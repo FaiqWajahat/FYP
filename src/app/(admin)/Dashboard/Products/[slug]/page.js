@@ -1,9 +1,8 @@
 "use client";
-import AddProduct from "@/Components/AddProduct";
-
-import DashboardPageHeader from "@/Components/DashboardPageHeader";
-import DashboardSearch from "@/Components/DashboardSearch";
-import ProductsTable from "@/Components/ProductTable";
+import AddProduct from "@/Components/admin-dashboard/AddProduct";
+import DashboardPageHeader from "@/Components/common/DashboardPageHeader";
+import DashboardSearch from "@/Components/admin-dashboard/DashboardSearch";
+import ProductsTable from "@/Components/admin-dashboard/ProductTable";
 
 import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";

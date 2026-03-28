@@ -1,11 +1,11 @@
 "use client";
 import { useState } from "react";
 import { Plus, Edit, Trash } from "lucide-react";
-import DsicountsTable from "@/Components/DsicountsTable";
-import DashboardSearch from "@/Components/DashboardSearch";
-import AddOrder from "@/Components/AddOrder";
-import DashboardPageHeader from "@/Components/DashboardPageHeader";
-import AddDiscount from "@/Components/AddDiscount";
+import DsicountsTable from "@/Components/admin-dashboard/DsicountsTable";
+import DashboardSearch from "@/Components/admin-dashboard/DashboardSearch";
+import AddOrder from "@/Components/admin-dashboard/AddOrder";
+import DashboardPageHeader from "@/Components/common/DashboardPageHeader";
+import AddDiscount from "@/Components/admin-dashboard/AddDiscount";
 
 export default function DiscountsPage() {
   const [discounts, setDiscounts] = useState([

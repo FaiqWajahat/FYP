@@ -1,8 +1,7 @@
-import AddCategory from '@/Components/AddCategory';
-import AddProduct from '@/Components/AddProduct';
-import CategoriesTable from '@/Components/CategoriesTable';
-import DashboardPageHeader from '@/Components/DashboardPageHeader';
-import DashboardSearch from '@/Components/DashboardSearch';
+import AddCategory from '@/Components/admin-dashboard/AddCategory';
+import CategoriesTable from '@/Components/admin-dashboard/CategoriesTable';
+import DashboardPageHeader from '@/Components/common/DashboardPageHeader';
+import DashboardSearch from '@/Components/admin-dashboard/DashboardSearch';
 import React from 'react'
 
 const DashboardCategories = () => {

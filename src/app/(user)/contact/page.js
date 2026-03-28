@@ -1,7 +1,7 @@
-import ContactDetails from '@/Components/ContactDetails'
-import ContactHero from '@/Components/ContactHero'
-import CTA from '@/Components/CTA'
-import FAQSection from '@/Components/Faqs'
+import ContactDetails from '@/Components/site/ContactDetails'
+import ContactHero from '@/Components/site/ContactHero'
+import CTA from '@/Components/site/CTA'
+import FAQSection from '@/Components/site/Faqs'
 import { Contact } from 'lucide-react'
 import React from 'react'
 
