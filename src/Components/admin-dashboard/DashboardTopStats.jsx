@@ -9,7 +9,7 @@ const DashboardTopStats = () => {
       
   <div className="stat ">
     <div className="stat-figure  bg-base-300 rounded-md  p-2">
-      <DollarSignIcon className='w-8 h-8   text-primary'/>
+      <DollarSignIcon className='w-8 h-8   text-[var(--primary)]'/>
     </div>
     <div className=" pb-1  ">Revenue</div>
     <div className="stat-value">
@@ -21,7 +21,7 @@ const DashboardTopStats = () => {
   <div className="stat">
    
        <div className="stat-figure  bg-base-300 rounded-md  p-2">
-      <Box className='w-8 h-8 text-primary'/>
+      <Box className='w-8 h-8 text-[var(--primary)]'/>
   
     </div>
     <div className="pb-1">Orders</div>
@@ -35,7 +35,7 @@ const DashboardTopStats = () => {
 <div className="stat">
     <div className="stat-figure ">
       <div className="stat-figure  bg-base-300 rounded-md  p-2">
-      <User className='w-8 h-8   text-primary'/>
+      <User className='w-8 h-8   text-[var(--primary)]'/>
     </div>
     </div>
     <div className="pb-1">Users</div>
@@ -48,7 +48,7 @@ const DashboardTopStats = () => {
   <div className="stat">
     <div className="stat-figure text-base-content ">
        <div className="stat-figure  bg-base-300 rounded-md p-2">
-      <Archive className='w-8 h-8   text-primary'/>
+      <Archive className='w-8 h-8   text-[var(--primary)]'/>
     </div>
     </div>
     <div className="pb-1">Products</div>

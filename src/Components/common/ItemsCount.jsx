@@ -5,7 +5,7 @@ const ItemsCount = () => {
   return (
    <>
    <p className='text-sm'>
-    Showing <span className='font-semibold text-primary'>10</span> of <span className='font-semibold text-primary'>20</span> items
+    Showing <span className='font-semibold text-[var(--primary)]'>10</span> of <span className='font-semibold text-[var(--primary)]'>20</span> items
    </p>
    </>
   )

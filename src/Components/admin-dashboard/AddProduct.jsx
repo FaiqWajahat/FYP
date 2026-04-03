@@ -127,7 +127,7 @@ export default function AddProduct({ onSave }) {
       <button
         type="button"
         onClick={open}
-        className="btn btn-primary text-white rounded-lg gap-2 text-sm font-medium shadow-sm"
+        className="btn bg-[var(--primary)] text-white border-transparent hover:brightness-110 text-white rounded-lg gap-2 text-sm font-medium shadow-sm"
       >
         <ShoppingBag className="w-4 h-4" /> Add Product
       </button>
@@ -136,20 +136,20 @@ export default function AddProduct({ onSave }) {
       <dialog ref={modalRef} className="modal modal-middle w-full h-full">
         <div className="modal-box text-sm max-w-3xl rounded-2xl p-0 bg-base-200 shadow-xl flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="px-6 py-4 bg-primary rounded-t-2xl shadow-md relative">
+          <div className="px-6 py-4 bg-[var(--primary)] rounded-t-2xl shadow-md relative">
             <div className="flex items-center gap-3">
-              <ShoppingBag className="w-5 h-5 text-primary-content" />
+              <ShoppingBag className="w-5 h-5 text-[var(--primary)]-content" />
               <div>
-                <h3 className="font-bold text-xl text-primary-content">
+                <h3 className="font-bold text-xl text-[var(--primary)]-content">
                   Add New Product
                 </h3>
-                <p className="text-xs text-primary-content/80">
+                <p className="text-xs text-[var(--primary)]-content/80">
                   Fill in the details to add a new product.
                 </p>
               </div>
             </div>
             <form method="dialog" className="absolute right-4 top-4">
-              <button className="btn btn-xs btn-primary btn-circle text-primary-content text-sm">
+              <button className="btn btn-xs bg-[var(--primary)] text-white border-transparent hover:brightness-110 btn-circle text-[var(--primary)]-content text-sm">
                 ✕
               </button>
             </form>
@@ -437,7 +437,7 @@ export default function AddProduct({ onSave }) {
             <button
               type="submit"
               disabled={submitting}
-              className="btn btn-primary btn-sm flex items-center gap-2 rounded-lg"
+              className="btn bg-[var(--primary)] text-white border-transparent hover:brightness-110 btn-sm flex items-center gap-2 rounded-lg"
               onClick={handleSubmit}
             >
               {submitting ? (

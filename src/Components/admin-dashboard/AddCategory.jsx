@@ -64,7 +64,7 @@ export default function AddCategory({ onSave }) {
       <button
         type="button"
         onClick={open}
-        className="btn btn-primary text-white rounded-lg gap-2 text-md font-medium shadow-sm"
+        className="btn bg-[var(--primary)] text-white border-transparent hover:brightness-110 text-white rounded-lg gap-2 text-md font-medium shadow-sm"
       >
         <FolderPlus className="w-5 h-5" /> Add Category
       </button>
@@ -73,20 +73,20 @@ export default function AddCategory({ onSave }) {
       <dialog ref={modalRef} className="modal text-sm  w-full modal-middle h-full">
         <div className="modal-box w-11/12 max-w-3xl rounded-xl p-0 bg-base-200 shadow-xl animate-fadeIn overflow-hidden flex flex-col">
           {/* Header */}
-          <div className="px-6 py-5 bg-primary rounded-md shadow-xl relative">
+          <div className="px-6 py-5 bg-[var(--primary)] rounded-md shadow-xl relative">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-full">
-                <FolderPlus className="w-6 h-6 text-primary-content" />
+                <FolderPlus className="w-6 h-6 text-[var(--primary)]-content" />
               </div>
               <div>
-                <h3 className="font-bold text-lg text-primary-content">Create Category</h3>
-                <p className="text-sm  text-primary-content/80">
+                <h3 className="font-bold text-lg text-[var(--primary)]-content">Create Category</h3>
+                <p className="text-sm  text-[var(--primary)]-content/80">
                   Add a new category and optional subcategories.
                 </p>
               </div>
             </div>
             <form method="dialog" className="absolute right-4 top-4">
-              <button className="btn btn-sm btn-primary btn-circle text-primary-content">
+              <button className="btn btn-sm bg-[var(--primary)] text-white border-transparent hover:brightness-110 btn-circle text-[var(--primary)]-content">
                 ✕
               </button>
             </form>
@@ -195,7 +195,7 @@ export default function AddCategory({ onSave }) {
             <button
               type="submit"
               disabled={submitting}
-              className="btn btn-primary flex items-center gap-2 rounded-lg text-xs"
+              className="btn bg-[var(--primary)] text-white border-transparent hover:brightness-110 flex items-center gap-2 rounded-lg text-xs"
               onClick={handleSubmit}
             >
               {submitting ? (

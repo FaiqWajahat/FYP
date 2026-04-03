@@ -211,7 +211,7 @@ export default function AddDiscount({
       <button
         type="button"
         onClick={open}
-        className="btn btn-primary text-white rounded-lg gap-2 text-sm font-medium shadow-sm"
+        className="btn bg-[var(--primary)] text-white border-transparent hover:brightness-110 text-white rounded-lg gap-2 text-sm font-medium shadow-sm"
       >
         <TicketPercent className="w-4 h-4" /> Add Discount
       </button>
@@ -220,20 +220,20 @@ export default function AddDiscount({
       <dialog ref={modalRef} className="modal w-full modal-middle h-full">
         <div className="modal-box max-w-3xl rounded-2xl p-0 bg-base-200 shadow-xl animate-fadeIn overflow-x-hidden flex flex-col text-sm">
           {/* Header */}
-          <div className="px-6 py-4 bg-primary rounded-md shadow-xl w-full">
+          <div className="px-6 py-4 bg-[var(--primary)] rounded-md shadow-xl w-full">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-full">
-                <TicketPercent className="w-5 h-5 text-primary-content" />
+                <TicketPercent className="w-5 h-5 text-[var(--primary)]-content" />
               </div>
               <div>
-                <h3 className="font-bold text-base text-primary-content">Create Discount</h3>
-                <p className="text-xs text-primary-content/80">
+                <h3 className="font-bold text-base text-[var(--primary)]-content">Create Discount</h3>
+                <p className="text-xs text-[var(--primary)]-content/80">
                   Set up a new discount code or automatic discount for your customers.
                 </p>
               </div>
             </div>
             <form method="dialog" className="absolute right-4 top-4 ">
-              <button className="btn btn-sm btn-primary btn-circle text-primary-content ">✕</button>
+              <button className="btn btn-sm bg-[var(--primary)] text-white border-transparent hover:brightness-110 btn-circle text-[var(--primary)]-content ">✕</button>
             </form>
           </div>
 
@@ -495,7 +495,7 @@ export default function AddDiscount({
               <button
                 type="submit"
                 disabled={submitting}
-                className="btn btn-primary btn-sm flex items-center gap-1 text-sm rounded-lg"
+                className="btn bg-[var(--primary)] text-white border-transparent hover:brightness-110 btn-sm flex items-center gap-1 text-sm rounded-lg"
                 onClick={handleSubmit}
               >
                 {submitting ? (

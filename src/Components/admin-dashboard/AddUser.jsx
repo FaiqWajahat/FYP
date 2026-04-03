@@ -85,7 +85,7 @@ export default function AddUser({ onSave }) {
       <button
         type="button"
         onClick={open}
-        className="btn btn-primary text-white rounded-lg gap-2 text-sm font-medium shadow-sm"
+        className="btn bg-[var(--primary)] text-white border-transparent hover:brightness-110 text-white rounded-lg gap-2 text-sm font-medium shadow-sm"
       >
         <UserPlus className="w-5 h-5" /> Add User
       </button>
@@ -94,22 +94,22 @@ export default function AddUser({ onSave }) {
       <dialog ref={modalRef} className="modal w-full modal-middle h-full">
         <div className="modal-box text-sm max-w-3xl rounded-2xl p-0 bg-base-200 shadow-xl overflow-hidden flex flex-col">
           {/* Header */}
-          <div className="px-6 py-5 bg-primary rounded-md relative">
+          <div className="px-6 py-5 bg-[var(--primary)] rounded-md relative">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-full">
-                <UserPlus className="w-6 h-6 text-primary-content" />
+                <UserPlus className="w-6 h-6 text-[var(--primary)]-content" />
               </div>
               <div>
-                <h3 className="font-semibold text-xl text-primary-content">
+                <h3 className="font-semibold text-xl text-[var(--primary)]-content">
                   Create User
                 </h3>
-                <p className="text-xs text-primary-content/80">
+                <p className="text-xs text-[var(--primary)]-content/80">
                   Add a new user to the system with role and status.
                 </p>
               </div>
             </div>
             <form method="dialog" className="absolute right-4 top-4">
-              <button className="btn btn-sm btn-circle text-primary-content bg-primary/40 hover:bg-primary/60 border-none">
+              <button className="btn btn-sm btn-circle text-[var(--primary)]-content bg-[var(--primary)]/40 hover:bg-[var(--primary)]/60 border-none">
                 ✕
               </button>
             </form>
@@ -288,7 +288,7 @@ export default function AddUser({ onSave }) {
             <button
               type="submit"
               disabled={submitting}
-              className="btn btn-primary flex items-center gap-2 rounded-lg text-sm"
+              className="btn bg-[var(--primary)] text-white border-transparent hover:brightness-110 flex items-center gap-2 rounded-lg text-sm"
               onClick={handleSubmit}
             >
               {submitting ? (

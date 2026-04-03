@@ -106,8 +106,8 @@ const TESTIMONIALS = [
 
 const Testimonials = () => {
   return (
-    <section className="py-24 bg-gradient-to-b from-slate-50 to-white relative overflow-hidden">
-      
+    <section className="py-24  relative overflow-hidden">
+
       {/* Background Decor */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none opacity-30">
         <div className="absolute -top-[20%] -right-[10%] w-[600px] h-[600px] bg-blue-100 rounded-full blur-[100px]"></div>
@@ -115,7 +115,7 @@ const Testimonials = () => {
       </div>
 
       <div className="container max-w-7xl mx-auto px-4 md:px-8 relative z-10">
-        
+
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="text-blue-600 font-bold tracking-wider uppercase text-xs mb-2 block">
@@ -125,7 +125,7 @@ const Testimonials = () => {
             Trusted by 500+ Brands Worldwide
           </h2>
           <p className="text-lg text-slate-500">
-            From startup labels in London to major wholesalers in New York, 
+            From startup labels in London to major wholesalers in New York,
             see why brands choose Factory Flow for their manufacturing.
           </p>
         </div>
@@ -143,9 +143,9 @@ const Testimonials = () => {
             disableOnInteraction: false,
             pauseOnMouseEnter: true,
           }}
-          pagination={{ 
-            clickable: true, 
-            dynamicBullets: true 
+          pagination={{
+            clickable: true,
+            dynamicBullets: true
           }}
           breakpoints={{
             640: {
@@ -163,15 +163,15 @@ const Testimonials = () => {
           {TESTIMONIALS.map((t) => (
             <SwiperSlide key={t.id} className="h-full">
               <div className="bg-white p-8 rounded-2xl shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] border border-slate-100 h-full flex flex-col hover:border-blue-200 transition-colors duration-300">
-                
+
                 {/* Card Header: Rating & Quote */}
                 <div className="flex justify-between items-start mb-6">
                   <div className="flex gap-1">
                     {[...Array(5)].map((_, i) => (
-                      <Star 
-                        key={i} 
-                        size={16} 
-                        className={i < Math.floor(t.rating) ? "text-yellow-400 fill-yellow-400" : "text-slate-200"} 
+                      <Star
+                        key={i}
+                        size={16}
+                        className={i < Math.floor(t.rating) ? "text-yellow-400 fill-yellow-400" : "text-slate-200"}
                       />
                     ))}
                   </div>
@@ -191,9 +191,9 @@ const Testimonials = () => {
                 {/* User Profile */}
                 <div className="flex items-center gap-4 pt-6 border-t border-slate-50 mt-auto">
                   <div className="relative">
-                    <img 
-                      src={t.image} 
-                      alt={t.name} 
+                    <img
+                      src={t.image}
+                      alt={t.name}
                       className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-md"
                     />
                     <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow-sm">

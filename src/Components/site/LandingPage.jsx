@@ -1,85 +1,14 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  ArrowRight, Package, Truck, CheckCircle, Zap, Globe,
-  BarChart3, Star, ChevronRight, Factory, Palette,
-  FileSpreadsheet, BadgeCheck, Sparkles, TrendingUp, Shield
+  ArrowRight, Package, CheckCircle, Zap, Globe,
+  BarChart3, BadgeCheck, TrendingUp, Shield, Palette,
+  LayoutDashboard, ShoppingBag, Receipt, Image as ImageIcon, Bell, Search, Clock
 } from 'lucide-react';
 import { useConfigStore } from '@/store/useConfigStore';
-
-// ─── Animated Counter Hook ─────────────────────────────────────────────────
-function useCountUp(target, duration = 2000, start = false) {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    if (!start) return;
-    let startTime = null;
-    const step = (ts) => {
-      if (!startTime) startTime = ts;
-      const progress = Math.min((ts - startTime) / duration, 1);
-      const ease = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.floor(ease * target));
-      if (progress < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }, [target, duration, start]);
-  return count;
-}
-
-// ─── Live Order Feed ───────────────────────────────────────────────────────
-const LIVE_ORDERS = [
-  { id: 'ORD-8821', product: 'Heavyweight Hoodies', units: '1,200 pcs', country: '🇺🇸 USA', status: 'In Production', dot: 'bg-blue-400', pill: 'bg-blue-50 text-blue-700 border-blue-200' },
-  { id: 'ORD-8739', product: 'Custom Embroidered Caps', units: '500 pcs', country: '🇦🇺 Australia', status: 'QC Passed', dot: 'bg-emerald-400', pill: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  { id: 'ORD-8901', product: 'Oversized Tees – 380 GSM', units: '3,000 pcs', country: '🇩🇪 Germany', status: 'Shipped', dot: 'bg-violet-400', pill: 'bg-violet-50 text-violet-700 border-violet-200' },
-  { id: 'ORD-8650', product: 'Fleece Joggers Collection', units: '800 pcs', country: '🇨🇦 Canada', status: 'Awaiting Approval', dot: 'bg-amber-400', pill: 'bg-amber-50 text-amber-700 border-amber-200' },
-  { id: 'ORD-9011', product: 'DTF Print Crewnecks', units: '2,500 pcs', country: '🇬🇧 UK', status: 'In Production', dot: 'bg-blue-400', pill: 'bg-blue-50 text-blue-700 border-blue-200' },
-];
-
-// ─── Features ──────────────────────────────────────────────────────────────
-const FEATURES = [
-  {
-    id: 'techpack',
-    label: 'Tech-Pack',
-    icon: FileSpreadsheet,
-    headline: 'Auto-generate production-ready specs',
-    body: 'Define fabric weight, GSM, stitching, and print formats. Our AI builds a verified tech-pack that factory floors accept on day one — no back-and-forth.',
-    stat: '98%', statLabel: 'Factory acceptance rate',
-    highlights: ['Auto-filled spec sheet', 'GSM & weight selector', 'AI validation engine'],
-    color: { bg: 'bg-blue-600', light: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-200', bar: 'bg-blue-600' },
-  },
-  {
-    id: 'branding',
-    label: 'Branding',
-    icon: Palette,
-    headline: 'Upload logos, preview on real products',
-    body: 'See your brand on garments before a single unit is cut. Choose embroidery, DTF, screen print — all costed in real-time with live margin breakdowns.',
-    stat: '3 min', statLabel: 'Avg. preview time',
-    highlights: ['Embroidery & DTF options', 'Real-time cost engine', 'Pantone color match'],
-    color: { bg: 'bg-violet-600', light: 'bg-violet-50', text: 'text-violet-600', border: 'border-violet-200', bar: 'bg-violet-600' },
-  },
-  {
-    id: 'tracking',
-    label: 'Live Track',
-    icon: BarChart3,
-    headline: 'Real-time order pipeline visibility',
-    body: 'From fabric sourcing to final QC scan, track every milestone on a live dashboard. Zero ambiguity, full factory transparency with photo updates.',
-    stat: '24/7', statLabel: 'Live production updates',
-    highlights: ['Milestone push alerts', 'Photo QC proof', 'ETA calculator'],
-    color: { bg: 'bg-emerald-600', light: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-200', bar: 'bg-emerald-600' },
-  },
-  {
-    id: 'export',
-    label: 'Global Export',
-    icon: Globe,
-    headline: 'Factory-to-door in 40+ countries',
-    body: 'DHL, sea freight, or air cargo — get instant quotes and customs documentation handled end-to-end by our dedicated logistics partners.',
-    stat: '40+', statLabel: 'Countries served',
-    highlights: ['Instant freight quotes', 'Customs docs included', 'DHL priority option'],
-    color: { bg: 'bg-amber-500', light: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-200', bar: 'bg-amber-500' },
-  },
-];
 
 // ─── Trust Ticker ──────────────────────────────────────────────────────────
 const TICKER = [
@@ -96,31 +25,13 @@ const TICKER = [
 export default function HeroSection() {
   const { projectName } = useConfigStore();
   const [mounted, setMounted] = useState(false);
-  const [activeFeature, setActiveFeature] = useState(0);
-  const [liveIdx, setLiveIdx] = useState(0);
-  const [statsGo, setStatsGo] = useState(false);
-  const statsRef = useRef(null);
-
-  const orders = useCountUp(12400, 2200, statsGo);
-  const brands = useCountUp(340, 1800, statsGo);
-  const countries = useCountUp(42, 1400, statsGo);
-  const satisfaction = useCountUp(98, 1600, statsGo);
 
   useEffect(() => {
     setMounted(true);
-    // Stats count-up: always fires after load
-    const t1 = setTimeout(() => setStatsGo(true), 900);
-    // Live order cycling
-    const t2 = setInterval(() => setLiveIdx(i => (i + 1) % LIVE_ORDERS.length), 3200);
-    // Feature tab auto-cycling
-    const t3 = setInterval(() => setActiveFeature(i => (i + 1) % FEATURES.length), 5000);
-    return () => { clearTimeout(t1); clearInterval(t2); clearInterval(t3); };
   }, []);
 
   if (!mounted) return <div className="flex-1 min-h-[80vh]" />;
 
-  const feat = FEATURES[activeFeature];
-  const c = feat.color;
   const headlineWords = 'The Operating System for Modern Apparel.'.split(' ');
 
   return (
@@ -136,17 +47,10 @@ export default function HeroSection() {
         }
         .ticker-inner { animation: ticker 28s linear infinite; }
         .ticker-inner:hover { animation-play-state: paused; }
-
-        @keyframes live-pulse {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50%       { opacity: 0.4; transform: scale(1.4); }
-        }
-        .live-dot { animation: live-pulse 1.8s ease-in-out infinite; }
       `}</style>
 
-      <section className="h-root relative w-full pt-20 pb-12 overflow-hidden flex flex-col items-center">
+      <section className="h-root relative w-full pt-20 pb-20 overflow-hidden flex flex-col items-center bg-slate-50/50">
         <div className="max-w-7xl mx-auto px-6 relative z-10 text-center flex flex-col items-center w-full">
-
 
 
           {/* ── Headline ── */}
@@ -187,7 +91,7 @@ export default function HeroSection() {
                 whileTap={{ scale: 0.97 }}
                 className="relative overflow-hidden px-9 py-4 bg-slate-900 text-white rounded-2xl font-bold text-sm flex items-center gap-3 shadow-[0_10px_36px_-10px_rgba(15,23,42,0.45)] group"
               >
-                <span className="absolute inset-0  opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <span className="relative z-10 flex items-center gap-3">
                   Start Your Order <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                 </span>
@@ -209,7 +113,7 @@ export default function HeroSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.8, duration: 0.8 }}
-            className="w-full max-w-6xl mx-auto overflow-hidden border border-slate-200 bg-white shadow-sm rounded-2xl py-3 mb-12"
+            className="w-full max-w-6xl mx-auto overflow-hidden border border-slate-200 bg-white shadow-sm rounded-2xl py-3 mb-10"
           >
             <div className="ticker-inner flex w-max select-none">
               {[...TICKER, ...TICKER].map(({ icon: Icon, text }, i) => (
@@ -223,241 +127,161 @@ export default function HeroSection() {
           </motion.div>
 
           {/* ════════════════════════════════════════════════════
-              NEW SPACIOUS LAYOUT
+              DASHBOARD PREVIEW SECTION
               ════════════════════════════════════════════════════ */}
 
-          {/* ── Stats Row ── */}
-          {/* <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 text-left"
-          >
-            {[
-              { val: orders, suf: '+', label: 'Units Produced', icon: Package, col: 'text-blue-600', bg: 'bg-blue-50' },
-              { val: brands, suf: '', label: 'Active Brands', icon: Star, col: 'text-violet-600', bg: 'bg-violet-50' },
-              { val: countries, suf: '+', label: 'Countries Served', icon: Globe, col: 'text-emerald-600', bg: 'bg-emerald-50' },
-              { val: satisfaction, suf: '%', label: 'Client Satisfaction', icon: BadgeCheck, col: 'text-amber-600', bg: 'bg-amber-50' },
-            ].map(({ val, suf, label, icon: Icon, col, bg }, i) => (
-              <motion.div
-                key={label}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1 + i * 0.1, duration: 0.5 }}
-                className="flex items-center gap-4 p-5 bg-white rounded-3xl border border-slate-200 shadow-sm hover:shadow-md transition-all group cursor-default"
-              >
-                <div className={`w-12 h-12 ${bg} rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
-                  <Icon size={20} className={col} />
-                </div>
-                <div>
-                  <p className="text-2xl font-black text-slate-900 leading-none tabular-nums">
-                    {val.toLocaleString()}{suf}
-                  </p>
-                  <p className="text-xs font-semibold text-slate-500 mt-1">{label}</p>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div> */}
-
-          {/* ── 2-Column Bento Base ── */}
           <motion.div
             initial={{ opacity: 0, y: 60 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8 text-left items-stretch"
+            className="w-full max-w-5xl mx-auto rounded-3xl border-4 border-slate-200/50 bg-slate-100/50 p-2 shadow-2xl relative"
           >
-            {/* ── LEFT: Feature showcase ── */}
-            <div className="lg:col-span-7 flex flex-col gap-4">
-              <div className="flex gap-2">
-                {FEATURES.map((f, i) => {
-                  const FI = f.icon;
-                  const fc = f.color;
-                  const active = i === activeFeature;
-                  return (
-                    <button
-                      key={f.id}
-                      onClick={() => setActiveFeature(i)}
-                      title={f.label}
-                      className={`flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-2xl text-xs sm:text-sm font-bold border transition-all duration-200 ${active
-                        ? `${fc.light} ${fc.text} ${fc.border} shadow-sm`
-                        : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-50'
-                        }`}
-                    >
-                      <FI size={16} />
-                      <span className="hidden sm:inline">{f.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
+            {/* Soft backdrop glow */}
+            <div className="absolute -inset-0.5 bg-gradient-to-tr from-blue-500/20 to-purple-500/20 blur-2xl -z-10 rounded-3xl" />
 
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={feat.id}
-                  initial={{ opacity: 0, scale: 0.98, y: 16 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.98, y: -16 }}
-                  transition={{ duration: 0.35 }}
-                  className="flex-1 min-h-[300px] rounded-3xl border border-slate-200 bg-white shadow-lg overflow-hidden flex flex-col justify-between"
-                >
-                  <div>
-                    <div className={`h-1.5 w-full ${c.bg}`} />
-                    <div className="p-8 flex flex-col gap-6">
-                      <div className="flex items-start gap-5">
-                        <div className={`w-14 h-14 ${c.light} rounded-2xl flex items-center justify-center flex-shrink-0`}>
-                          {React.createElement(feat.icon, { size: 28, className: c.text })}
-                        </div>
-                        <div>
-                          <p className={`text-[11px] font-black uppercase tracking-widest mb-1.5 ${c.text}`}>{feat.label}</p>
-                          <h3 className="text-lg md:text-xl font-extrabold text-slate-900 leading-snug">{feat.headline}</h3>
-                        </div>
-                      </div>
-                      <p className="text-slate-500 font-medium leading-relaxed">{feat.body}</p>
-                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-2">
-                        {feat.highlights.map(h => (
-                          <li key={h} className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-                            <CheckCircle size={16} className={c.text} />
-                            {h}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-
-                  <div className="p-8 pt-0 mt-auto">
-                    <div className={`flex items-center justify-between p-4 rounded-2xl ${c.light} border ${c.border} mb-4`}>
-                      <div>
-                        <p className={`text-4xl font-black leading-none ${c.text}`}>{feat.stat}</p>
-                        <p className="text-xs text-slate-600 font-semibold mt-1">{feat.statLabel}</p>
-                      </div>
-                      <div className={`h-12 w-12 ${c.bg} rounded-2xl flex items-center justify-center shadow-md`}>
-                        <ArrowRight size={20} className="text-white" />
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      {FEATURES.map((_, i) => (
-                        <button
-                          key={i}
-                          onClick={() => setActiveFeature(i)}
-                          className={`h-2 flex-1 rounded-full transition-all duration-500 ${i === activeFeature ? c.bar : 'bg-slate-100 hover:bg-slate-200'}`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-
-            {/* ── RIGHT: Live orders Feed ── */}
-            <div className="lg:col-span-5 flex flex-col gap-4">
-              <div className="w-full flex items-center justify-between px-2">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 live-dot border border-emerald-200" />
-                  <span className="text-xs font-black text-slate-500 uppercase tracking-widest">Live Orders Feed</span>
+            <div className="w-full rounded-2xl overflow-hidden bg-white shadow-lg flex flex-col border border-slate-200">
+              
+              {/* Mock OS Header */}
+              <div className="h-12 bg-slate-50 border-b border-slate-200 flex items-center px-4 gap-4">
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-400 hover:bg-red-500 transition-colors shadow-sm" />
+                  <div className="w-3 h-3 rounded-full bg-amber-400 hover:bg-amber-500 transition-colors shadow-sm" />
+                  <div className="w-3 h-3 rounded-full bg-emerald-400 hover:bg-emerald-500 transition-colors shadow-sm" />
                 </div>
-                <span className="text-xs text-slate-400 font-semibold bg-slate-100 px-2 py-1 rounded-md">Auto-updating</span>
-              </div>
-
-              <div className="flex flex-col gap-3 min-h-[300px]">
-                <div className="relative rounded-3xl border border-slate-200 bg-white shadow-lg overflow-hidden flex-1">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={liveIdx}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ duration: 0.4 }}
-                      className="p-6 h-full flex flex-col justify-center gap-4"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{LIVE_ORDERS[liveIdx].id}</p>
-                          <p className="font-extrabold text-slate-900 text-lg mt-1">{LIVE_ORDERS[liveIdx].product}</p>
-                        </div>
-                        <span className={`px-3 py-1.5 rounded-full text-xs font-bold border whitespace-nowrap shadow-sm ${LIVE_ORDERS[liveIdx].pill}`}>
-                          {LIVE_ORDERS[liveIdx].status}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-6 mt-2 pt-4 border-t border-slate-100">
-                        <div className="flex flex-col">
-                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Volume</span>
-                          <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 mt-0.5"><Package size={14} className="text-slate-400" />{LIVE_ORDERS[liveIdx].units}</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Destination</span>
-                          <span className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 mt-0.5"><Truck size={14} className="text-slate-400" />{LIVE_ORDERS[liveIdx].country}</span>
-                        </div>
-                      </div>
-                    </motion.div>
-                  </AnimatePresence>
-                  <div className="h-1 bg-slate-50 absolute bottom-0 inset-x-0">
-                    <motion.div
-                      className={`h-full ${LIVE_ORDERS[liveIdx].dot}`}
-                      initial={{ width: '100%' }}
-                      animate={{ width: '0%' }}
-                      transition={{ duration: 3.2, ease: 'linear' }}
-                      key={liveIdx}
-                    />
+                <div className="flex-1 flex justify-center">
+                  <div className="h-7 w-72 bg-white border border-slate-200 rounded-md flex items-center px-3 justify-center shadow-inner">
+                    <Search size={14} className="text-slate-300 mr-2" />
+                    <div className="h-2 w-32 bg-slate-100 rounded-full" />
                   </div>
                 </div>
+              </div>
 
-                <div className="flex flex-col gap-2">
-                  {LIVE_ORDERS.filter((_, i) => i !== liveIdx).slice(0, 3).map((o, i) => (
+              {/* Mock App Body */}
+              <div className="flex flex-col md:flex-row h-[560px]">
+                
+                {/* Sidebar */}
+                <div className="hidden md:flex w-60 bg-slate-50 border-r border-slate-200 p-5 flex-col gap-2">
+                  <div className="mb-6 px-3">
+                    <span className="font-extrabold text-xl tracking-tight text-slate-800 d-font">{projectName}.</span>
+                  </div>
+                  {[
+                    { icon: LayoutDashboard, label: 'Dashboard', active: true },
+                    { icon: ShoppingBag, label: 'Production Pipeline' },
+                    { icon: ImageIcon, label: 'Mockup Studio' },
+                    { icon: Receipt, label: 'Invoices & Billing' },
+                  ].map((item, i) => (
                     <motion.div
-                      key={o.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: i * 0.08 }}
-                      className="flex items-center gap-4 p-4 bg-white border border-slate-200 rounded-2xl hover:border-slate-300 hover:shadow-sm transition-all shadow-sm"
+                      key={i}
+                      whileHover={{ scale: 1.02 }}
+                      className={`flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold cursor-default transition-all ${
+                        item.active ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-slate-600 hover:bg-slate-200/50 hover:text-slate-900'
+                      }`}
                     >
-                      <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${o.dot}`} />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-slate-800 truncate">{o.product}</p>
-                        <p className="text-xs text-slate-500 font-medium mt-0.5">{o.units} · {o.country}</p>
-                      </div>
-                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border whitespace-nowrap ${o.pill}`}>{o.status}</span>
+                      <item.icon size={18} className={item.active ? 'opacity-100' : 'opacity-60'} />
+                      {item.label}
                     </motion.div>
                   ))}
+
+                  <div className="mt-auto px-3 py-4 border-t border-slate-200">
+                     <div className="flex items-center gap-3">
+                       <div className="w-9 h-9 rounded-full bg-slate-200 border-2 border-white shadow-sm flex items-center justify-center overflow-hidden">
+                         <div className="w-full h-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs">US</div>
+                       </div>
+                       <div className="flex flex-col text-left">
+                         <span className="text-xs font-bold text-slate-800">Supply Studio</span>
+                         <span className="text-[10px] font-semibold text-slate-500">Premium Plan</span>
+                       </div>
+                     </div>
+                  </div>
+                </div>
+
+                {/* Main Content Area */}
+                <div className="flex-1 bg-white p-6 md:p-8 flex flex-col gap-8 overflow-hidden text-left relative">
+                  
+                  {/* Subtle background decoration */}
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50/50 rounded-full blur-[80px] pointer-events-none" />
+
+                  {/* Header */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 z-10">
+                    <div>
+                      <motion.h2 initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.2 }} className="text-2xl pt-2 font-black text-slate-900 d-font">
+                        Welcome back, Studio.
+                      </motion.h2>
+                      <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.3 }} className="text-sm font-medium text-slate-500 mt-1">
+                        Here's what's happening with your production lines today.
+                      </motion.p>
+                    </div>
+                    <div className="hidden sm:flex items-center gap-3">
+                      <button className="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-700 transition-colors">
+                        <Bell size={18} />
+                      </button>
+                      <button className="px-5 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold shadow-sm hover:shadow-md transition-shadow">
+                        New Order
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Stats Cards */}
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 z-10">
+                    {[
+                      { val: '12', label: 'Active Lines', col: 'text-blue-600', bg: 'bg-blue-50' },
+                      { val: '4', label: 'Pending Mockups', col: 'text-amber-600', bg: 'bg-amber-50' },
+                      { val: '$42k', label: 'Paid Invoices', col: 'text-emerald-600', bg: 'bg-emerald-50' },
+                    ].map((s, i) => (
+                      <motion.div
+                        key={i}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 1.4 + (i * 0.1) }}
+                        whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                        className="p-5 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all bg-white"
+                      >
+                        <p className={`text-3xl font-black ${s.col} tracking-tight`}>{s.val}</p>
+                        <p className="text-[11px] font-bold text-slate-500 mt-2 uppercase tracking-widest">{s.label}</p>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  {/* Active Productions Table */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.7 }}
+                    className="flex-1 rounded-2xl border border-slate-100 shadow-sm bg-white overflow-hidden flex flex-col z-10"
+                  >
+                    <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                      <h3 className="font-extrabold text-slate-800 text-sm">Recent Productions</h3>
+                      <button className="text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg">View All</button>
+                    </div>
+                    <div className="p-2 flex flex-col gap-1 overflow-y-auto">
+                      {[
+                        { id: 'ORD-8821', title: 'Heavyweight Hoodies', items: '1,200 units', status: 'In Production', stBg: 'bg-blue-50', stText: 'text-blue-600', icon: Package },
+                        { id: 'ORD-8901', title: 'Oversized Tees (380 GSM)', items: '3,000 units', status: 'QC Passed', stBg: 'bg-emerald-50', stText: 'text-emerald-600', icon: CheckCircle },
+                        { id: 'ORD-8650', title: 'Fleece Joggers Collection', items: '800 units', status: 'Payment Review', stBg: 'bg-amber-50', stText: 'text-amber-600', icon: Clock },
+                      ].map((row, i) => (
+                        <div key={i} className="flex items-center justify-between p-3 px-4 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-100 transition-all cursor-default">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${row.stBg} shadow-inner`}>
+                              <row.icon size={18} className={row.stText} />
+                            </div>
+                            <div>
+                              <p className="font-extrabold text-slate-800 text-sm">{row.title}</p>
+                              <p className="text-[11px] font-semibold text-slate-500 mt-1 uppercase tracking-wider">{row.id} <span className="mx-1 text-slate-300">•</span> {row.items}</p>
+                            </div>
+                          </div>
+                          <div className={`px-3 py-1 rounded-full text-[10px] font-black ${row.stBg} ${row.stText} shadow-sm border border-white/50 uppercase tracking-wide`}>
+                            {row.status}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </motion.div>
+
                 </div>
               </div>
             </div>
-
           </motion.div>
 
-          {/* ── How It Works (Horizontal Strip) ── */}
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1.2, ease: [0.16, 1, 0.3, 1] }}
-            className="w-full mt-4 p-6 md:p-8 bg-slate-900 rounded-[2rem] shadow-xl text-left relative overflow-hidden"
-          >
-            {/* Background design accents */}
-            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
-
-            <p className="text-xs font-black text-blue-400 uppercase tracking-widest mb-6 relative z-10 flex items-center gap-2">
-              <Zap size={14} /> How Implementation Works
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
-              {[
-                { icon: Sparkles, step: '01', title: 'Configure & Brand', label: 'Use our 3D studio to apply your graphics.' },
-                { icon: CheckCircle, step: '02', title: 'Tech-Pack AI', label: 'Auto-generate factory schematics & costings.' },
-                { icon: Factory, step: '03', title: 'Production Floor', label: 'Your styles hit verified automated looms.' },
-                { icon: Truck, step: '04', title: 'Global Delivery', label: 'DDP freight tracking door-to-door.' },
-              ].map(({ icon: Icon, step, title, label }, i) => (
-                <div key={i} className="flex flex-col gap-4 p-5 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center flex-shrink-0">
-                      <Icon size={18} />
-                    </div>
-                    <span className="text-3xl font-black text-white/5">{step}</span>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-white mb-1.5">{title}</h4>
-                    <p className="text-[13px] font-medium text-slate-400 leading-relaxed">{label}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
         </div>
       </section>
     </>

@@ -81,8 +81,8 @@ function UploadModal({ onClose, onSave }) {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-base-200 bg-base-50 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center">
-              <Plus size={16} className="text-primary" />
+            <div className="w-9 h-9 bg-[var(--primary)]/10 rounded-xl flex items-center justify-center">
+              <Plus size={16} className="text-[var(--primary)]" />
             </div>
             <div>
               <p className="font-bold text-sm">Upload Invoice</p>
@@ -105,7 +105,7 @@ function UploadModal({ onClose, onSave }) {
             </label>
             <div className="relative">
               <select value={form.userId} onChange={e => set("userId", e.target.value)}
-                className="w-full border border-base-300 rounded-xl px-4 py-3 text-sm appearance-none focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/10 bg-base-100">
+                className="w-full border border-base-300 rounded-xl px-4 py-3 text-sm appearance-none focus:outline-none focus:border-[var(--primary)]/60 focus:ring-2 focus:ring-[var(--primary)]/10 bg-base-100">
                 <option value="">Select a client…</option>
                 {MOCK_USERS.map(u => (
                   <option key={u.id} value={u.id}>{u.name} — {u.company}</option>
@@ -123,13 +123,13 @@ function UploadModal({ onClose, onSave }) {
               </label>
               <input type="text" value={form.orderId} onChange={e => set("orderId", e.target.value)}
                 placeholder="ORD-0000"
-                className="w-full border border-base-300 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/10 bg-base-100 placeholder:text-base-content/25" />
+                className="w-full border border-base-300 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[var(--primary)]/60 focus:ring-2 focus:ring-[var(--primary)]/10 bg-base-100 placeholder:text-base-content/25" />
             </div>
             <div>
               <label className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 block">Order Description</label>
               <input type="text" value={form.orderName} onChange={e => set("orderName", e.target.value)}
                 placeholder="e.g. Hoodie — 500 pcs"
-                className="w-full border border-base-300 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/10 bg-base-100 placeholder:text-base-content/25" />
+                className="w-full border border-base-300 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[var(--primary)]/60 focus:ring-2 focus:ring-[var(--primary)]/10 bg-base-100 placeholder:text-base-content/25" />
             </div>
           </div>
 
@@ -141,7 +141,7 @@ function UploadModal({ onClose, onSave }) {
               </label>
               <input type="number" value={form.amount} onChange={e => set("amount", e.target.value)}
                 placeholder="0.00" min="0" step="0.01"
-                className="w-full border border-base-300 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-primary/60 focus:ring-2 focus:ring-primary/10 bg-base-100 placeholder:text-base-content/25" />
+                className="w-full border border-base-300 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[var(--primary)]/60 focus:ring-2 focus:ring-[var(--primary)]/10 bg-base-100 placeholder:text-base-content/25" />
             </div>
             <div>
               <label className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 block">Currency</label>
@@ -157,14 +157,14 @@ function UploadModal({ onClose, onSave }) {
             <div>
               <label className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 block">Issue Date</label>
               <input type="date" value={form.issuedDate} onChange={e => set("issuedDate", e.target.value)}
-                className="w-full border border-base-300 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-primary/60 bg-base-100 text-base-content/70" />
+                className="w-full border border-base-300 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[var(--primary)]/60 bg-base-100 text-base-content/70" />
             </div>
             <div>
               <label className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 block">
                 Due Date <span className="text-error">*</span>
               </label>
               <input type="date" value={form.dueDate} onChange={e => set("dueDate", e.target.value)}
-                className="w-full border border-base-300 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-primary/60 bg-base-100 text-base-content/70" />
+                className="w-full border border-base-300 rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[var(--primary)]/60 bg-base-100 text-base-content/70" />
             </div>
           </div>
 
@@ -174,7 +174,7 @@ function UploadModal({ onClose, onSave }) {
             <textarea value={form.notes} onChange={e => set("notes", e.target.value)}
               placeholder="Payment instructions, milestone description, etc."
               rows={2}
-              className="w-full border border-base-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary/60 bg-base-100 placeholder:text-base-content/25 resize-none" />
+              className="w-full border border-base-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[var(--primary)]/60 bg-base-100 placeholder:text-base-content/25 resize-none" />
           </div>
 
           {/* PDF Upload */}
@@ -182,20 +182,20 @@ function UploadModal({ onClose, onSave }) {
             <label className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 block">Invoice PDF</label>
             <button type="button" onClick={() => fileRef.current?.click()}
               className={`w-full border-2 border-dashed rounded-xl transition-all group ${
-                form.pdfFile ? "border-primary/40 bg-primary/5 py-3 px-4" : "border-base-300 hover:border-primary/50 hover:bg-base-50 py-5 px-4"
+                form.pdfFile ? "border-[var(--primary)]/40 bg-[var(--primary)]/5 py-3 px-4" : "border-base-300 hover:border-[var(--primary)]/50 hover:bg-base-50 py-5 px-4"
               }`}>
               {form.pdfFile ? (
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <FileText size={14} className="text-primary" />
+                  <div className="w-8 h-8 bg-[var(--primary)]/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <FileText size={14} className="text-[var(--primary)]" />
                   </div>
-                  <span className="text-sm font-medium text-primary truncate flex-1">{form.pdfFile.name}</span>
+                  <span className="text-sm font-medium text-[var(--primary)] truncate flex-1">{form.pdfFile.name}</span>
                   <button type="button"
                     onClick={e => { e.stopPropagation(); set("pdfFile", null); }}
                     className="text-base-content/30 hover:text-error flex-shrink-0"><X size={14} /></button>
                 </div>
               ) : (
-                <div className="flex flex-col items-center gap-2 text-base-content/40 group-hover:text-primary/60 transition-colors">
+                <div className="flex flex-col items-center gap-2 text-base-content/40 group-hover:text-[var(--primary)]/60 transition-colors">
                   <Upload size={22} />
                   <div className="text-center">
                     <p className="text-sm font-semibold">Upload Invoice PDF</p>
@@ -217,7 +217,7 @@ function UploadModal({ onClose, onSave }) {
           </button>
           <button onClick={handleSubmit} disabled={!valid}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all ${
-              valid ? "bg-primary text-white hover:bg-primary/90 shadow-md" : "bg-base-200 text-base-content/30 cursor-not-allowed"
+              valid ? "bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90 shadow-md" : "bg-base-200 text-base-content/30 cursor-not-allowed"
             }`}>
             <Upload size={14} /> Send Invoice
           </button>
@@ -258,7 +258,7 @@ function InvoiceRow({ invoice, user, onDelete }) {
       {/* PDF badge */}
       <div>
         {invoice.pdfFile ? (
-          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-primary bg-primary/10 px-2 py-1 rounded-lg border border-primary/20">
+          <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--primary)] bg-[var(--primary)]/10 px-2 py-1 rounded-lg border border-[var(--primary)]/20">
             <FileText size={10} /> PDF
           </span>
         ) : (
@@ -269,7 +269,7 @@ function InvoiceRow({ invoice, user, onDelete }) {
       {/* Actions */}
       <div className="flex items-center gap-2">
         {invoice.pdfFile && (
-          <button className="w-8 h-8 rounded-lg border border-base-200 hover:border-primary/30 hover:text-primary flex items-center justify-center text-base-content/40 transition-all" title="Download PDF">
+          <button className="w-8 h-8 rounded-lg border border-base-200 hover:border-[var(--primary)]/30 hover:text-[var(--primary)] flex items-center justify-center text-base-content/40 transition-all" title="Download PDF">
             <Download size={13} />
           </button>
         )}
@@ -323,7 +323,7 @@ export default function AdminInvoiceManager() {
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: "Total Invoices", value: counts.all, Icon: FileText, color: "text-primary", bg: "bg-primary/10" },
+          { label: "Total Invoices", value: counts.all, Icon: FileText, color: "text-[var(--primary)]", bg: "bg-[var(--primary)]/10" },
           { label: "Awaiting Approval", value: counts.pending, Icon: Clock, color: "text-amber-600", bg: "bg-amber-50" },
           { label: "Approved", value: counts.approved, Icon: CheckCircle, color: "text-emerald-600", bg: "bg-emerald-50" },
           { label: "Outstanding Amount", value: fmt(totalOutstanding), Icon: AlertCircle, color: "text-amber-600", bg: "bg-amber-50" },
@@ -348,7 +348,7 @@ export default function AdminInvoiceManager() {
             <button key={s} onClick={() => setStatusFilter(s)}
               className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all ${
                 statusFilter === s
-                  ? "bg-primary text-white shadow-sm"
+                  ? "bg-[var(--primary)] text-white shadow-sm"
                   : "text-base-content/50 hover:bg-base-200"
               }`}>
               {s === "all" ? `All (${counts.all})` : `${s} (${counts[s]})`}
@@ -361,12 +361,12 @@ export default function AdminInvoiceManager() {
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30" />
           <input type="text" value={search} onChange={e => setSearch(e.target.value)}
             placeholder="Search invoices, clients…"
-            className="w-full pl-9 pr-4 py-2.5 text-sm border border-base-200 rounded-xl focus:outline-none focus:border-primary/50 focus:ring-2 focus:ring-primary/10 bg-base-100 placeholder:text-base-content/25 transition-all" />
+            className="w-full pl-9 pr-4 py-2.5 text-sm border border-base-200 rounded-xl focus:outline-none focus:border-[var(--primary)]/50 focus:ring-2 focus:ring-[var(--primary)]/10 bg-base-100 placeholder:text-base-content/25 transition-all" />
         </div>
 
         {/* Upload CTA */}
         <button onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-primary/90 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
+          className="flex items-center gap-2 bg-[var(--primary)] text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-[var(--primary)]/90 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
           <Plus size={15} /> Upload Invoice
         </button>
       </div>

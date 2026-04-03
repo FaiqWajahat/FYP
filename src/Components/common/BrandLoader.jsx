@@ -32,16 +32,15 @@ export default function Brandloader({ duration = 3000 }) {
 
   return (
     <div
-      className={`fixed inset-0 z-[9999] flex items-center justify-center bg-gradient-to-br from-base-100 to-base-200 transition-all duration-700 ${
-        isAnimatingOut ? "opacity-0 scale-105" : "opacity-100 scale-100"
-      }`}
+      className={`fixed inset-0 z-[9999] flex items-center justify-center bg-gradient-to-br from-base-100 to-base-200 transition-all duration-700 ${isAnimatingOut ? "opacity-0 scale-105" : "opacity-100 scale-100"
+        }`}
     >
       {/* Brand Name with Bounce */}
       <h1
-        className="text-6xl md:text-9xl font-black text-primary tracking-tight"
+        className="text-6xl md:text-9xl font-black text-[var(--primary)] tracking-tight"
         style={{ fontFamily: "system-ui, -apple-system, sans-serif" }}
       >
-        {"Pxvion".split("").map((letter, index) => (
+        {"Admin".split("").map((letter, index) => (
           <span
             key={index}
             className="inline-block bounce"
