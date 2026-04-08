@@ -88,10 +88,10 @@ const DraggableLogo = ({ imageSrc, isSelected, onSelect, logoProps, onChange }) 
 
 // --- Main Studio Component ---
 const ProductStudio = forwardRef(function ProductStudio({ 
-  images, productTitle, isCustomizing, selectedFormat, 
-  uploadedLogo, selectedLogoId, selectLogoId, logoProps, setLogoProps 
+  images, product, isCustomizing, selectedFormat, 
+  uploadedLogos = [], selectedLogoId, selectLogoId, onLogoChange,
+  activeImage = 0, onImageSelect = () => {} 
 }, ref) {
-  const [activeImage, setActiveImage] = useState(0);
   const containerRef = useRef(null);
   const stageRef = useRef(null);
   const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
@@ -135,13 +135,17 @@ const ProductStudio = forwardRef(function ProductStudio({
                 if (e.target === e.target.getStage()) selectLogoId(null);
               }}>
               <Layer>
-                <BackgroundImage src={images[activeImage]} stageWidth={stageSize.width} stageHeight={stageSize.height} />
-                {isCustomizing && uploadedLogo && (
+                <BackgroundImage src={images[activeImage] || images[0]} stageWidth={stageSize.width} stageHeight={stageSize.height} />
+                {isCustomizing && uploadedLogos.map((logo) => (
                   <DraggableLogo 
-                    imageSrc={uploadedLogo} isSelected={selectedLogoId === 'logo1'} onSelect={() => selectLogoId('logo1')} 
-                    logoProps={logoProps} onChange={(newAttrs) => setLogoProps(newAttrs)}
+                    key={logo.id}
+                    imageSrc={logo.src} 
+                    isSelected={selectedLogoId === logo.id} 
+                    onSelect={() => selectLogoId(logo.id)} 
+                    logoProps={logo} 
+                    onChange={(newProps) => onLogoChange(logo.id, newProps)}
                   />
-                )}
+                ))}
               </Layer>
             </Stage>
           )}
@@ -150,7 +154,7 @@ const ProductStudio = forwardRef(function ProductStudio({
               <Layers size={12} /> {selectedFormat?.name} Mode
             </div>
           )}
-          {isCustomizing && uploadedLogo && selectedLogoId && (
+          {isCustomizing && uploadedLogos.length > 0 && selectedLogoId && (
             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/80 backdrop-blur text-white px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 pointer-events-none animate-pulse">
                <Move size={14} /> Drag <Maximize size={14} className="ml-2"/> Resize
             </div>
@@ -160,7 +164,7 @@ const ProductStudio = forwardRef(function ProductStudio({
         {/* Thumbnails */}
         <div className="grid grid-cols-5 gap-3">
           {images.map((img, idx) => (
-            <button key={idx} onClick={() => setActiveImage(idx)} className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-slate-900 ring-1 ring-slate-900' : 'border-transparent opacity-60 hover:opacity-100'}`}>
+            <button key={idx} onClick={() => onImageSelect(idx)} className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-slate-900 ring-1 ring-slate-900' : 'border-transparent opacity-60 hover:opacity-100'}`}>
               <img src={img} alt="" className="w-full h-full object-cover"/>
             </button>
           ))}
@@ -170,9 +174,9 @@ const ProductStudio = forwardRef(function ProductStudio({
         <div className="hidden lg:block mt-8 bg-slate-50 rounded-xl p-6 border border-slate-200">
            <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider"><ShieldCheck size={16}/> Factory Specifications</h3>
            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div className="flex justify-between border-b border-slate-200 pb-2"><span className="text-slate-500">GSM</span><span className="font-bold text-slate-900">400</span></div>
-              <div className="flex justify-between border-b border-slate-200 pb-2"><span className="text-slate-500">Material</span><span className="font-bold text-slate-900">100% Cotton</span></div>
-              <div className="flex justify-between border-b border-slate-200 pb-2"><span className="text-slate-500">Fit</span><span className="font-bold text-slate-900">Oversized</span></div>
+              <div className="flex justify-between border-b border-slate-200 pb-2"><span className="text-slate-500">GSM</span><span className="font-bold text-slate-900">{product?.gsm || 'N/A'}</span></div>
+              <div className="flex justify-between border-b border-slate-200 pb-2"><span className="text-slate-500">Material</span><span className="font-bold text-slate-900">{product?.fabric || 'N/A'}</span></div>
+              <div className="flex justify-between border-b border-slate-200 pb-2"><span className="text-slate-500">Category</span><span className="font-bold text-slate-900">{product?.subCategory || product?.category || 'N/A'}</span></div>
               <div className="flex justify-between border-b border-slate-200 pb-2"><span className="text-slate-500">Origin</span><span className="font-bold text-slate-900">Sialkot, PK</span></div>
            </div>
         </div>

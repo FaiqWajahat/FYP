@@ -156,9 +156,8 @@ export default function AddOrder({ onSave }) {
                     value={form.customerName}
                     onChange={(e) => setField("customerName", e.target.value)}
                     placeholder="John Doe"
-                    className={`input input-bordered input-sm w-full rounded-lg ${
-                      errors.customerName ? "input-error" : ""
-                    }`}
+                    className={`input input-bordered input-sm w-full rounded-lg ${errors.customerName ? "input-error" : ""
+                      }`}
                   />
                   {errors.customerName && (
                     <p className="text-error text-sm mt-1">{errors.customerName}</p>
@@ -175,9 +174,8 @@ export default function AddOrder({ onSave }) {
                     value={form.customerEmail}
                     onChange={(e) => setField("customerEmail", e.target.value)}
                     placeholder="john@example.com"
-                    className={`input input-bordered input-sm w-full rounded-lg ${
-                      errors.customerEmail ? "input-error" : ""
-                    }`}
+                    className={`input input-bordered input-sm w-full rounded-lg ${errors.customerEmail ? "input-error" : ""
+                      }`}
                   />
                   {errors.customerEmail && (
                     <p className="text-error text-sm mt-1">{errors.customerEmail}</p>
@@ -218,9 +216,8 @@ export default function AddOrder({ onSave }) {
                     value={form.productName}
                     onChange={(e) => setField("productName", e.target.value)}
                     placeholder="Smart Watch"
-                    className={`input input-bordered input-sm w-full rounded-lg ${
-                      errors.productName ? "input-error" : ""
-                    }`}
+                    className={`input input-bordered input-sm w-full rounded-lg ${errors.productName ? "input-error" : ""
+                      }`}
                   />
                   {errors.productName && (
                     <p className="text-error text-sm mt-1">{errors.productName}</p>
@@ -239,9 +236,8 @@ export default function AddOrder({ onSave }) {
                     value={form.productSKU}
                     onChange={(e) => setField("productSKU", e.target.value)}
                     placeholder="PROD-001"
-                    className={`input input-bordered input-sm w-full rounded-lg ${
-                      errors.productSKU ? "input-error" : ""
-                    }`}
+                    className={`input input-bordered input-sm w-full rounded-lg ${errors.productSKU ? "input-error" : ""
+                      }`}
                   />
                   {errors.productSKU && (
                     <p className="text-error text-sm mt-1">{errors.productSKU}</p>
@@ -260,9 +256,8 @@ export default function AddOrder({ onSave }) {
                     value={form.quantity}
                     onChange={(e) => setField("quantity", e.target.value)}
                     placeholder="1"
-                    className={`input input-bordered input-sm w-full rounded-lg ${
-                      errors.quantity ? "input-error" : ""
-                    }`}
+                    className={`input input-bordered input-sm w-full rounded-lg ${errors.quantity ? "input-error" : ""
+                      }`}
                   />
                   {errors.quantity && (
                     <p className="text-error text-sm mt-1">{errors.quantity}</p>
@@ -281,9 +276,8 @@ export default function AddOrder({ onSave }) {
                     value={form.price}
                     onChange={(e) => setField("price", e.target.value)}
                     placeholder="0.00"
-                    className={`input input-bordered input-sm w-full rounded-lg ${
-                      errors.price ? "input-error" : ""
-                    }`}
+                    className={`input input-bordered input-sm w-full rounded-lg ${errors.price ? "input-error" : ""
+                      }`}
                   />
                   {errors.price && (
                     <p className="text-error text-sm mt-1">{errors.price}</p>
@@ -301,9 +295,8 @@ export default function AddOrder({ onSave }) {
                     name="orderDate"
                     value={form.orderDate}
                     onChange={(e) => setField("orderDate", e.target.value)}
-                    className={`input input-bordered input-sm w-full rounded-lg ${
-                      errors.orderDate ? "input-error" : ""
-                    }`}
+                    className={`input input-bordered input-sm w-full rounded-lg ${errors.orderDate ? "input-error" : ""
+                      }`}
                   />
                   {errors.orderDate && (
                     <p className="text-error text-sm mt-1">{errors.orderDate}</p>

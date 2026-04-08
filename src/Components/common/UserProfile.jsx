@@ -5,8 +5,10 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, ChevronDown, Sparkles, MessageSquare, Package, LogOut, LayoutDashboard } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/store/AuthContext';
 
 const UserProfile = () => {
+  const { profile, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
   const pathname = usePathname();
@@ -27,6 +29,8 @@ const UserProfile = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  if (!profile) return null;
+
   return (
     <div className="relative z-[1001] hidden md:block" ref={containerRef}>
       <motion.button
@@ -39,11 +43,19 @@ const UserProfile = () => {
           }`}
       >
         <div className={`h-9 w-9 rounded-xl flex items-center justify-center overflow-hidden transition-colors ${isOpen ? 'bg-blue-600' : 'bg-slate-100'}`}>
-          <User size={20} className={isOpen ? 'text-white' : 'text-slate-500'} />
+          {profile.profile_image ? (
+            <img src={profile.profile_image} alt={profile.full_name} className="w-full h-full object-cover" />
+          ) : (
+            <User size={20} className={isOpen ? 'text-white' : 'text-slate-500'} />
+          )}
         </div>
         <div className="flex flex-col items-start mr-1">
-          <span className={`text-[11px] font-black uppercase tracking-wider leading-none ${isOpen ? 'text-white' : 'text-slate-900'}`}>John</span>
-          <span className={`text-[9px] font-bold mt-0.5 leading-none ${isOpen ? 'text-blue-200' : 'text-slate-400'}`}>Elite Client</span>
+          <span className={`text-[11px] font-black uppercase tracking-wider leading-none ${isOpen ? 'text-white' : 'text-slate-900'}`}>
+            {profile.full_name?.split(' ')[0] || 'User'}
+          </span>
+          <span className={`text-[9px] font-bold mt-0.5 leading-none ${isOpen ? 'text-blue-200' : 'text-slate-400'}`}>
+            {profile.role === 'admin' ? 'Administrator' : 'Client'}
+          </span>
         </div>
         <ChevronDown size={14} className={`transition-transform duration-500 ease-out ${isOpen ? 'rotate-180 text-white' : 'text-slate-400'}`} />
       </motion.button>
@@ -68,7 +80,10 @@ const UserProfile = () => {
 
             {/* Logout Footer */}
             <div className="p-3 bg-slate-50/50 border-t border-slate-100">
-              <button className="flex w-full items-center justify-center gap-2 text-xs font-black text-slate-500 hover:text-red-600 hover:bg-red-50 py-3 rounded-2xl transition-all duration-300">
+              <button 
+                onClick={signOut}
+                className="flex w-full items-center justify-center gap-2 text-xs font-black text-slate-500 hover:text-red-600 hover:bg-red-50 py-3 rounded-2xl transition-all duration-300"
+              >
                 <LogOut size={14} strokeWidth={2.5} /> Sign Out
               </button>
             </div>

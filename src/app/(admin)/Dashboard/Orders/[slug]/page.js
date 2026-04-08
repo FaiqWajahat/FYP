@@ -7,8 +7,16 @@ import OrdersTable from "@/Components/admin-dashboard/OrdersTable";
 import Pagination from "@/Components/common/Pagination";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import Loader from "@/Components/common/Loader";
 
 const OrderPage = () => {
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
   const allOrders = [
     {
       id: "#21001",
@@ -113,8 +121,14 @@ const OrderPage = () => {
           </div>
         </div>
 
-        <div className="w-full overflow-x-auto">
-          <OrdersTable orders={orders} />
+        <div className="w-full bg-base-50/50 rounded-lg border border-base-200">
+          {loading ? (
+            <Loader variant="inline" message="Fetching Orders History..." />
+          ) : (
+            <div className="w-full overflow-x-auto">
+              <OrdersTable orders={orders} />
+            </div>
+          )}
         </div>
         <div className="w-full flex items-center justify-between mt-6 md:px-2 ">
          <div className="w-full ">

@@ -5,10 +5,10 @@
 }
 
 @theme {
-  --color-primary: #155DFC;
-  --color-primary-content: #ffffff;
-  --color-secondary: #0F172B;
-  --color-secondary-content: #ffffff;
+  --color-primary: var(--primary);
+  --color-primary-content: var(--primary-content, #ffffff);
+  --color-secondary: var(--secondary);
+  --color-secondary-content: var(--secondary-content, #ffffff);
 }
 
 /* Tooltip theme variables */
@@ -41,21 +41,25 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #cbd5e1; /* light slate-300 */
+  background-color: #cbd5e1;
+  /* light slate-300 */
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: #94a3b8; /* slate-400 */
+  background-color: #94a3b8;
+  /* slate-400 */
 }
 
 /* Dark mode overrides */
 [data-theme="dark"] ::-webkit-scrollbar-thumb {
-  background-color: #334155; /* slate-700 */
+  background-color: #334155;
+  /* slate-700 */
 }
 
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-  background-color: #475569; /* slate-600 */
+  background-color: #475569;
+  /* slate-600 */
 }
 
 ::-webkit-scrollbar-button {

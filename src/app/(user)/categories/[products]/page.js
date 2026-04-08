@@ -13,17 +13,111 @@ import SidebarFilter, { FILTERS } from '@/Components/site/SidebarFilter';
 import ProductsToolbar from '@/Components/common/ProductsToolbar';
 import ProductCard from '@/Components/site/ProductCard';
 import Breadcrumbs from '@/Components/site/ShopBreadCrumps';
-import { PRODUCTS } from '@/data/mockProducts';
+import Loader from '@/Components/common/Loader';
+import axios from 'axios';
+import { toast } from 'react-hot-toast';
+import { useEffect } from 'react';
 
-export default function ShopPage() {
+export default function ShopPage({ params }) {
+  const unwrappedParams = React.use(params);
   const pathname = usePathname();
   const [viewMode, setViewMode] = useState('grid');
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   
+  // Data State
+  const [dbProducts, setDbProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
   // Filter States
   const [activeCategory, setActiveCategory] = useState("All Products");
+  const [activeSubCategories, setActiveSubCategories] = useState([]);
   const [activeFabrics, setActiveFabrics] = useState([]);
   const [activeGsm, setActiveGsm] = useState([]);
+
+  // Derive available sub-categories for active category
+  const currentSubCategories = activeCategory === "All Products" 
+    ? [] 
+    : categories.find(c => c.name === activeCategory)?.subcategories || [];
+
+  // Sync state with URL params
+  useEffect(() => {
+    if (unwrappedParams?.products) {
+      if (unwrappedParams.products === 'all') {
+        setActiveCategory("All Products");
+      } else {
+        // Derive category from slug
+        const formatted = unwrappedParams.products.charAt(0).toUpperCase() + unwrappedParams.products.slice(1).replace(/-/g, ' ');
+        const match = categories.find(c => c.name.toLowerCase() === formatted.toLowerCase());
+        if (match) setActiveCategory(match.name);
+      }
+    }
+  }, [unwrappedParams, categories]);
+
+  // Reset sub-categories when main category changes
+  useEffect(() => {
+    setActiveSubCategories([]);
+  }, [activeCategory]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [productsRes, categoriesRes] = await Promise.all([
+          axios.get('/api/products'),
+          axios.get('/api/categories')
+        ]);
+        
+        if (productsRes.data.products) setDbProducts(productsRes.data.products);
+        if (categoriesRes.data.categories) setCategories(categoriesRes.data.categories);
+        
+      } catch (err) {
+        console.error("Catalog fetch error:", err);
+        toast.error("Failed to load products from factory warehouse.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Helper for GSM Range Matching
+  const matchesGsmRange = (productGsm, filterRanges) => {
+    if (!filterRanges || filterRanges.length === 0) return true;
+    
+    // Convert current gsmWeight to a number
+    const gsm = parseInt(productGsm);
+    if (isNaN(gsm)) return false;
+
+    return filterRanges.some(range => {
+      if (range.includes("400+")) return gsm >= 400;
+      if (range.includes("180-250")) return gsm >= 180 && gsm <= 250;
+      if (range.includes("280-350")) return gsm >= 280 && gsm <= 350;
+      return false;
+    });
+  };
+
+  // Derive filtered products
+  const filteredProducts = dbProducts.filter((product) => {
+    // Category match (Case-insensitive)
+    const categoryMatch = 
+      activeCategory === "All Products" || 
+      product.category?.toLowerCase() === activeCategory.toLowerCase();
+
+    // Sub-Category match
+    const subCategoryMatch = 
+      activeSubCategories.length === 0 || 
+      activeSubCategories.some(sub => product.subCategory?.toLowerCase() === sub.toLowerCase());
+
+    // Fabrics match (Robust partial match)
+    const fabricMatch = 
+      activeFabrics.length === 0 || 
+      activeFabrics.some(f => product.fabric?.toLowerCase().includes(f.toLowerCase()));
+
+    // GSM match (Range logic)
+    const gsmMatch = matchesGsmRange(product.gsmWeight, activeGsm);
+
+    return categoryMatch && subCategoryMatch && fabricMatch && gsmMatch;
+  });
 
   // Dynamic Header Title
   const getCategoryTitle = () => {
@@ -38,25 +132,7 @@ export default function ShopPage() {
     { label: getCategoryTitle(), href: pathname },
   ];
 
-  // Derive filtered products
-  const filteredProducts = PRODUCTS.filter((product) => {
-    // Category match
-    const categoryMatch = 
-      activeCategory === "All Products" || 
-      product.category.toLowerCase() === activeCategory.toLowerCase();
-
-    // Fabrics match (if any specified)
-    const fabricMatch = 
-      activeFabrics.length === 0 || 
-      activeFabrics.includes(product.fabric);
-
-    // GSM match (if any specified)
-    const gsmMatch = 
-      activeGsm.length === 0 || 
-      activeGsm.includes(product.gsmWeight);
-
-    return categoryMatch && fabricMatch && gsmMatch;
-  });
+  if (loading) return <Loader message="Accessing Factory Catalog..." />;
 
   return (
     <>
@@ -91,6 +167,10 @@ export default function ShopPage() {
                 setActiveFabrics={setActiveFabrics}
                 activeGsm={activeGsm}
                 setActiveGsm={setActiveGsm}
+                availableCategories={categories}
+                activeSubCategories={activeSubCategories}
+                setActiveSubCategories={setActiveSubCategories}
+                subCategoryList={currentSubCategories}
               />
             </aside>
 
@@ -120,7 +200,7 @@ export default function ShopPage() {
                   <p className="text-slate-500">Try adjusting your fabric or weight filters.</p>
                   <button 
                     className="mt-6 px-6 py-2 bg-slate-900 text-white font-bold rounded-lg text-sm transition-transform active:scale-95"
-                    onClick={() => { setActiveFabrics([]); setActiveGsm([]); setActiveCategory("All Products"); }}
+                    onClick={() => { setActiveFabrics([]); setActiveGsm([]); setActiveCategory("All Products"); setActiveSubCategories([]); }}
                   >
                     Clear All Filters
                   </button>
@@ -166,6 +246,10 @@ export default function ShopPage() {
                 setActiveFabrics={setActiveFabrics}
                 activeGsm={activeGsm}
                 setActiveGsm={setActiveGsm}  
+                availableCategories={categories}
+                activeSubCategories={activeSubCategories}
+                setActiveSubCategories={setActiveSubCategories}
+                subCategoryList={currentSubCategories}
               />
             </motion.div>
           </>

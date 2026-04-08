@@ -49,6 +49,7 @@ const navGroups = [
         icon: Package,
         children: [
           { title: "All Products", href: "/Dashboard/Products/All" },
+          { title: "Add Product", href: "/Dashboard/Products/Add" },
           { title: "Low Stock", href: "/Dashboard/Products/LowStock", dot: true },
         ],
       },
@@ -95,11 +96,11 @@ const navGroups = [
         title: "Settings",
         icon: Settings,
         children: [
-          { title: "General", href: "/settings" },
-          { title: "Security", href: "/settings/security" },
+          { title: "General", href: "/Dashboard/Settings" },
+          { title: "Security", href: "/Dashboard/Settings/Security" },
         ],
       },
-      { title: "My Profile", icon: User, href: "/profile" },
+      { title: "My Profile", icon: User, href: "/Dashboard/Profile" },
     ],
   },
 ];

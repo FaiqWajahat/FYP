@@ -1,12 +1,22 @@
 "use client";
 
-import { Edit, Eye, Trash } from "lucide-react";
+import { Edit, Eye, Trash, ShoppingCart } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 
 
 export default function OrdersTable({orders}) {
   const router=useRouter()
+
+  if (!orders || orders.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4 border-2 border-dashed border-base-content/10 rounded-2xl">
+        <ShoppingCart className="w-12 h-12 text-base-content/20" />
+        <p className="text-[10px] uppercase font-black tracking-widest text-base-content/40">No Orders Found</p>
+      </div>
+    );
+  }
+
   return (
      
       <table className="table w-full table-md ">

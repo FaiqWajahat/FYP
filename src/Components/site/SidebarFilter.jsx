@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { LayoutGrid, Package, SlidersHorizontal, CheckCircle2, X } from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import { LayoutGrid, Package, SlidersHorizontal, CheckCircle2, X, Layers } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
 
 export const FILTERS = {
   categories: ["All Products", "Hoodies", "Jackets", "Tracksuits", "T-Shirts", "Bottoms"],
-  fabrics: ["100% Cotton", "Poly-Cotton Blend", "French Terry", "Nylon / Windbreaker", "Wool/Leather"],
+  fabrics: ["Cotton", "Poly-Cotton", "French Terry", "Fleece", "Jersey", "Nylon"],
   gsm: ["180-250 (Light)", "280-350 (Mid)", "400+ (Heavyweight)"]
 };
 
@@ -19,23 +19,42 @@ const SidebarFilter = ({
   activeFabrics = [],
   setActiveFabrics = () => {},
   activeGsm = [],
-  setActiveGsm = () => {}
+  setActiveGsm = () => {},
+  availableCategories = [],
+  activeSubCategories = [], // New state for sub-categories
+  setActiveSubCategories = () => {},
+  subCategoryList = [] // Available sub-categories for active category
 }) => {
   const pathname = usePathname();
+  const router = useRouter();
 
-  // Highlight category based on URL on mount ONLY if not set
-  useEffect(() => {
-    if (!activeCategory || activeCategory === "All Products") {
-      const pathSegment = pathname.split('/').pop();
-      if (!pathSegment || pathSegment === 'shop' || pathSegment === 'all') {
-        setActiveCategory("All Products");
-      } else {
-        const formattedTitle = pathSegment.charAt(0).toUpperCase() + pathSegment.slice(1).replace(/-/g, ' ');
-        const match = FILTERS.categories.find(c => c.toLowerCase() === formattedTitle.toLowerCase());
-        if (match) setActiveCategory(match);
-      }
+  const categoryList = availableCategories.length > 0 
+    ? ["All Products", ...availableCategories.map(c => c.name)] 
+    : FILTERS.categories;
+
+  // Handle Category Selection via Navigation
+  const handleCategoryClick = (cat) => {
+    if (mobile && onClose) onClose();
+    
+    if (cat === "All Products") {
+      router.push('/categories/all');
+    } else {
+      const slug = cat.toLowerCase().replace(/\s+/g, '-');
+      router.push(`/categories/${slug}`);
     }
-  }, [pathname, activeCategory, setActiveCategory]);
+  };
+
+  // Sync activeCategory with URL path
+  useEffect(() => {
+    const pathSegment = pathname.split('/').pop();
+    if (!pathSegment || pathSegment === 'shop' || pathSegment === 'all') {
+      setActiveCategory("All Products");
+    } else {
+      const formattedTitle = pathSegment.charAt(0).toUpperCase() + pathSegment.slice(1).replace(/-/g, ' ');
+      const match = categoryList.find(c => c.toLowerCase() === formattedTitle.toLowerCase());
+      if (match) setActiveCategory(match);
+    }
+  }, [pathname, categoryList, setActiveCategory]);
 
   const toggleArrayItem = (setter, activeArray, item) => {
     if (activeArray.includes(item)) {
@@ -73,12 +92,12 @@ const SidebarFilter = ({
             <LayoutGrid size={16} /> Categories
           </h3>
           <div className="space-y-3">
-            {FILTERS.categories.map((cat) => {
+            {categoryList.map((cat) => {
               const isActive = cat === activeCategory;
               return (
                 <div 
                   key={cat} 
-                  onClick={() => setActiveCategory(cat)}
+                  onClick={() => handleCategoryClick(cat)}
                   className="flex items-center gap-3 cursor-pointer group"
                 >
                   <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${isActive ? 'bg-blue-600 border-blue-600' : 'border-slate-300 group-hover:border-blue-400 bg-white'}`}>
@@ -92,6 +111,34 @@ const SidebarFilter = ({
             })}
           </div>
         </div>
+
+        {/* Sub-Categories (Contextual) */}
+        {subCategoryList.length > 0 && (
+          <div className="mb-8 pt-6 border-t border-slate-100 animate-in fade-in slide-in-from-top-2 duration-300">
+            <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2 text-sm uppercase tracking-wider">
+              <Layers size={16} /> Sub-Categories
+            </h3>
+            <div className="space-y-3">
+              {subCategoryList.map((sub) => {
+                const isActive = activeSubCategories.includes(sub);
+                return (
+                  <div 
+                    key={sub} 
+                    onClick={() => toggleArrayItem(setActiveSubCategories, activeSubCategories, sub)}
+                    className="flex items-center gap-3 cursor-pointer group"
+                  >
+                    <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${isActive ? 'bg-blue-600 border-blue-600' : 'border-slate-300 group-hover:border-blue-400 bg-white'}`}>
+                      {isActive && <CheckCircle2 size={14} className="text-white" />}
+                    </div>
+                    <span className={`text-sm ${isActive ? 'font-bold text-slate-900' : 'text-slate-600 group-hover:text-blue-600'}`}>
+                      {sub}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Fabrics */}
         <div className="pt-6 border-t border-slate-100 mb-8">

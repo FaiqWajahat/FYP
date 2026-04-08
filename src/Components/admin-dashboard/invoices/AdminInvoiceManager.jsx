@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import Loader from "@/Components/common/Loader";
 import {
   FileText, Upload, Trash2, Eye, Search, Plus, X, CheckCircle,
   Clock, XCircle, AlertCircle, Download, ChevronDown, Building2,
@@ -35,9 +36,9 @@ const INITIAL_INVOICES = [
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const STATUS_META = {
-  pending:  { label: "Pending",  Icon: Clock,        classes: "bg-amber-50 text-amber-700 border-amber-200" },
-  approved: { label: "Approved", Icon: CheckCircle,  classes: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-  rejected: { label: "Rejected", Icon: XCircle,      classes: "bg-red-50 text-red-600 border-red-200" },
+  pending: { label: "Pending", Icon: Clock, classes: "bg-amber-50 text-amber-700 border-amber-200" },
+  approved: { label: "Approved", Icon: CheckCircle, classes: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  rejected: { label: "Rejected", Icon: XCircle, classes: "bg-red-50 text-red-600 border-red-200" },
 };
 const fmt = (n, c = "USD") => new Intl.NumberFormat("en-US", { style: "currency", currency: c }).format(n);
 const fmtDate = (d) => new Date(d).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
@@ -147,7 +148,7 @@ function UploadModal({ onClose, onSave }) {
               <label className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 block">Currency</label>
               <select value={form.currency} onChange={e => set("currency", e.target.value)}
                 className="w-full border border-base-300 rounded-xl px-3 py-3 text-sm focus:outline-none bg-base-100">
-                {["USD","EUR","GBP","AED","PKR"].map(c => <option key={c}>{c}</option>)}
+                {["USD", "EUR", "GBP", "AED", "PKR"].map(c => <option key={c}>{c}</option>)}
               </select>
             </div>
           </div>
@@ -181,9 +182,8 @@ function UploadModal({ onClose, onSave }) {
           <div>
             <label className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-1.5 block">Invoice PDF</label>
             <button type="button" onClick={() => fileRef.current?.click()}
-              className={`w-full border-2 border-dashed rounded-xl transition-all group ${
-                form.pdfFile ? "border-[var(--primary)]/40 bg-[var(--primary)]/5 py-3 px-4" : "border-base-300 hover:border-[var(--primary)]/50 hover:bg-base-50 py-5 px-4"
-              }`}>
+              className={`w-full border-2 border-dashed rounded-xl transition-all group ${form.pdfFile ? "border-[var(--primary)]/40 bg-[var(--primary)]/5 py-3 px-4" : "border-base-300 hover:border-[var(--primary)]/50 hover:bg-base-50 py-5 px-4"
+                }`}>
               {form.pdfFile ? (
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-[var(--primary)]/10 rounded-lg flex items-center justify-center flex-shrink-0">
@@ -216,9 +216,8 @@ function UploadModal({ onClose, onSave }) {
             Cancel
           </button>
           <button onClick={handleSubmit} disabled={!valid}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all ${
-              valid ? "bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90 shadow-md" : "bg-base-200 text-base-content/30 cursor-not-allowed"
-            }`}>
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold transition-all ${valid ? "bg-[var(--primary)] text-white hover:bg-[var(--primary)]/90 shadow-md" : "bg-base-200 text-base-content/30 cursor-not-allowed"
+              }`}>
             <Upload size={14} /> Send Invoice
           </button>
         </div>
@@ -291,6 +290,12 @@ export default function AdminInvoiceManager() {
   const [showModal, setShowModal] = useState(false);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleSave = (inv) => setInvoices(p => [inv, ...p]);
   const handleDelete = (id) => setInvoices(p => p.filter(i => i.id !== id));
@@ -316,6 +321,14 @@ export default function AdminInvoiceManager() {
   const totalOutstanding = invoices
     .filter(i => i.status === "pending")
     .reduce((a, b) => a + b.amount, 0);
+  
+  if (loading) {
+    return (
+      <div className="min-h-[400px] flex items-center justify-center bg-base-100 rounded-3xl border border-base-200">
+        <Loader variant="inline" message="Retrieving financial records..." />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-5">
@@ -346,11 +359,10 @@ export default function AdminInvoiceManager() {
         <div className="flex items-center gap-1.5 bg-base-100 border border-base-200 rounded-xl p-1.5 shadow-sm">
           {["all", "pending", "approved", "rejected"].map(s => (
             <button key={s} onClick={() => setStatusFilter(s)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all ${
-                statusFilter === s
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all ${statusFilter === s
                   ? "bg-[var(--primary)] text-white shadow-sm"
                   : "text-base-content/50 hover:bg-base-200"
-              }`}>
+                }`}>
               {s === "all" ? `All (${counts.all})` : `${s} (${counts[s]})`}
             </button>
           ))}

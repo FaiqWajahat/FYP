@@ -8,8 +8,11 @@ import { Menu, X, Sparkles, ChevronDown, LayoutDashboard, ShieldCheck, ShoppingB
 
 import UserProfile from '@/Components/common/UserProfile';
 import { useConfigStore } from '@/store/useConfigStore';
+import { useAuth } from '@/store/AuthContext';
 
 export default function Navbar() {
+  const { user, profile } = useAuth();
+  const [categories, setCategories] = useState([]);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [isCatalogHovered, setIsCatalogHovered] = useState(false);
@@ -20,8 +23,18 @@ export default function Navbar() {
 
   const isAdminPath = pathname.startsWith('/Dashboard') || pathname.startsWith('/admin');
 
-  // Watch for scroll to toggle glassmorphism intensity
   useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const res = await fetch('/api/categories');
+        const data = await res.json();
+        setCategories(data.categories || []);
+      } catch (err) {
+        console.error("Navbar category fetch failed:", err);
+      }
+    };
+    fetchCats();
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
@@ -109,17 +122,32 @@ export default function Navbar() {
                     animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
                     exit={{ opacity: 0, y: 10, scale: 0.95, filter: 'blur(4px)' }}
                     transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                    className="absolute top-full left-1/2 -translate-x-1/2 pt-5 w-72 z-[101]"
+                    className="absolute top-full left-1/2 -translate-x-1/2 pt-5 w-[380px] z-[101]"
                   >
-                    <div className="bg-white/95 backdrop-blur-2xl border border-slate-200/50 rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.12)] p-3 overflow-hidden">
-                      <DropdownLink icon={Layers} href="/categories/hoodies" label="Hoodies & Fleece" description="Heavyweight luxury blanks" />
-                      <DropdownLink icon={Factory} href="/categories/jackets" label="Jackets & Outerwear" description="Varsity, Puffers & Tech" />
-                      <DropdownLink icon={ShieldCheck} href="/categories/tracksuits" label="Tracksuits & Sets" description="Lifestyle & Performance" />
+                    <div className="bg-white/95 backdrop-blur-2xl border border-slate-200/50 rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.12)] p-4 overflow-hidden">
+                      <div className="space-y-1 max-h-[400px] overflow-y-auto no-scrollbar">
+                        {categories.filter(c => c.status === 'Active').length > 0 ? (
+                          categories.filter(c => c.status === 'Active').map((cat) => (
+                            <DropdownLink 
+                              key={cat.id}
+                              cat={cat}
+                              icon={Layers} 
+                              href={`/categories/${cat.slug}`} 
+                              label={cat.name} 
+                              description={cat.description || (cat.subcategories?.slice(0, 3).join(", "))} 
+                            />
+                          ))
+                        ) : (
+                          <div className="py-8 text-center">
+                            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">No categories active</span>
+                          </div>
+                        )}
+                      </div>
 
-                      <div className="mt-2 pt-2 border-t border-slate-100 px-1">
+                      <div className="mt-3 pt-3 border-t border-slate-100 px-1">
                         <Link href="/categories" className="group flex items-center justify-between w-full py-3 px-3 text-[11px] font-black uppercase tracking-widest text-slate-800 hover:text-slate-900 hover:bg-slate-50 rounded-xl transition-all">
-                          Explore Catalog
-                          <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-slate-200 transition-colors">
+                          Full Collections
+                          <div className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center transition-colors">
                             <span className="text-[10px] leading-none">→</span>
                           </div>
                         </Link>
@@ -133,33 +161,37 @@ export default function Navbar() {
             <NavItem href="/about" label="About" active={pathname === '/about'} hoveredPath={hoveredPath} setHoveredPath={setHoveredPath} />
             <NavItem href="/contact" label="Contact" active={pathname === '/contact'} hoveredPath={hoveredPath} setHoveredPath={setHoveredPath} />
 
-            {/* Dashboard / Panel Switcher */}
-            <div className="h-5 w-px bg-slate-200 mx-2" />
-            <div
-              className="relative"
-              onMouseEnter={() => setHoveredPath('panel')}
-            >
-              <Link
-                href={isAdminPath ? '/' : '/Dashboard'}
-                className={`relative px-4 py-2 rounded-full text-[13px] font-bold transition-all flex items-center gap-1.5 z-10 ${isAdminPath || hoveredPath === 'panel'
-                  ? 'text-slate-900'
-                  : 'text-slate-500'
-                  }`}
-              >
-                {isAdminPath ? (
-                  <><ShoppingBag size={14} /> Store</>
-                ) : (
-                  <><LayoutDashboard size={14} /> Admin</>
-                )}
-              </Link>
-              {hoveredPath === 'panel' && (
-                <motion.div
-                  layoutId="nav-pill"
-                  className="absolute inset-0 bg-slate-100/80 rounded-full z-0 pointer-events-none"
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                />
-              )}
-            </div>
+            {/* Dashboard / Panel Switcher - Only for Admins */}
+            {profile?.role === 'admin' && (
+              <>
+                <div className="h-5 w-px bg-slate-200 mx-2" />
+                <div
+                  className="relative"
+                  onMouseEnter={() => setHoveredPath('panel')}
+                >
+                  <Link
+                    href={isAdminPath ? '/' : '/Dashboard'}
+                    className={`relative px-4 py-2 rounded-full text-[13px] font-bold transition-all flex items-center gap-1.5 z-10 ${isAdminPath || hoveredPath === 'panel'
+                      ? 'text-slate-900'
+                      : 'text-slate-500'
+                      }`}
+                  >
+                    {isAdminPath ? (
+                      <><ShoppingBag size={14} /> Store</>
+                    ) : (
+                      <><LayoutDashboard size={14} /> Admin</>
+                    )}
+                  </Link>
+                  {hoveredPath === 'panel' && (
+                    <motion.div
+                      layoutId="nav-pill"
+                      className="absolute inset-0 bg-slate-100/80 rounded-full z-0 pointer-events-none"
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                    />
+                  )}
+                </div>
+              </>
+            )}
           </nav>
 
           {/* RIGHT ACTIONS */}
@@ -178,7 +210,19 @@ export default function Navbar() {
             </Link>
 
             <div className="pl-1 sm:pl-2">
-              <UserProfile />
+              {user ? (
+                <UserProfile />
+              ) : (
+                <Link href="/login">
+                  <motion.button 
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-6 py-2.5 bg-primary text-primary-content rounded-full font-bold text-[13px] shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
+                  >
+                    Login
+                  </motion.button>
+                </Link>
+              )}
             </div>
 
             {/* Mobile Toggle */}
@@ -254,18 +298,55 @@ export default function Navbar() {
                 transition={{ delay: 0.3, duration: 0.5 }}
                 className="pt-8 mt-auto border-t border-slate-100 space-y-4"
               >
-                <Link
-                  href={isAdminPath ? '/' : '/Dashboard'}
-                  onClick={() => setIsMobileOpen(false)}
-                  className="w-full flex items-center justify-between p-4 bg-slate-50 rounded-2xl font-bold text-slate-900"
-                >
-                  <span className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
-                      {isAdminPath ? <ShoppingBag size={14} className="text-blue-600" /> : <LayoutDashboard size={14} className="text-blue-600" />}
-                    </div>
-                    {isAdminPath ? 'Switch to User Store' : 'Switch to Admin Panel'}
-                  </span>
-                </Link>
+                <div className="space-y-4">
+                  {user ? (
+                    <>
+                      {profile?.role === 'admin' && (
+                        <Link
+                          href={isAdminPath ? '/' : '/Dashboard'}
+                          onClick={() => setIsMobileOpen(false)}
+                          className="w-full flex items-center justify-between p-4 bg-slate-50 rounded-2xl font-bold text-slate-900"
+                        >
+                          <span className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
+                              {isAdminPath ? <ShoppingBag size={14} className="text-primary" /> : <LayoutDashboard size={14} className="text-primary" />}
+                            </div>
+                            {isAdminPath ? 'Switch to User Store' : 'Switch to Admin Panel'}
+                          </span>
+                        </Link>
+                      )}
+                      <Link
+                        href="/dashboard/profile"
+                        onClick={() => setIsMobileOpen(false)}
+                        className="w-full flex items-center justify-between p-4 bg-slate-50 rounded-2xl font-bold text-slate-900"
+                      >
+                        <span className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm overflow-hidden">
+                            {profile?.profile_image ? (
+                              <img src={profile.profile_image} alt="Avatar" className="w-full h-full object-cover" />
+                            ) : (
+                              <User size={14} className="text-slate-400" />
+                            )}
+                          </div>
+                          Account Settings
+                        </span>
+                      </Link>
+                    </>
+                  ) : (
+                    <Link
+                      href="/login"
+                      onClick={() => setIsMobileOpen(false)}
+                      className="w-full flex items-center justify-between p-4 bg-primary text-primary-content rounded-2xl font-bold"
+                    >
+                      <span className="flex items-center gap-3 pl-2">
+                        Login / Create Account
+                      </span>
+                      <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                        <span className="text-[12px]">→</span>
+                      </div>
+                    </Link>
+                  )}
+                </div>
 
                 <Link href="/smart-inquiry" onClick={() => setIsMobileOpen(false)}>
                   <button className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black flex items-center justify-center gap-2 active:scale-95 transition-transform mt-2">
@@ -317,18 +398,22 @@ const NavItem = ({ href, label, active, hoveredPath, setHoveredPath }) => {
   );
 };
 
-const DropdownLink = ({ href, label, description, icon: Icon }) => (
+const DropdownLink = ({ href, label, description, icon: Icon, cat }) => (
   <Link href={href} className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-all group relative overflow-hidden">
     <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-slate-300 rounded-r-md transition-all duration-300 group-hover:h-1/2 opacity-0 group-hover:opacity-100" />
-    <div className="w-10 h-10 rounded-xl bg-slate-50 group-hover:bg-white border border-slate-100 group-hover:border-slate-200 transition-all flex items-center justify-center shrink-0 shadow-sm group-hover:shadow-md">
-      {Icon && <Icon size={16} className="text-slate-500 group-hover:text-slate-900 transition-colors" />}
+    <div className="w-12 h-12 rounded-xl bg-slate-50 group-hover:bg-white border border-slate-100 group-hover:border-slate-200 transition-all flex items-center justify-center shrink-0 shadow-sm group-hover:shadow-md overflow-hidden bg-white">
+      {cat?.image_url ? (
+        <img src={cat.image_url} alt={label} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+      ) : (
+        Icon && <Icon size={18} className="text-slate-400 group-hover:text-slate-900 transition-colors" />
+      )}
     </div>
     <div className="flex flex-col">
-      <span className="text-sm font-bold text-slate-800 group-hover:text-slate-900 transition-colors flex items-center gap-2">
+      <span className="text-[13px] font-black text-slate-800 group-hover:text-slate-900 transition-colors flex items-center gap-2 uppercase tracking-wide">
         {label}
         <span className="text-[10px] text-slate-300 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300">→</span>
       </span>
-      <span className="text-[10px] font-medium text-slate-500 mt-0.5">{description}</span>
+      <span className="text-[10px] font-bold text-slate-400 mt-0.5 line-clamp-1 uppercase tracking-widest">{description}</span>
     </div>
   </Link>
 );

@@ -1,7 +1,16 @@
-import { Edit, Trash } from 'lucide-react'
+import { Edit, Trash, Tag } from 'lucide-react'
 import React from 'react'
 
 const DsicountsTable = ({discounts}) => {
+  if (!discounts || discounts.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4 border-2 border-dashed border-base-content/10 rounded-2xl">
+        <Tag className="w-12 h-12 text-base-content/20" />
+        <p className="text-[10px] uppercase font-black tracking-widest text-base-content/40">No Discounts Found</p>
+      </div>
+    );
+  }
+
   return (
   <>
      <table className="table w-full table-md">

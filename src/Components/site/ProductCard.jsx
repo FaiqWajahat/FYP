@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Sparkles, ShoppingBag, ArrowRight, Layers } from 'lucide-react';
 
 const ProductCard = ({ product }) => {
-  const categoryParam = product.category ? product.category.toLowerCase() : 'all';
+  const categoryParam = product.category ? product.category.toLowerCase().replace(/\s+/g, '-') : 'all';
   const skuParam = product.sku || 'default-sku';
   const productUrl = `/categories/${categoryParam}/${skuParam}`;
 
@@ -36,7 +36,7 @@ const ProductCard = ({ product }) => {
         
         {/* Main Image */}
         <img 
-          src={product.image} 
+          src={product.images?.[0] || 'https://placehold.co/600x800?text=No+Image'} 
           alt={product.name} 
           className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105" 
         />
@@ -85,25 +85,41 @@ const ProductCard = ({ product }) => {
           <div>
             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-0.5">Wholesale</p>
             <div className="flex items-baseline gap-1">
-              <span className="text-lg font-black text-slate-900">${product.price.toFixed(2)}</span>
+              <span className="text-lg font-black text-slate-900">
+                ${(Number(product.pricingTiers?.[0]?.price) || Number(product.price) || 0).toFixed(2)}
+              </span>
               <span className="text-xs text-slate-400 font-medium">/ unit</span>
             </div>
           </div>
           
-          {/* Color Swatches */}
           <div className="flex -space-x-2">
-            {product.colors.map((color, i) => (
-              <div 
-                key={i} 
-                className={`w-6 h-6 rounded-full border-2 border-white shadow-sm transition-transform hover:scale-110 hover:z-10 relative group/color`}
-                style={{ backgroundColor: color }}
-              >
-                {/* Handle White Colors visibility */}
-                {color.toLowerCase() === 'white' && (
-                  <div className="absolute inset-0 rounded-full border border-slate-200"></div>
-                )}
-              </div>
-            ))}
+            {Array.isArray(product.colors) ? product.colors.map((colorObj, i) => {
+              const bgColor = typeof colorObj === 'string' ? colorObj : (colorObj.hex || 'transparent');
+              return (
+                <div 
+                  key={i} 
+                  className="w-6 h-6 rounded-full border-2 border-white shadow-sm transition-transform hover:scale-110 hover:z-10 relative group/color"
+                  style={{ backgroundColor: bgColor }}
+                >
+                  {bgColor.toLowerCase() === '#ffffff' && (
+                    <div className="absolute inset-0 rounded-full border border-slate-200"></div>
+                  )}
+                </div>
+              );
+            }) : (product.colors || "").split(",").map((cStr, i) => {
+              const hex = cStr.includes(":") ? cStr.split(":")[1] : cStr;
+              return (
+                <div 
+                  key={i} 
+                  className="w-6 h-6 rounded-full border-2 border-white shadow-sm transition-transform hover:scale-110 hover:z-10 relative group/color"
+                  style={{ backgroundColor: hex }}
+                >
+                  {hex.toLowerCase() === '#ffffff' && (
+                    <div className="absolute inset-0 rounded-full border border-slate-200"></div>
+                  )}
+                </div>
+              );
+            })}
             {/* "More Colors" Indicator */}
             <div className="w-6 h-6 rounded-full border-2 border-white bg-slate-50 flex items-center justify-center text-[8px] font-bold text-slate-500 shadow-sm z-0">
               +

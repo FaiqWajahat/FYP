@@ -13,7 +13,10 @@ import ColorSelector from '@/Components/common/ColorSelector';
 import SizingModule from '@/Components/site/SizingModule';
 import OrderSummary from '@/Components/common/OrderSummary';
 
-// --- CONSTANTS & MOCK DATA ---
+import { notFound, useParams } from 'next/navigation';
+import Loader from '@/Components/common/Loader';
+
+// --- CONSTANTS ---
 const BRANDING_FORMATS = [
   { id: 'print', name: 'Screen Print', price: 1.50, desc: 'Best for high volume.' },
   { id: 'embroidery', name: '3D Embroidery', price: 3.50, desc: 'Premium raised thread.' },
@@ -21,51 +24,39 @@ const BRANDING_FORMATS = [
   { id: 'patch', name: 'Woven Patch', price: 4.00, desc: 'Sewn-on luxury branding.' },
 ];
 
-const PRODUCT = {
-  id: 1,
-  name: "Heavyweight Cotton Fleece Hoodie",
-  sku: "FCT-HOOD-400",
-  rating: 4.8,
-  reviews: 124,
-  description: "Premium 400 GSM heavyweight cotton fleece. Designed for streetwear brands requiring structure, durability, and a luxury hand-feel.",
-  pricingTiers: [
-    { label: "Sample", quantity: 1, range: "1-20", price: 45.00, desc: "Quality Check" },
-    { label: "MOQ", quantity: 20, range: "21-50", price: 22.00, desc: "Small Batch" },
-    { label: "Standard", quantity: 50, range: "51-100", price: 18.50, desc: "Production Run" },
-    { label: "Volume", quantity: 500, range: "501+", price: 15.00, desc: "Factory Direct" },
-  ],
-  colors: [
-    { name: "White", hex: "#ffffff" },
-    { name: "Navy", hex: "#1e3a8a" },
-    { name: "Grey", hex: "#a1a1aa" },
-    { name: "Olive", hex: "#3f4d36" }
-  ],
-  standardSizes: ["XS", "S", "M", "L", "XL", "2XL"],
-  images: [
-    "https://plus.unsplash.com/premium_photo-1690034979146-59a98168f27e?q=80&w=387&auto=format&fit=crop",
-    "https://plus.unsplash.com/premium_photo-1690034979146-59a98168f27e?q=80&w=387&auto=format&fit=crop",
-  ],
-  sizeChart: [
-    { size: "XS", chest: 20, length: 26, sleeve: 24 },
-    { size: "S", chest: 21, length: 27, sleeve: 25 },
-    { size: "M", chest: 22, length: 28, sleeve: 26 },
-    { size: "L", chest: 23, length: 29, sleeve: 27 },
-    { size: "XL", chest: 24, length: 30, sleeve: 28 },
-    { size: "2XL", chest: 25, length: 31, sleeve: 29 },
-  ]
-};
-
 export default function ProductDetailPage() {
+  const params = useParams();
+  const rawSku = params?.sku || '';
   
+  // Database Product State
+  const [dbProduct, setDbProduct] = useState(null);
+  const [loadingDb, setLoadingDb] = useState(true);
+
   // 1. Branding State
-  const [selectedColor, setSelectedColor] = useState(PRODUCT.colors[0]);
+  const [selectedColor, setSelectedColor] = useState(null);
   const [isCustomizing, setIsCustomizing] = useState(false);
   const [selectedFormat, setSelectedFormat] = useState(BRANDING_FORMATS[0]);
+  const [activeImage, setActiveImage] = useState(0);
   
-  const [uploadedLogo, setUploadedLogo] = useState(null);
+  // Multiple Logo Support
+  const [uploadedLogos, setUploadedLogos] = useState([]);
   const [selectedLogoId, selectLogoId] = useState(null); 
-  const [logoProps, setLogoProps] = useState({ x: 100, y: 150, width: 100, height: 100, rotation: 0 });
   const logoInputRef = useRef(null);
+
+  // Sync Handlers
+  const handleColorSelect = (color, index) => {
+    setSelectedColor(color);
+    if (dbProduct && dbProduct.images && index < dbProduct.images.length) {
+      setActiveImage(index);
+    }
+  };
+
+  const handleImageSelect = (index) => {
+    setActiveImage(index);
+    if (dbProduct && dbProduct.colors && index < dbProduct.colors.length) {
+      setSelectedColor(dbProduct.colors[index]);
+    }
+  };
 
   // 2. Sizing State
   const [sizingMode, setSizingMode] = useState('standard'); 
@@ -75,16 +66,73 @@ export default function ProductDetailPage() {
   const sizeChartInputRef = useRef(null);
   const studioRef = useRef(null);
 
-  // 3. Hydrate from Store (Go Back and Make Changes)
+  // 3. Hydrate from Store / Database
   const orderData = useOrderStore();
   
   useEffect(() => {
+    async function fetchProduct() {
+      try {
+        if (!rawSku) return;
+        const res = await fetch(`/api/products?sku=${encodeURIComponent(rawSku)}`);
+        if (!res.ok) { setLoadingDb(false); return; }
+        const data = await res.json();
+        
+        if (data.product) {
+          const product = data.product;
+          
+          // 1. Map dynamic branding formats based on database enabled options
+          const dbBranding = product.brandingOptions || [];
+          const availableBranding = BRANDING_FORMATS.map(base => {
+            const match = dbBranding.find(o => o.id === base.id);
+            if (match) {
+              return { 
+                ...base, 
+                price: parseFloat(match.price) || base.price,
+                enabled: true 
+              };
+            }
+            return { ...base, enabled: false };
+          }).filter(b => b.enabled);
+
+          // 2. Normalize colors (String to Array)
+          const normalizedColors = product.colors ? product.colors.split(",").map(c => {
+             const [name, hex] = c.split(":");
+             return { name, hex: hex || "#f8fafc" }; // Fallback to off-white
+          }) : [{ name: "Standard", hex: "#f8fafc" }];
+
+          // 3. Normalize sizes
+          const normalizedSizes = product.sizes ? product.sizes.split(" ") : ["S", "M", "L", "XL", "2XL"];
+
+          setDbProduct({
+            ...product,
+            colors: normalizedColors,
+            standardSizes: normalizedSizes,
+            availableBranding: availableBranding.length > 0 ? availableBranding : BRANDING_FORMATS.slice(0, 2) // Fallback if none set
+          });
+
+          setSelectedColor(normalizedColors[0]);
+          if (availableBranding.length > 0) {
+            setSelectedFormat(availableBranding[0]);
+          } else {
+             setSelectedFormat(BRANDING_FORMATS[0]);
+          }
+        }
+      } catch (err) {
+        console.error("Fetch product error:", err);
+      } finally {
+        setLoadingDb(false);
+      }
+    }
+    fetchProduct();
+  }, [rawSku]);
+
+  useEffect(() => {
     // If the store already has this product configured, restore it
-    if (orderData.product && orderData.product.sku === PRODUCT.sku) {
+    if (dbProduct && orderData.product && orderData.product.sku === dbProduct.sku) {
       const { product, customization, sizing } = orderData;
       
       // Restore color
-      const savedColor = PRODUCT.colors.find(c => c.name === product.color);
+      const savedColor = dbProduct.colors.find(c => c.name === product.color);
       if (savedColor) setSelectedColor(savedColor);
       
       // Restore customization
@@ -100,7 +148,7 @@ export default function ProductDetailPage() {
         setCustomRows(sizing.breakdown);
       }
     }
-  }, []); // Run once on mount
+  }, [dbProduct, orderData]);
 
   // 4. Central Calculations
   const totalQuantity = useMemo(() => {
@@ -112,16 +160,19 @@ export default function ProductDetailPage() {
   }, [sizingMode, standardQuantities, customRows]);
 
   const activeTier = useMemo(() => {
-    return PRODUCT.pricingTiers.reduce((prev, curr) => {
+    if (!dbProduct || !dbProduct.pricingTiers) return { price: 0 };
+    return dbProduct.pricingTiers.reduce((prev, curr) => {
       return totalQuantity >= curr.quantity ? curr : prev;
-    }, PRODUCT.pricingTiers[0]);
-  }, [totalQuantity]);
+    }, dbProduct.pricingTiers[0]);
+  }, [totalQuantity, dbProduct]);
 
   const unitPrice = useMemo(() => {
-    let base = activeTier.price;
-    if (isCustomizing) base += selectedFormat.price;
+    let base = parseFloat(activeTier.price) || 0;
+    if (isCustomizing && uploadedLogos.length > 0) {
+      base += (parseFloat(selectedFormat.price) || 0) * uploadedLogos.length;
+    }
     return base;
-  }, [activeTier, isCustomizing, selectedFormat]);
+  }, [activeTier, isCustomizing, selectedFormat, uploadedLogos.length]);
 
   const totalEstimate = (totalQuantity * unitPrice).toFixed(2);
 
@@ -131,16 +182,25 @@ export default function ProductDetailPage() {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setUploadedLogo(reader.result);
-        selectLogoId('logo1');
+        const id = `logo-${Date.now()}`;
+        setUploadedLogos(prev => [...prev, {
+          id,
+          src: reader.result,
+          x: 100, y: 150, width: 100, height: 100, rotation: 0
+        }]);
+        selectLogoId(id);
       };
       reader.readAsDataURL(file);
     }
   };
-  const removeLogo = () => {
-    setUploadedLogo(null);
-    selectLogoId(null);
-    if (logoInputRef.current) logoInputRef.current.value = "";
+
+  const removeLogo = (id) => {
+    setUploadedLogos(prev => prev.filter(l => l.id !== id));
+    if (selectedLogoId === id) selectLogoId(null);
+  };
+
+  const updateLogoProps = (id, props) => {
+    setUploadedLogos(prev => prev.map(l => l.id === id ? { ...l, ...props } : l));
   };
 
   const handleStandardQtyChange = (size, delta) => {
@@ -162,6 +222,14 @@ export default function ProductDetailPage() {
       if(sizeChartInputRef.current) sizeChartInputRef.current.value = "";
   };
 
+  if (loadingDb) return <Loader message="Locating Database Product..." />;
+  if (!dbProduct) return (
+    <div className="min-h-screen pt-32 pb-20 flex flex-col items-center">
+       <h1 className="text-4xl font-black mb-4">404 Product Not Found</h1>
+       <p className="text-base-content/60">Could not locate SKU: {rawSku}</p>
+    </div>
+  );
+
   return (
     <>
       
@@ -169,8 +237,8 @@ export default function ProductDetailPage() {
         <div className="container max-w-7xl mx-auto px-4 md:px-8 mb-6">
            <Breadcrumbs items={[
              { label: 'Catalog', href: '/' },
-             { label: 'Hoodies', href: '/hoodies' },
-             { label: PRODUCT.name, href: '#' }
+             { label: dbProduct.category || 'Apparel', href: '#' },
+             { label: dbProduct.name, href: '#' }
            ]} />
         </div>
 
@@ -179,44 +247,45 @@ export default function ProductDetailPage() {
             
             <ProductStudio 
               ref={studioRef}
-              images={PRODUCT.images}
-              productTitle={PRODUCT.name}
+              images={dbProduct.images && dbProduct.images.length > 0 ? dbProduct.images : ["https://via.placeholder.com/600"]}
+              product={dbProduct}
               isCustomizing={isCustomizing}
               selectedFormat={selectedFormat}
-              uploadedLogo={uploadedLogo}
+              uploadedLogos={uploadedLogos}
               selectedLogoId={selectedLogoId}
               selectLogoId={selectLogoId}
-              logoProps={logoProps}
-              setLogoProps={setLogoProps}
+              onLogoChange={updateLogoProps}
+              activeImage={activeImage}
+              onImageSelect={handleImageSelect}
             />
 
             {/* RIGHT: CONFIGURATOR */}
             <div className="w-full lg:w-[55%]">
               
-              <ProductHeader product={PRODUCT} activeTier={activeTier} />
+              <ProductHeader product={dbProduct} activeTier={activeTier} />
 
               <BrandingOptions 
                 isCustomizing={isCustomizing}
                 setIsCustomizing={setIsCustomizing}
-                brandingFormats={BRANDING_FORMATS}
+                brandingFormats={dbProduct.availableBranding}
                 selectedFormat={selectedFormat}
                 setSelectedFormat={setSelectedFormat}
-                uploadedLogo={uploadedLogo}
+                uploadedLogos={uploadedLogos}
                 handleLogoUpload={handleLogoUpload}
                 removeLogo={removeLogo}
                 logoInputRef={logoInputRef}
               />
 
               <ColorSelector 
-                colors={PRODUCT.colors}
+                colors={dbProduct.colors}
                 selectedColor={selectedColor}
-                setSelectedColor={setSelectedColor}
+                onColorSelect={handleColorSelect}
               />
 
               <SizingModule 
                 sizingMode={sizingMode}
                 setSizingMode={setSizingMode}
-                standardSizes={PRODUCT.standardSizes}
+                standardSizes={dbProduct.standardSizes}
                 standardQuantities={standardQuantities}
                 handleStandardQtyChange={handleStandardQtyChange}
                 customRows={customRows}
@@ -227,11 +296,11 @@ export default function ProductDetailPage() {
                 handleSizeChartUpload={handleSizeChartUpload}
                 removeSizeChart={removeSizeChart}
                 sizeChartInputRef={sizeChartInputRef}
-                sizeChartData={PRODUCT.sizeChart}
+                sizeChartData={dbProduct.sizeChart || []}
               />
 
               <OrderSummary 
-                product={PRODUCT}
+                product={dbProduct}
                 selectedColor={selectedColor}
                 isCustomizing={isCustomizing}
                 selectedFormat={selectedFormat}
@@ -243,7 +312,7 @@ export default function ProductDetailPage() {
                 unitPrice={unitPrice}
                 totalEstimate={totalEstimate}
                 studioRef={studioRef}
-                logoProps={logoProps}
+                uploadedLogosCount={uploadedLogos.length}
               />
 
             </div>

@@ -38,10 +38,13 @@ export default function ChatSidebar({ contacts, activeContact, onSelectContact, 
 
                 <div className="ml-3 flex-1 overflow-hidden">
                   <div className="flex justify-between items-center w-full">
-                    <span className="font-semibold text-sm truncate">{contact.name}</span>
-                    <span className="text-[10px] text-base-content/50 whitespace-nowrap">{contact.lastSeen}</span>
+                    <span className="font-semibold text-sm truncate uppercase tracking-tight">{contact.name}</span>
+                    <span className="text-[9px] text-base-content/40 whitespace-nowrap ml-2 font-medium">{contact.lastSeen}</span>
                   </div>
-                  <span className="text-xs text-base-content/60 block truncate">{contact.role}</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] text-base-content/60 block truncate max-w-[120px]">{contact.lastMessage || 'No messages yet'}</span>
+                    {!contact.isOnline && <span className="text-[9px] text-base-content/30 italic">Offline</span>}
+                  </div>
                 </div>
               </button>
             </li>

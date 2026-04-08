@@ -85,7 +85,7 @@ export default function AddUser({ onSave }) {
       <button
         type="button"
         onClick={open}
-        className="btn bg-[var(--primary)] text-white border-transparent hover:brightness-110 text-white rounded-lg gap-2 text-sm font-medium shadow-sm"
+        className="btn btn-[var(--primary)] text-white rounded-lg gap-2 text-sm font-medium shadow-sm"
       >
         <UserPlus className="w-5 h-5" /> Add User
       </button>
@@ -94,7 +94,7 @@ export default function AddUser({ onSave }) {
       <dialog ref={modalRef} className="modal w-full modal-middle h-full">
         <div className="modal-box text-sm max-w-3xl rounded-2xl p-0 bg-base-200 shadow-xl overflow-hidden flex flex-col">
           {/* Header */}
-          <div className="px-6 py-5 bg-[var(--primary)] rounded-md relative">
+          <div className="px-6 py-5 bg-[var(--primary)] rounded-md relative font-sans">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-full">
                 <UserPlus className="w-6 h-6 text-[var(--primary)]-content" />
@@ -151,9 +151,8 @@ export default function AddUser({ onSave }) {
                     value={form.name}
                     onChange={handleChange}
                     placeholder="Full Name"
-                    className={`input input-bordered rounded-lg w-full text-sm ${
-                      errors.name ? "input-error" : ""
-                    }`}
+                    className={`input input-bordered rounded-lg w-full text-sm ${errors.name ? "input-error" : ""
+                      }`}
                   />
                   {errors.name && (
                     <p className="text-error text-xs mt-1">{errors.name}</p>
@@ -173,9 +172,8 @@ export default function AddUser({ onSave }) {
                     value={form.email}
                     onChange={handleChange}
                     placeholder="user@example.com"
-                    className={`input input-bordered rounded-lg w-full text-sm ${
-                      errors.email ? "input-error" : ""
-                    }`}
+                    className={`input input-bordered rounded-lg w-full text-sm ${errors.email ? "input-error" : ""
+                      }`}
                   />
                   {errors.email && (
                     <p className="text-error text-xs mt-1">{errors.email}</p>
@@ -212,9 +210,8 @@ export default function AddUser({ onSave }) {
                     value={form.password}
                     onChange={handleChange}
                     placeholder="******"
-                    className={`input input-bordered rounded-lg w-full text-sm ${
-                      errors.password ? "input-error" : ""
-                    }`}
+                    className={`input input-bordered rounded-lg w-full text-sm ${errors.password ? "input-error" : ""
+                      }`}
                   />
                   {errors.password && (
                     <p className="text-error text-xs mt-1">
@@ -255,9 +252,9 @@ export default function AddUser({ onSave }) {
                   <label className="label">
                     <span className="label-text flex items-center gap-2 text-sm">
                       {form.status === "Active" ? (
-                        <ToggleRight className="w-4 h-4 text-green-500" />
+                        <ToggleRight className="w-4 h-4 text-success" />
                       ) : (
-                        <ToggleLeft className="w-4 h-4 text-red-500" />
+                        <ToggleLeft className="w-4 h-4 text-error" />
                       )}
                       Status
                     </span>
@@ -288,7 +285,7 @@ export default function AddUser({ onSave }) {
             <button
               type="submit"
               disabled={submitting}
-              className="btn bg-[var(--primary)] text-white border-transparent hover:brightness-110 flex items-center gap-2 rounded-lg text-sm"
+              className="btn btn-[var(--primary)] text-white flex items-center gap-2 rounded-lg text-sm"
               onClick={handleSubmit}
             >
               {submitting ? (

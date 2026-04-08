@@ -171,7 +171,7 @@ export default function OrderList() {
                           <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
                             hasPendingInvoice
                               ? 'bg-amber-100 group-hover:bg-amber-200'
-                              : 'bg-[var(--primary)]/10 group-hover:bg-[var(--primary)]/20'
+                              : 'bg-[var(--primary)]/10 group-hover:bg-(--primary)/20'
                           }`}>
                             {hasPendingInvoice
                               ? <AlertCircle size={16} className="text-amber-600" />

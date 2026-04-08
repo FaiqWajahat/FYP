@@ -1,6 +1,7 @@
 'use client'
 import { PanelLeftClose } from 'lucide-react';
 import React from 'react'
+import Link from 'next/link';
 import { useConfigStore } from '@/store/useConfigStore';
 
 const DashboardSidebarHead = ({ sidebarOpen, setSidebarOpen }) => {
@@ -9,7 +10,7 @@ const DashboardSidebarHead = ({ sidebarOpen, setSidebarOpen }) => {
   return (
     <div className="flex w-full items-center justify-between gap-2  ">
       {/* Brand / Logo */}
-      <div className="flex items-center gap-2.5 min-w-0">
+      <Link href="/" className="flex items-center gap-2.5 min-w-0 hover:opacity-80 transition-opacity cursor-pointer">
         {/* Logo mark */}
         <div className="w-8 h-8 rounded-xl bg-[var(--primary)] flex items-center justify-center shrink-0 shadow-md shadow-[var(--primary)]/25">
           <span className="text-white text-sm font-black leading-none">
@@ -21,11 +22,11 @@ const DashboardSidebarHead = ({ sidebarOpen, setSidebarOpen }) => {
           <h1 className="text-[15px] font-extrabold text-base-content leading-tight truncate">
             {projectName}
           </h1>
-          <p className="text-[10px] text-base-content/40 font-medium tracking-wide leading-none mt-0.5">
-            Admin Panel
+          <p className="text-[10px] text-base-content/45 font-medium tracking-wide leading-none mt-0.5">
+            Dashboard
           </p>
         </div>
-      </div>
+      </Link>
 
       {/* Collapse toggle */}
       <button

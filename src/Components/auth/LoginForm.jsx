@@ -1,22 +1,64 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Mail, Lock, ArrowRight, Chrome } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Chrome, Loader2 } from 'lucide-react';
 import { useConfigStore } from '@/store/useConfigStore';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/store/AuthContext';
+import { toast } from 'react-hot-toast';
+import { useRouter } from 'next/navigation';
 
 export default function LoginForm() {
   const { projectName } = useConfigStore();
+  const { signInWithGoogle } = useAuth();
+  const router = useRouter();
+  
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleGoogleLogin = () => {
-    // Placeholder for Supabase Google Login
-    console.log("Initiate Supabase Google Auth");
+  const handleEmailLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single();
+
+      toast.success("Welcome back!");
+      if (profile?.role === 'admin') {
+        router.push('/Dashboard');
+      } else {
+        router.push('/'); // Redirect standard user to site
+      }
+    } catch (err) {
+      toast.error(err.message || "Failed to sign in");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onGoogleLogin = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (err) {
+      toast.error("Failed to initiate Google Login");
+    }
   };
 
   return (
     <div className="w-full max-w-md mx-auto p-8 sm:p-12 bg-white rounded-3xl shadow-[0_8px_40px_rgba(0,0,0,0.04)] border border-slate-100 relative overflow-hidden">
-      {/* Decorative Glow */}
       <div className="absolute -top-20 -right-20 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
       
       <div className="relative z-10">
@@ -27,7 +69,7 @@ export default function LoginForm() {
           </p>
         </div>
 
-        <form className="space-y-5" onSubmit={(e) => e.preventDefault()}>
+        <form className="space-y-5" onSubmit={handleEmailLogin}>
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Email Address</label>
             <div className="relative">
@@ -38,6 +80,8 @@ export default function LoginForm() {
                 type="email" 
                 className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
                 placeholder="name@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
@@ -46,7 +90,7 @@ export default function LoginForm() {
           <div className="space-y-1.5">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-slate-700 uppercase tracking-wider">Password</label>
-              <Link href="/forgot-password" className="text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors">
+              <Link href="/forgot-password" disabled={loading} className="text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors">
                 Forgot?
               </Link>
             </div>
@@ -58,6 +102,8 @@ export default function LoginForm() {
                 type="password" 
                 className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400"
                 placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 required
               />
             </div>
@@ -66,9 +112,11 @@ export default function LoginForm() {
           <motion.button
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
-            className="w-full py-4 bg-slate-900 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-slate-900/10 hover:bg-blue-600 transition-all mt-6"
+            disabled={loading}
+            type="submit"
+            className="w-full py-4 bg-slate-900 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-lg shadow-slate-900/10 hover:bg-blue-600 transition-all mt-6 disabled:opacity-50"
           >
-            Sign In <ArrowRight size={16} />
+            {loading ? <Loader2 className="animate-spin" size={20} /> : "Sign In"} <ArrowRight size={16} />
           </motion.button>
         </form>
 
@@ -83,8 +131,10 @@ export default function LoginForm() {
           <motion.button
             whileHover={{ scale: 1.01 }}
             whileTap={{ scale: 0.98 }}
-            onClick={handleGoogleLogin}
-            className="w-full py-3.5 bg-white border-2 border-slate-100 text-slate-700 rounded-xl text-sm font-bold flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-slate-200 transition-all"
+            onClick={onGoogleLogin}
+            disabled={loading}
+            type="button"
+            className="w-full py-3.5 bg-white border-2 border-slate-100 text-slate-700 rounded-xl text-sm font-bold flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-slate-200 transition-all disabled:opacity-50"
           >
             <Chrome size={18} className="text-blue-500" />
             Sign in with Google
@@ -94,7 +144,7 @@ export default function LoginForm() {
         <p className="mt-10 text-center text-sm font-medium text-slate-500">
           Don't have an account?{' '}
           <Link href="/signup" className="font-bold text-blue-600 hover:text-blue-700 transition-colors">
-            Create workspace
+            Create account
           </Link>
         </p>
       </div>
