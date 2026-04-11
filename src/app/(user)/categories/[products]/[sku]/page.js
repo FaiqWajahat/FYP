@@ -62,7 +62,7 @@ export default function ProductDetailPage() {
   const [sizingMode, setSizingMode] = useState('standard'); 
   const [standardQuantities, setStandardQuantities] = useState({ "M": 20 }); 
   const [customRows, setCustomRows] = useState([{ id: 1, name: "Custom Size 1", qty: 20 }]); 
-  const [uploadedSizeChart, setUploadedSizeChart] = useState(null);
+  const [sizeChartFile, setSizeChartFile] = useState(null); // The actual File object
   const sizeChartInputRef = useRef(null);
   const studioRef = useRef(null);
 
@@ -215,10 +215,10 @@ export default function ProductDetailPage() {
 
   const handleSizeChartUpload = (e) => {
     const file = e.target.files[0];
-    if (file) setUploadedSizeChart(file.name);
+    if (file) setSizeChartFile(file);
   };
   const removeSizeChart = () => {
-      setUploadedSizeChart(null);
+      setSizeChartFile(null);
       if(sizeChartInputRef.current) sizeChartInputRef.current.value = "";
   };
 
@@ -292,7 +292,7 @@ export default function ProductDetailPage() {
                 handleAddCustomRow={() => setCustomRows([...customRows, { id: Date.now(), name: "New Size", qty: 0 }])}
                 handleUpdateCustomRow={(id, field, val) => setCustomRows(rows => rows.map(r => r.id === id ? { ...r, [field]: val } : r))}
                 handleDeleteCustomRow={(id) => setCustomRows(rows => rows.filter(r => r.id !== id))}
-                uploadedSizeChart={uploadedSizeChart}
+                sizeChartFile={sizeChartFile}
                 handleSizeChartUpload={handleSizeChartUpload}
                 removeSizeChart={removeSizeChart}
                 sizeChartInputRef={sizeChartInputRef}
@@ -312,7 +312,9 @@ export default function ProductDetailPage() {
                 unitPrice={unitPrice}
                 totalEstimate={totalEstimate}
                 studioRef={studioRef}
+                logoProps={uploadedLogos}
                 uploadedLogosCount={uploadedLogos.length}
+                sizeChartFile={sizeChartFile}
               />
 
             </div>

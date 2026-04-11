@@ -31,6 +31,15 @@ export default function CustomDropdown({
     setIsOpen(false);
   };
 
+  // NEW: Find the display label for the current value
+  const getDisplayLabel = () => {
+    if (!value) return placeholder;
+    const selectedOption = options.find(opt => 
+      (typeof opt === "object" ? opt.value : opt) === value
+    );
+    return typeof selectedOption === "object" ? selectedOption.label : (selectedOption || value);
+  };
+
   return (
     <div className={`relative w-full ${className}`} ref={dropdownRef}>
       <button
@@ -44,7 +53,7 @@ export default function CustomDropdown({
         style={isOpen ? { '--tw-ring-color': 'color-mix(in srgb, var(--primary) 15%, transparent)' } : {}}
       >
         <span className={value ? "text-base-content" : "text-base-content/40"}>
-          {value || placeholder}
+          {getDisplayLabel()}
         </span>
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}
@@ -62,7 +71,7 @@ export default function CustomDropdown({
             exit={{ opacity: 0, y: -5, scaleY: 0.95 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
             style={{ transformOrigin: "top" }}
-            className="absolute left-0 top-full z-[99] w-full mt-2 bg-base-100 border border-base-content/10 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden py-1 max-h-60 overflow-y-auto"
+            className="absolute left-0 top-full z-[1000] w-full mt-2 bg-base-100 border border-base-content/10 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden py-1 max-h-60 overflow-y-auto font-sans"
           >
             {options.length === 0 ? (
               <div className="px-4 py-3 text-xs text-base-content/40 italic">No options available</div>
@@ -71,6 +80,7 @@ export default function CustomDropdown({
                 {options.map((option, idx) => {
                   const optValue = typeof option === "object" ? option.value : option;
                   const optLabel = typeof option === "object" ? option.label : option;
+                  const optSub = typeof option === "object" ? option.subLabel : null;
                   const isSelected = value === optValue;
 
                   return (
@@ -82,8 +92,11 @@ export default function CustomDropdown({
                           ${isSelected ? "bg-base-200 text-[var(--primary)] font-bold" : "text-base-content font-medium hover:bg-base-200"}
                         `}
                       >
-                        <span className="truncate">{optLabel}</span>
-                        {isSelected && <Check className="w-4 h-4 shrink-0" />}
+                        <div className="flex flex-col items-start min-w-0">
+                          <span className="truncate">{optLabel}</span>
+                          {optSub && <span className="text-[10px] opacity-50 font-medium truncate">{optSub}</span>}
+                        </div>
+                        {isSelected && <Check className="w-4 h-4 shrink-0 ml-2" />}
                       </button>
                     </li>
                   );

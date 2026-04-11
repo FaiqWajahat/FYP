@@ -49,13 +49,7 @@ export default function AddUserPage() {
           heading="Add New User"
           subHeading="Invite a new team member or administrative partner."
         />
-        {/* <Link
-          href="/Dashboard/Users/All"
-          className="btn btn-ghost btn-sm gap-2 text-base-content/50 hover:text-base-content"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          Back to List
-        </Link> */}
+      
       </div>
 
       <div className="w-full mx-auto">

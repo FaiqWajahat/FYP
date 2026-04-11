@@ -2,8 +2,8 @@
 import { Archive, DollarSignIcon, User,Box } from 'lucide-react';
 import React from 'react'
 import CountUp from 'react-countup';
-
-const DashboardTopStats = () => {
+const DashboardTopStats = ({ stats = {} }) => {
+  const { revenue = 0, ordersCount = 0, usersCount = 0, productsCount = 0 } = stats;
   return (
     <div className="stats bg-base-100 w-full  stats-vertical md:stats-horizontal overflow-hidden shadow">
       
@@ -13,7 +13,7 @@ const DashboardTopStats = () => {
     </div>
     <div className=" pb-1  ">Revenue</div>
     <div className="stat-value">
-      <CountUp start={0} end={31} duration={2.75} suffix='k'></CountUp>
+      $<CountUp start={0} end={revenue} duration={2.75} decimals={2}></CountUp>
       </div>
    
   </div>
@@ -26,7 +26,7 @@ const DashboardTopStats = () => {
     </div>
     <div className="pb-1">Orders</div>
     <div className="stat-value">
-        <CountUp start={0} end={21} duration={2.75} suffix='K'></CountUp>
+        <CountUp start={0} end={ordersCount} duration={2.75}></CountUp>
     </div>
     
   </div>
@@ -40,7 +40,7 @@ const DashboardTopStats = () => {
     </div>
     <div className="pb-1">Users</div>
     <div className="stat-value">
-        <CountUp start={0} end={4.2}  duration={2.75} suffix='k'></CountUp>
+        <CountUp start={0} end={usersCount} duration={2.75}></CountUp>
     </div>
    
   </div>
@@ -53,7 +53,7 @@ const DashboardTopStats = () => {
     </div>
     <div className="pb-1">Products</div>
     <div className="stat-value">
-        <CountUp start={0} end={80} duration={2.75} ></CountUp>
+        <CountUp start={0} end={productsCount} duration={2.75}></CountUp>
     </div>
    
   </div>

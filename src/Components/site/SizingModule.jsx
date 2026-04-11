@@ -8,7 +8,7 @@ export default function SizingModule({
   sizingMode, setSizingMode,
   standardSizes, standardQuantities, handleStandardQtyChange,
   customRows, handleAddCustomRow, handleUpdateCustomRow, handleDeleteCustomRow,
-  uploadedSizeChart, handleSizeChartUpload, removeSizeChart, sizeChartInputRef, sizeChartData
+  sizeChartFile, handleSizeChartUpload, removeSizeChart, sizeChartInputRef, sizeChartData
 }) {
   const [showSizeChartModal, setShowSizeChartModal] = useState(false);
 
@@ -52,7 +52,7 @@ export default function SizingModule({
           <div className="animate-in fade-in">
             <div className="mb-6">
                 <p className="text-xs font-bold text-slate-900 mb-2 uppercase tracking-wider">1. Upload Your Tech Pack / Size Chart</p>
-                {!uploadedSizeChart ? (
+                {!sizeChartFile ? (
                    <div onClick={() => sizeChartInputRef.current.click()} className="border-2 border-dashed border-slate-300 bg-white rounded-lg p-6 text-center hover:border-blue-400 hover:bg-blue-50 transition-colors cursor-pointer group">
                       <input type="file" ref={sizeChartInputRef} onChange={handleSizeChartUpload} accept=".pdf,.csv,.xlsx,.xls,image/*" className="hidden" />
                       <div className="inline-flex p-3 bg-slate-100 text-slate-500 rounded-full mb-3 group-hover:bg-blue-100 group-hover:text-blue-600 transition-colors"><FileText size={24} /></div>
@@ -63,8 +63,8 @@ export default function SizingModule({
                    <div className="flex items-center gap-4 bg-white p-4 rounded-lg border border-green-200 shadow-sm">
                       <div className="p-3 bg-green-50 text-green-600 rounded-lg"><CheckCircle2 size={24} /></div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-slate-900 truncate">{uploadedSizeChart}</p>
-                        <p className="text-xs text-green-600 font-medium">Chart successfully attached.</p>
+                        <p className="text-sm font-bold text-slate-900 truncate">{sizeChartFile.name}</p>
+                        <p className="text-xs text-green-600 font-medium">Chart successfully attached. Will upload on review.</p>
                       </div>
                       <button onClick={removeSizeChart} className="text-xs font-bold text-slate-400 hover:text-red-500 transition-colors underline">Remove</button>
                    </div>

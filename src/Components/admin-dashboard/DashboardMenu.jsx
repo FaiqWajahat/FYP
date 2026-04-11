@@ -37,11 +37,13 @@ const navGroups = [
       {
         title: "Orders",
         icon: ShoppingBag,
-        badge: "12",
+
         children: [
           { title: "All Orders", href: "/Dashboard/Orders/All" },
+          { title: "Add Order", href: "/Dashboard/Orders/Add" },
           { title: "Pending", href: "/Dashboard/Orders/Pending", dot: true },
-          { title: "Delivered", href: "/Dashboard/Orders/Delivered" },
+          { title: "Processing", href: "/Dashboard/Orders/Processing" },
+          { title: "Completed", href: "/Dashboard/Orders/Completed" },
         ],
       },
       {
@@ -71,15 +73,16 @@ const navGroups = [
   {
     groupLabel: "Finance",
     items: [
-      {
-        title: "Discounts",
-        icon: Percent,
-        href: "/Dashboard/Discounts/All",
-      },
+
       {
         title: "Invoices",
         icon: FileText,
-        href: "/Dashboard/Invoices",
+        children: [
+          { title: "All Invoices", href: "/Dashboard/Invoices/All" },
+          { title: "Unpaid", href: "/Dashboard/Invoices/Unpaid", dot: true },
+          { title: "Paid", href: "/Dashboard/Invoices/Paid" },
+          { title: "Overdue", href: "/Dashboard/Invoices/Overdue" },
+        ],
       },
     ],
   },
@@ -90,16 +93,9 @@ const navGroups = [
         title: "Messages",
         icon: MessageSquare,
         href: "/Dashboard/Messages",
-        badge: "3",
+
       },
-      {
-        title: "Settings",
-        icon: Settings,
-        children: [
-          { title: "General", href: "/Dashboard/Settings" },
-          { title: "Security", href: "/Dashboard/Settings/Security" },
-        ],
-      },
+
       { title: "My Profile", icon: User, href: "/Dashboard/Profile" },
     ],
   },

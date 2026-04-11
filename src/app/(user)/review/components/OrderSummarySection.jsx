@@ -38,6 +38,39 @@ export default function OrderSummarySection({ orderData }) {
         </div>
       </div>
 
+      {/* Branding & Logo Details */}
+      {customization.enabled && (
+        <div className="mt-5 pt-5 border-t border-slate-100 space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Branding Pipeline</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center gap-3">
+              <div className="w-10 h-10 bg-white rounded-lg border border-slate-200 flex items-center justify-center text-[10px] font-black text-blue-600 uppercase">
+                {customization.format.slice(0, 3)}
+              </div>
+              <div>
+                <p className="text-xs font-bold text-slate-900">{customization.format}</p>
+                <p className="text-[10px] text-slate-500">Premium Manufacturing</p>
+              </div>
+            </div>
+            
+            <div className="flex -space-x-2 overflow-hidden items-center">
+              {(customization.logoProps || []).map((logo, idx) => (
+                <div key={idx} className="inline-block h-10 w-10 rounded-full ring-2 ring-white bg-slate-100 border border-slate-200 overflow-hidden">
+                   <img src={logo.src} alt="logo" className="w-full h-full object-contain" />
+                </div>
+              ))}
+              {(customization.logoProps || []).length > 0 && (
+                <span className="pl-4 text-[10px] font-bold text-slate-400">
+                  + {(customization.logoProps || []).length} Branding Assets
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Size Breakdown */}
       <div className="mt-5 pt-5 border-t border-slate-100">
         <div className="flex justify-between items-center mb-3">

@@ -55,3 +55,31 @@ export async function POST(request) {
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }
+
+export async function GET() {
+  try {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY,
+      {
+        cookies: {
+          getAll() { return [] },
+          setAll() { },
+        },
+      }
+    )
+
+    // Fetch users for the client list (safe selection of verified columns)
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, full_name, role, email')
+      .order('full_name');
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, users: data });
+  } catch (err) {
+    console.error("Admin User Fetch Error:", err)
+    return NextResponse.json({ error: err.message }, { status: 500 })
+  }
+}

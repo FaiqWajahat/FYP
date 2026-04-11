@@ -9,7 +9,7 @@ const Pagination = () => {
     type="radio"
     name="options"
     aria-label="1"
-    checked="checked"
+    defaultChecked
    
     />
   <input className="join-item btn btn-square btn-sm" type="radio" name="options" aria-label="2" />

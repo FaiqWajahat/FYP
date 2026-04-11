@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle2, ChevronRight, ArrowLeft } from 'lucide-react';
 
 import { useOrderStore } from '@/store/useOrderStore';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'react-hot-toast';
 import OrderSummarySection from './components/OrderSummarySection';
 import PaymentMethodSection from './components/PaymentMethodSection';
 import PaymentScheduleSection from './components/PaymentScheduleSection';
@@ -23,8 +25,17 @@ export default function ReviewContent() {
 
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [user, setUser] = useState(null);
 
-  if (!orderData.product) {
+  useEffect(() => {
+    async function getUser() {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    }
+    getUser();
+  }, []);
+
+  if (!orderData || !orderData.product) {
     return (
       <div className="min-h-screen bg-slate-50 flex  flex-col items-center justify-center p-6 text-center">
         <div className="w-16 h-16 bg-slate-200 rounded-full flex items-center justify-center mb-6 animate-pulse">
@@ -56,12 +67,43 @@ export default function ReviewContent() {
   const amountDueNow = paymentDivision === 'split' ? grandTotal * 0.5 : grandTotal;
   const canSubmit = paymentMethod && paymentDivision && agreedToTerms;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!canSubmit) return;
     setIsSubmitting(true);
-    setTimeout(() => {
-      router.push('/confirmation');
-    }, 1200);
+
+    try {
+      // Logic for syncing assets has been moved to the "Next Step" button 
+      // in OrderSummary to ensure the Review page is always initialized with URLs.
+
+      // 1. Final Order Submission
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: user?.id || null,
+          product: orderData.product, 
+          customization: orderData.customization,
+          design_assets: orderData.design_assets, // Use pre-synced Cloudinary URLs
+          sizing: orderData.sizing,
+          pricing: orderData.pricing,
+          paymentMethod: paymentMethod.name,
+          paymentDivision: paymentDivision
+        })
+      });
+
+      const resData = await response.json();
+      if (!resData.success) throw new Error(resData.error);
+
+      toast.success("Order request submitted successfully!");
+      
+      // Clear store and redirect
+      orderData.resetOrder();
+      router.push(`/confirmation?id=${resData.orderId}`);
+    } catch (err) {
+      console.error("Submission Error:", err);
+      toast.error(`Failed to submit order: ${err.message}`);
+      setIsSubmitting(false);
+    }
   };
 
   return (

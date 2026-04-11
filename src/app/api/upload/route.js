@@ -10,28 +10,44 @@ cloudinary.config({
 
 export async function POST(req) {
   try {
-    const formData = await req.formData();
-    const file = formData.get('file');
+    let base64Str = "";
+    let folder = "b2b-products";
 
-    if (!file) {
-      return NextResponse.json({ error: 'No file received.' }, { status: 400 });
+    const contentType = req.headers.get("content-type") || "";
+    
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await req.formData();
+      const file = formData.get('file');
+      if (!file) throw new Error("No file received");
+      
+      console.log("Upload API: Received multipart file:", file.name, file.type);
+      
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      base64Str = `data:${file.type};base64,${buffer.toString('base64')}`;
+    } else {
+      const body = await req.json();
+      base64Str = body.file; 
+      if (body.folder) folder = body.folder;
+      console.log("Upload API: Received JSON base64. Folder:", folder);
     }
 
-    // Convert file to base64 for Cloudinary upload
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const base64Str = `data:${file.type};base64,${buffer.toString('base64')}`;
+    if (!base64Str) {
+      console.error("Upload API: No base64 data received.");
+      return NextResponse.json({ error: 'No data received.' }, { status: 400 });
+    }
 
-    // Upload to Cloudinary
+    console.log("Upload API: Triggering Cloudinary upload...");
     const uploadResponse = await cloudinary.uploader.upload(base64Str, {
-      folder: 'b2b-products', // Organize uploads
+      folder: folder,
       resource_type: 'auto'
     });
 
+    console.log("Upload API: Success! URL:", uploadResponse.secure_url);
     return NextResponse.json({ success: true, url: uploadResponse.secure_url });
     
   } catch (err) {
-    console.error("Cloudinary Upload Error:", err);
-    return NextResponse.json({ error: 'Failed to upload to Cloudinary.' }, { status: 500 });
+    console.error("Upload API: FATAL ERROR:", err);
+    return NextResponse.json({ error: err.message || 'Failed to upload to Cloudinary.' }, { status: 500 });
   }
 }

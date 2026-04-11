@@ -1,28 +1,55 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import {
   CheckCircle2, LayoutDashboard, FileText, Clock,
   Upload, ShieldCheck, ArrowRight
 } from 'lucide-react';
 import { useConfigStore } from '@/store/useConfigStore';
+import { useSearchParams } from 'next/navigation';
 
-export default function OrderConfirmationPage() {
+function OrderConfirmationContent() {
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get('id');
+  
   const [visible, setVisible] = useState(false);
+  const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
   const { projectName } = useConfigStore();
 
-  // Trigger the entrance animation on mount
+  // Trigger the entrance animation on mount and fetch data
   useEffect(() => {
     const t = setTimeout(() => setVisible(true), 100);
+    
+    async function fetchOrder() {
+      if (!orderId) {
+        setLoading(false);
+        return;
+      }
+      try {
+        const res = await fetch(`/api/orders?id=${orderId}`);
+        const data = await res.json();
+        if (data.success) {
+          setOrder(data.order);
+        }
+      } catch (err) {
+        console.error("Fetch confirmation error:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    fetchOrder();
     return () => clearTimeout(t);
-  }, []);
+  }, [orderId]);
 
-  const orderId = 'REQ-8892-FC';
-  const submittedAt = new Date().toLocaleString('en-US', {
+  const submittedAt = order ? new Date(order.created_at).toLocaleString('en-US', {
     weekday: 'short', year: 'numeric', month: 'short', day: 'numeric',
     hour: '2-digit', minute: '2-digit'
-  });
+  }) : "--";
+
+  const displayId = order ? `ORD-${1000 + (order.display_id || 0)}` : (orderId ? "Locating..." : "N/A");
 
   return (
     <div className="flex-1 flex flex-col pt-20">
@@ -60,7 +87,7 @@ export default function OrderConfirmationPage() {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                 <div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Order ID</p>
-                  <p className="font-mono font-black text-slate-900 text-lg">{orderId}</p>
+                  <p className="font-mono font-black text-slate-900 text-lg">{displayId}</p>
                 </div>
                 <div className="sm:text-right">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Submitted At</p>
@@ -119,7 +146,7 @@ export default function OrderConfirmationPage() {
               {/* CTAs */}
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <Link
-                  href="/"
+                  href="/dashboard"
                   className="flex-1 py-3.5 px-5 bg-blue-600 text-white rounded-xl font-bold text-sm hover:bg-blue-500 shadow-lg shadow-blue-200 active:scale-95 transition-all flex items-center justify-center gap-2 group"
                 >
                   <LayoutDashboard size={17} />
@@ -145,5 +172,13 @@ export default function OrderConfirmationPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function OrderConfirmationPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center pt-20"><span className="loading loading-spinner text-blue-600"></span></div>}>
+      <OrderConfirmationContent />
+    </Suspense>
   );
 }

@@ -1,80 +1,89 @@
-'use client'
-import React from 'react'
-import { CreditCard, User, MapPin, ArrowRight } from 'lucide-react'
+"use client";
+import React from 'react';
+import { CreditCard, User, MapPin, Phone, Mail, Fingerprint } from 'lucide-react';
 
-const OrderOtherDetails = () => {
+const OrderOtherDetails = ({ order }) => {
+  if (!order) return null;
+  const profile = order.profiles || {};
+
   return (
-    <div className="w-full grid gap-4 mt-4 md:mt-6 md:grid-cols-2 lg:grid-cols-3">
-      {/* Payment Information */}
-      <div className="bg-base-100 rounded-xl border border-base-200 shadow-sm p-5">
-        <h2 className="text-sm w-full text-center mb-6 font-semibold text-base-content bg-base-200 py-2 px-3 rounded-sm block">
-          Payment Information
-        </h2>
-        
-        <div className="space-y-3">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 bg-base-200 rounded-lg flex items-center justify-center flex-shrink-0">
-              <CreditCard className="w-5 h-5 text-base-content" strokeWidth={2} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-base-content">Ends with 2487</p>
-              <p className="text-xs text-base-content/60 mt-0.5">Expired at 08/27</p>
-            </div>
-            <div className="px-6 py-1 bg-success/10 border-2 border-dashed  border-success/30 rounded-sm flex-shrink-0">
-              <span className="text-xs font-medium text-success">Paid</span>
-            </div>
-          </div>
-          
-         
+    <div className="w-full grid gap-6 mt-6 md:grid-cols-2 lg:grid-cols-3">
+      {/* Customer Record */}
+      <div className="bg-base-100 rounded-xl border border-base-200 shadow-sm overflow-hidden">
+        <div className="px-4 py-2 bg-base-200/50 border-b border-base-200">
+          <h3 className="text-[10px] font-black uppercase tracking-widest text-base-content/50">Client Identity</h3>
         </div>
-      </div>
-
-      {/* Customer Details */}
-      <div className="bg-base-100 rounded-xl border border-base-200 shadow-sm p-5">
-        <h2 className="text-sm w-full text-center mb-6 font-semibold text-base-content bg-base-200 py-2 px-3 rounded-sm block">
-          Customer Details
-        </h2>
-        
-        <div className="flex items-start gap-3">
-          <div className="w-10 h-10 bg-base-200 rounded-lg flex items-center justify-center flex-shrink-0">
-            <User className="w-5 h-5 text-base-content" strokeWidth={2} />
+        <div className="p-5 flex items-start gap-4">
+          <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center shrink-0">
+            <User className="text-primary" size={20} />
           </div>
-          <div className="space-y-2 min-w-0 flex-1">
-            <p className="text-sm font-semibold text-base-content">Samuel E. Clark</p>
-            <div className="space-y-1">
-              <p className="text-xs text-base-content/70">
-                <span className="font-medium">Email:</span> samuel.clark@email.com
-              </p>
-              <p className="text-xs text-base-content/70">
-                <span className="font-medium">Phone:</span> +1 (555) 123-4567
-              </p>
+          <div className="flex flex-col">
+            <h4 className="text-sm font-black text-base-content">{profile.full_name || 'Guest User'}</h4>
+            <div className="mt-2 space-y-1">
+               <div className="flex items-center gap-2 text-[10px] text-base-content/60 font-medium">
+                  <Mail size={12} className="shrink-0" />
+                  <span className="truncate">{profile.email || 'No email provided'}</span>
+               </div>
+               <div className="flex items-center gap-2 text-[10px] text-base-content/60 font-medium">
+                  <Fingerprint size={12} className="shrink-0" />
+                  <span className="font-mono">ID: {profile.id?.slice(0,8) || 'Unknown'}</span>
+               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Delivery Address */}
-      <div className="bg-base-100 rounded-xl border border-base-200 shadow-sm p-5">
-        <h2 className="text-sm w-full text-center mb-6 font-semibold text-base-content bg-base-200 py-2 px-3 rounded-sm block">
-          Delivery Address
-        </h2>
-        
-        <div className="flex items-start gap-3">
-          <div className="w-10 h-10 bg-base-200 rounded-lg flex items-center justify-center flex-shrink-0">
-            <MapPin className="w-5 h-5 text-base-content" strokeWidth={2} />
+      {/* Production Metadata */}
+      <div className="bg-base-100 rounded-xl border border-base-200 shadow-sm overflow-hidden">
+        <div className="px-4 py-2 bg-base-200/50 border-b border-base-200">
+          <h3 className="text-[10px] font-black uppercase tracking-widest text-base-content/50">Production Specs</h3>
+        </div>
+        <div className="p-5 flex items-start gap-4">
+          <div className="w-12 h-12 bg-base-200 rounded-xl flex items-center justify-center shrink-0">
+             <Fingerprint className="text-base-content/40" size={20} />
           </div>
-          <div className="space-y-1 flex-1">
-            <p className="text-sm font-semibold text-base-content">Home Address</p>
-            <p className="text-xs text-base-content/70 leading-relaxed">
-              742 Evergreen Terrace,
-              Springfield, IL 62704<br />
-              United States
-            </p>
+          <div className="flex flex-col">
+            <h4 className="text-sm font-black text-base-content">System Reference</h4>
+            <div className="mt-2 space-y-1">
+               <p className="text-[10px] font-medium text-base-content/60 uppercase racking-tight">
+                  <span className="text-primary font-black">Internal ID:</span> {order.id}
+               </p>
+               <p className="text-[10px] font-medium text-base-content/60 uppercase tracking-tight">
+                  <span className="text-primary font-black">SKU Prefix:</span> {order.sku?.split('-')[0] || 'N/A'}
+               </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Estimated Shipping */}
+      <div className="bg-base-100 rounded-xl border border-base-200 shadow-sm overflow-hidden">
+        <div className="px-4 py-2 bg-base-200/50 border-b border-base-200">
+          <h3 className="text-[10px] font-black uppercase tracking-widest text-base-content/50">Logistics Overview</h3>
+        </div>
+        <div className="p-5 flex items-start gap-4">
+          <div className="w-12 h-12 bg-base-200 rounded-xl flex items-center justify-center shrink-0 font-mono text-xs font-black text-base-content/40">
+             MAP
+          </div>
+          <div className="flex flex-col">
+            <h4 className="text-sm font-black text-base-content">Shipping Status</h4>
+            <div className="mt-2 space-y-1">
+               <p className="text-[10px] font-medium text-base-content/60 leading-relaxed uppercase">
+                  {order.shipping_tracking ? (
+                    <span className="text-emerald-600 font-black">Tracking: {order.shipping_tracking}</span>
+                  ) : (
+                    "No tracking info generated yet."
+                  )}
+               </p>
+               <p className="text-[10px] font-medium text-base-content/40 italic">
+                  Address details are locked to the user profile or technical sheet.
+               </p>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default OrderOtherDetails
+export default OrderOtherDetails;

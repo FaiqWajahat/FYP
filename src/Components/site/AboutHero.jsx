@@ -5,7 +5,7 @@ import { ArrowDown } from 'lucide-react'
 
 const AboutHero = () => {
   return (
-    <section className="relative py-10 w-full flex flex-col items-center justify-center overflow-hidden ">
+    <section className="relative py-20 w-full flex flex-col items-center justify-center overflow-hidden ">
 
 
 
@@ -27,15 +27,13 @@ const AboutHero = () => {
           </h1>
 
           {/* Subtext */}
-          <p className="text-lg text-slate-500 leading-relaxed max-w-2xl mx-auto font-medium">
-            <p className="text-xl text-slate-600 leading-relaxed max-w-3xl mx-auto font-medium">
-              Factory Flow is the first digital ecosystem for <strong>custom bulk apparel</strong>.
-              We streamline the entire export lifecycle—integrating
-              <span className="text-slate-900"> AI-driven customization</span>,
-              <span className="text-slate-900"> live production tracking</span>, and
-              <span className="text-slate-900"> secure milestone payments</span> into one seamless platform.
-            </p>
-          </p>
+          <div className="text-xl text-slate-600 leading-relaxed max-w-3xl mx-auto font-medium">
+            Factory Flow is the first digital ecosystem for <strong>custom bulk apparel</strong>.
+            We streamline the entire export lifecycle—integrating
+            <span className="text-slate-900"> AI-driven customization</span>,
+            <span className="text-slate-900"> live production tracking</span>, and
+            <span className="text-slate-900"> secure milestone payments</span> into one seamless platform.
+          </div>
         </motion.div>
 
       </div>

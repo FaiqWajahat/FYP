@@ -11,35 +11,9 @@ import {
   Legend,
 } from 'recharts'
 
-// Data
-const weeklyData = [
-  { name: 'Mon', revenue: 500 },
-  { name: 'Tue', revenue: 700 },
-  { name: 'Wed', revenue: 600 },
-  { name: 'Thu', revenue: 800 },
-  { name: 'Fri', revenue: 750 },
-  { name: 'Sat', revenue: 900 },
-  { name: 'Sun', revenue: 650 },
-]
-
-const monthlyData = [
-  { name: 'Jan', revenue: 4000 },
-  { name: 'Feb', revenue: 3000 },
-  { name: 'Mar', revenue: 2000 },
-  { name: 'Apr', revenue: 2780 },
-  { name: 'May', revenue: 1890 },
-  { name: 'Jun', revenue: 2390 },
-  { name: 'Jul', revenue: 3490 },
-  { name: 'Aug', revenue: 4200 },
-  { name: 'Sep', revenue: 3800 },
-  { name: 'Oct', revenue: 4500 },
-  { name: 'Nov', revenue: 4700 },
-  { name: 'Dec', revenue: 5200 },
-]
-
-export default function RevenueChart() {
+export default function RevenueChart({ aggData = { monthlyRevenue: [], weeklyRevenue: [] } }) {
   const [view, setView] = useState('month')
-  const data = view === 'month' ? monthlyData : weeklyData
+  const data = view === 'month' ? aggData.monthlyRevenue : aggData.weeklyRevenue
 
   return (
     <div className="w-full max-w-full mx-auto rounded-xl shadow-lg p-3 lg:p-6 bg-base-100 text-base-content text-lg transition-colors duration-300">
@@ -54,7 +28,7 @@ export default function RevenueChart() {
             onClick={() => setView('week')}
             aria-pressed={view === 'week'}
             className={`px-4 py-1 rounded-full font-semibold transition-colors duration-300 text-sm ${
-              view === 'week' ? 'bg-[#422ad5] text-white' : 'text-base-content'
+              view === 'week' ? 'bg-[var(--primary)] text-white' : 'text-base-content'
             }`}
           >
             Week
@@ -63,7 +37,7 @@ export default function RevenueChart() {
             onClick={() => setView('month')}
             aria-pressed={view === 'month'}
             className={`px-4 py-2 rounded-full font-semibold transition-colors duration-300 text-sm sm:text-base ${
-              view === 'month' ? 'bg-[#422ad5] text-white' : 'text-base-content'
+              view === 'month' ? 'bg-[var(--primary)] text-white' : 'text-base-content'
             }`}
           >
             Month
@@ -79,8 +53,8 @@ export default function RevenueChart() {
         >
           <defs>
             <linearGradient id="gradRevenue" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#6b5ef0" stopOpacity={0.25} />
-              <stop offset="100%" stopColor="#6b5ef0" stopOpacity={0} />
+              <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.25} />
+              <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
             </linearGradient>
           </defs>
 
@@ -112,8 +86,8 @@ export default function RevenueChart() {
               border: '1px solid var(--tooltip-border, #e5e7eb)',
               boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
             }}
-            itemStyle={{ color: '#422ad5', fontWeight: 600 }}
-            cursor={{ stroke: 'rgba(66, 42, 213, 0.12)', strokeWidth: 2 }}
+            itemStyle={{ color: 'var(--primary)', fontWeight: 600 }}
+            cursor={{ stroke: 'var(--primary)', strokeOpacity: 0.12, strokeWidth: 2 }}
           />
 
           <Legend verticalAlign="top" align="right" height={36} />
@@ -122,7 +96,7 @@ export default function RevenueChart() {
             type="monotone"
             dataKey="revenue"
             name="Revenue"
-            stroke="#422ad5"
+            stroke="var(--primary)"
             strokeWidth={3}
             dot={{ r: 4 }}
             activeDot={{ r: 6 }}

@@ -10,8 +10,10 @@ export const useOrderStore = create(
       orderId: null,      // Generated on client to avoid hydration mismatch
       product: null,       // { name, sku, image, color }
       customization: null, // { enabled, format, formatPrice, logoProps }
-      sizing: null,        // { mode, breakdown, totalUnits }
-      pricing: null,      // { unitPrice, subtotal }
+      sizing: null,        // { mode, breakdown, totalUnits, size_chart_url }
+      pricing: null,       // { unitPrice, subtotal }
+      design_assets: [],   // Array of persistent Cloudinary URLs
+      sizeChartUrl: null,  // Cloudinary URL of uploaded size chart
       
       // --- PAYMENT STATE ---
       paymentMethod: null,   // { id, name, feePercent, feeFixed }
@@ -30,12 +32,14 @@ export const useOrderStore = create(
         customization: null,
         sizing: null,
         pricing: null,
+        design_assets: [],
         paymentMethod: null,
         paymentDivision: null,
+        sizeChartUrl: null,
       }),
     }),
     {
-      name: 'venpa-order-storage', // unique name for localStorage
+      name: 'factory-flow-storage', // unique name for localStorage
     }
   )
 );

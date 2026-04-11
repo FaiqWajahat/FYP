@@ -4,11 +4,27 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Sparkles, ShoppingBag, ArrowRight, Layers } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/store/AuthContext';
+import { toast } from 'react-hot-toast';
 
 const ProductCard = ({ product }) => {
+  const router = useRouter();
+  const { user } = useAuth();
   const categoryParam = product.category ? product.category.toLowerCase().replace(/\s+/g, '-') : 'all';
   const skuParam = product.sku || 'default-sku';
   const productUrl = `/categories/${categoryParam}/${skuParam}`;
+
+  const handleCustomizeClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!user) {
+      toast.error("Authenticating: Please log in to enter the Digital Visualizer.");
+      router.push(`/login?returnTo=${encodeURIComponent(productUrl)}`);
+      return;
+    }
+    router.push(productUrl);
+  };
 
   // Helper to determine status color
   const getStatusColor = (status) => {
@@ -53,7 +69,10 @@ const ProductCard = ({ product }) => {
         {/* Hover Overlay Actions */}
         <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-3 p-4">
           
-          <button className="w-full max-w-[200px] py-3 bg-white text-slate-900 rounded-lg font-bold text-sm hover:bg-blue-50 hover:text-blue-700 transition-colors shadow-xl flex items-center justify-center gap-2 translate-y-4 group-hover:translate-y-0 duration-300">
+          <button 
+            onClick={handleCustomizeClick}
+            className="w-full max-w-[200px] py-3 bg-white text-slate-900 rounded-lg font-bold text-sm hover:bg-blue-50 hover:text-blue-700 transition-colors shadow-xl flex items-center justify-center gap-2 translate-y-4 group-hover:translate-y-0 duration-300"
+          >
             <Sparkles size={16} /> Customize Design
           </button>
           
