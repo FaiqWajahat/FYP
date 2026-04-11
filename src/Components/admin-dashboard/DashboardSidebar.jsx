@@ -27,7 +27,7 @@ const DashboardSidebar = ({ sidebarOpen, setSidebarOpen }) => {
       </div>
 
       {/* Bottom user card section */}
-      <div className='flex-none p-3 border-t border-base-200/50 bg-base-100/50 backdrop-blur-sm'>
+      <div className='flex-none p-3 border-t '>
         <DashboardSidebarBottom role="Admin" />
       </div>
     </aside>

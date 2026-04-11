@@ -48,7 +48,7 @@ const DashboardSidebarBottom = () => {
     <div className="relative" ref={ref}>
       {/* Popup Menu */}
       {menuOpen && (
-        <div className="absolute bottom-full left-0 right-0 mb-2 z-50">
+        <div className="absolute bottom-full left-0 right-0 mb-2 z-100 bg-base-100">
           <div className="bg-base-100 border border-base-300 rounded-2xl shadow-2xl shadow-black/15 p-1.5 overflow-hidden">
             <div className="px-3 py-2.5 mb-1 border-b border-base-200">
               <p className="text-xs font-semibold text-base-content truncate">{userName}</p>
