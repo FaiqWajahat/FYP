@@ -37,11 +37,7 @@ export default function LoginForm() {
         .single();
 
       toast.success("Welcome back!");
-      if (profile?.role === 'admin') {
-        router.push('/Dashboard');
-      } else {
-        router.push('/'); // Redirect standard user to site
-      }
+      router.push('/');
     } catch (err) {
       toast.error(err.message || "Failed to sign in");
     } finally {

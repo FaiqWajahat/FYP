@@ -24,17 +24,6 @@ export async function GET(request) {
     )
     const { data: { session } } = await supabase.auth.exchangeCodeForSession(code)
     
-    if (session?.user) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', session.user.id)
-        .single();
-        
-      if (profile?.role === 'admin') {
-        return NextResponse.redirect(requestUrl.origin + '/Dashboard')
-      }
-    }
   }
 
   // URL to redirect to after sign in process completes
