@@ -23,8 +23,8 @@ export default function ProfileSettingsPage() {
   }
 
   const breadData = [
-    { name: "Dashboard", href: "/dashboard" }, 
-    { name: "Profile", href: "/dashboard/profile" }
+    { name: "Dashboard", href: "/admin" }, 
+    { name: "Profile", href: "/admin/profile" }
   ];
 
   return (
@@ -58,3 +58,5 @@ export default function ProfileSettingsPage() {
     </div>
   );
 }
+
+

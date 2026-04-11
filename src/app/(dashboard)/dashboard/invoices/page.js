@@ -8,11 +8,13 @@ export default function InvoicesPage() {
       <DashboardPageHeader
         heading="Invoices"
         breadData={[
-          { name: "Dashboard", href: "/dashboard" },
-          { name: "Invoices", href: "/dashboard/invoices" },
+          { name: "Dashboard", href: "/admin" },
+          { name: "Invoices", href: "/admin/invoices" },
         ]}
       />
       <InvoiceList />
     </div>
   );
 }
+
+

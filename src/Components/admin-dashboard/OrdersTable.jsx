@@ -172,7 +172,7 @@ export default function OrdersTable({ orders, onDelete }) {
                 <td>
                   <div className="flex justify-end items-center gap-1">
                     <button
-                      onClick={() => router.push(`/Dashboard/Orders/OrderDetails?id=${order.id}`)}
+                      onClick={() => router.push(`/admin/Orders/OrderDetails?id=${order.id}`)}
                       className="btn btn-ghost btn-circle btn-xs hover:bg-base-300 p-1"
                       title="View Details"
                     >

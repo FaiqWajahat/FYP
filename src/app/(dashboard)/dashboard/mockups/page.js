@@ -8,10 +8,12 @@ export default function MockupsPage() {
     <div className="space-y-8 font-sans pb-10">
       <DashboardPageHeader 
         heading="Design Mockups" 
-        breadData={[{ name: "Dashboard", href: "/dashboard" }, { name: "Mockups", href: "/dashboard/mockups" }]} 
+        breadData={[{ name: "Dashboard", href: "/admin" }, { name: "Mockups", href: "/admin/mockups" }]} 
       />
       
       <MockupsList />
     </div>
   );
 }
+
+

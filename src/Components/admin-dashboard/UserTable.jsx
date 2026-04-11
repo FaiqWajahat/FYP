@@ -111,7 +111,7 @@ export default function UsersTable({ users, onRefresh }) {
               <td>
                 <div className="flex justify-end items-center gap-1">
                   <Link
-                    href={`/Dashboard/Users/Edit/${user.id}`}
+                    href={`/admin/Users/Edit/${user.id}`}
                     className="btn btn-ghost btn-circle btn-xs hover:bg-base-300 p-1"
                   >
                     <Edit className="h-4 w-4" />

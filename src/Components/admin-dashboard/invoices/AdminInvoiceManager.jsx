@@ -148,7 +148,7 @@ export default function AdminInvoiceManager({ slug = "All" }) {
            {/* Action */}
            <div className="w-full md:w-auto flex justify-end">
               <Link
-                href="/Dashboard/Invoices/Add"
+                href="/admin/Invoices/Add"
                 className="btn bg-[var(--primary)] text-white border-transparent hover:brightness-110 rounded-lg gap-2 text-sm font-medium shadow-sm transition-all active:scale-95 h-11 px-6 w-full md:w-auto"
               >
                 <Plus size={18} strokeWidth={3} />
@@ -238,7 +238,7 @@ export default function AdminInvoiceManager({ slug = "All" }) {
                             </a>
                           )}
                           <Link
-                            href={`/Dashboard/Invoices/Edit/${inv.id}`}
+                            href={`/admin/Invoices/Edit/${inv.id}`}
                             className="btn btn-ghost btn-circle btn-xs hover:bg-base-300 p-1"
                             title="Edit Invoice"
                           >

@@ -21,7 +21,7 @@ export default function Navbar() {
   const { projectName } = useConfigStore();
   const pathname = usePathname();
 
-  const isAdminPath = pathname.startsWith('/Dashboard') || pathname.startsWith('/admin');
+  const isAdminPath = pathname.startsWith('/admin');
 
   useEffect(() => {
     const fetchCats = async () => {
@@ -170,7 +170,7 @@ export default function Navbar() {
                   onMouseEnter={() => setHoveredPath('panel')}
                 >
                   <Link
-                    href={isAdminPath ? '/' : '/Dashboard'}
+                    href={isAdminPath ? '/' : '/admin'}
                     className={`relative px-4 py-2 rounded-full text-[13px] font-bold transition-all flex items-center gap-1.5 z-10 ${isAdminPath || hoveredPath === 'panel'
                       ? 'text-slate-900'
                       : 'text-slate-500'
@@ -303,7 +303,7 @@ export default function Navbar() {
                     <>
                       {profile?.role === 'admin' && (
                         <Link
-                          href={isAdminPath ? '/' : '/Dashboard'}
+                          href={isAdminPath ? '/' : '/admin'}
                           onClick={() => setIsMobileOpen(false)}
                           className="w-full flex items-center justify-between p-4 bg-slate-50 rounded-2xl font-bold text-slate-900"
                         >
@@ -316,7 +316,7 @@ export default function Navbar() {
                         </Link>
                       )}
                       <Link
-                        href="/dashboard/profile"
+                        href="/admin/profile"
                         onClick={() => setIsMobileOpen(false)}
                         className="w-full flex items-center justify-between p-4 bg-slate-50 rounded-2xl font-bold text-slate-900"
                       >

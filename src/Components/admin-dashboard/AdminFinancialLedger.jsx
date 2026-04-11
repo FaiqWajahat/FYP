@@ -102,7 +102,7 @@ export default function AdminFinancialLedger({ order, onUpdate }) {
                         <span className="text-[10px] font-black text-base-content uppercase tracking-tight">{inv.milestone_type} Invoice</span>
                         <span className="text-[10px] font-mono text-base-content/40">{fmt(inv.amount)}</span>
                      </div>
-                     <a href={`/Dashboard/Invoices?id=${inv.id}`} className="text-[var(--primary)] hover:opacity-70 transition-opacity p-1">
+                     <a href={`/admin/Invoices?id=${inv.id}`} className="text-[var(--primary)] hover:opacity-70 transition-opacity p-1">
                         <ExternalLink size={14} />
                      </a>
                   </div>

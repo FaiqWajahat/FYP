@@ -37,7 +37,7 @@ export default function ProductFormActions({
         {/* Right side: Primary Actions */}
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <Link
-            href="/Dashboard/Products/All"
+            href="/admin/Products/All"
             className="px-6 py-3 rounded-xl border border-transparent text-base-content/50 font-bold text-xs hover:bg-base-200 transition-all flex items-center gap-2"
           >
             <ArrowLeft className="w-4 h-4" /> CANCEL

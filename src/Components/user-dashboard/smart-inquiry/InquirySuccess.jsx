@@ -228,3 +228,4 @@ export default function InquirySuccess({ category, config, onReset }) {
     </div>
   );
 }
+

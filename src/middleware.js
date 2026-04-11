@@ -38,10 +38,11 @@ export async function middleware(req) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // 1. Guest Protection: Redirect guests trying to access any dashboard path
-  const isDashboardPath = pathname.startsWith('/Dashboard') || pathname.startsWith('/dashboard');
+  // 1. Protection Logic
+  const isAdminPath = pathname.startsWith('/admin');
+  const isUserPath = pathname.startsWith('/dashboard');
   
-  if (isDashboardPath && !user) {
+  if ((isAdminPath || isUserPath) && !user) {
     const url = req.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
@@ -58,18 +59,21 @@ export async function middleware(req) {
 
     const role = profile?.role || 'user';
 
-    // 2a. Admin Dashboard Protection: Only admins can access /Dashboard (Capital D)
-    if (pathname.startsWith('/Dashboard') && role !== 'admin') {
+    // 2a. Admin Dashboard Protection
+    if (isAdminPath && role !== 'admin') {
       const url = req.nextUrl.clone();
       url.pathname = '/dashboard'; 
       return NextResponse.redirect(url);
     }
 
-    // 2b. Smart Auth Redirection: If already logged in, redirect away from login/signup to their dashboard
+    // 2b. User Dashboard Protection (Prevent admins from cluttering user dashboard if desired, or just allow it)
+    // For now, let's just ensure users can't enter admin. 
+
+    // 2c. Smart Auth Redirection: If already logged in, redirect away from login/signup to their dashboard
     const isAuthPath = pathname.startsWith('/login') || pathname.startsWith('/signup');
     if (isAuthPath) {
       const url = req.nextUrl.clone();
-      url.pathname = role === 'admin' ? '/Dashboard' : '/dashboard';
+      url.pathname = role === 'admin' ? '/admin' : '/dashboard';
       return NextResponse.redirect(url);
     }
   }
@@ -89,3 +93,5 @@ export const config = {
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
   ],
 }
+
+

@@ -138,7 +138,7 @@ export default function AdminInvoicePipeline({ order, onUpdate }) {
                 </>
               ) : (
                 <button
-                  onClick={() => router.push(`/Dashboard/Invoices/Add?orderId=${order.id}&type=deposit`)}
+                  onClick={() => router.push(`/admin/Invoices/Add?orderId=${order.id}&type=deposit`)}
                   className="btn btn-xs h-9 px-4 bg-slate-800 text-white hover:bg-slate-700 border-none rounded-lg font-bold uppercase tracking-wider shadow-sm"
                 >
                   <FilePlus size={14} /> Create Invoice
@@ -198,7 +198,7 @@ export default function AdminInvoicePipeline({ order, onUpdate }) {
                 </>
               ) : (
                 <button
-                  onClick={() => router.push(`/Dashboard/Invoices/Add?orderId=${order.id}&type=final`)}
+                  onClick={() => router.push(`/admin/Invoices/Add?orderId=${order.id}&type=final`)}
                   disabled={!order.is_deposit_paid}
                   className="btn btn-xs h-9 px-4 bg-slate-800 text-white hover:bg-slate-700 border-none rounded-lg font-bold uppercase tracking-wider shadow-sm"
                 >

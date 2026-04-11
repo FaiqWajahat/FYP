@@ -93,7 +93,7 @@ const UserForm = ({ initialData = null, isEdit = false, onSave }) => {
     try {
       await onSave(formData);
       router.refresh();
-      router.push('/Dashboard/Users/All');
+      router.push('/admin/Users/All');
     } catch (err) {
       toast.error(err.message || "Failed to save user");
     } finally {

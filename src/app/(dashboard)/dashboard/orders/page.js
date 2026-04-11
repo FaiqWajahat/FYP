@@ -8,9 +8,11 @@ export default function OrdersPage() {
     <div className="space-y-6">
       <DashboardPageHeader 
         heading="My Orders" 
-        breadData={[{ name: "Dashboard", href: "/dashboard" }, { name: "Orders", href: "/dashboard/orders" }]} 
+        breadData={[{ name: "Dashboard", href: "/admin" }, { name: "Orders", href: "/admin/orders" }]} 
       />
       <OrderList />
     </div>
   );
 }
+
+

@@ -39,7 +39,7 @@ const navGroups = [
 
 // ─── Single Nav Item ───────────────────────────────────────────
 const NavItem = ({ item, pathname }) => {
-  const isRoot = item.href === '/Dashboard' || item.href === '/dashboard';
+  const isRoot = item.href === '/dashboard' || item.href === '/dashboard';
   const isChildActive = item.children?.some((c) => pathname === c.href || pathname?.startsWith(c.href + "/"));
   const isActive = item.href ? (pathname === item.href || (!isRoot && pathname?.startsWith(item.href + "/"))) : isChildActive;
 
@@ -186,3 +186,4 @@ const UserDashboardMenu = () => {
 };
 
 export default UserDashboardMenu;
+

@@ -162,7 +162,7 @@ export default function ProductsTable({ products, onRefresh }) {
               <td>
                 <div className="flex items-center gap-1">
                   <button 
-                    onClick={() => router.push(`/Dashboard/Products/Edit/${product.id}`)}
+                    onClick={() => router.push(`/admin/Products/Edit/${product.id}`)}
                     className="btn btn-ghost btn-circle btn-xs hover:bg-base-300 p-1"
                   >
                     <Edit className="h-4 w-4" />

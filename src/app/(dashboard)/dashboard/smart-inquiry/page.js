@@ -7,11 +7,13 @@ export default function SmartInquiryPage() {
       <DashboardPageHeader
         heading="Smart Inquiry"
         breadData={[
-          { name: 'Dashboard', href: '/dashboard' },
-          { name: 'Smart Inquiry', href: '/dashboard/smart-inquiry' },
+          { name: 'Dashboard', href: '/admin' },
+          { name: 'Smart Inquiry', href: '/admin/smart-inquiry' },
         ]}
       />
       <SmartInquiryWizard />
     </div>
   );
 }
+
+

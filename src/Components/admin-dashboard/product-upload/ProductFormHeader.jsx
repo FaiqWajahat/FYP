@@ -18,7 +18,7 @@ export default function ProductFormHeader({ activeStep = 1, onSaveDraft, saving 
         {/* Left: Branding & Title */}
         <div className="flex items-center gap-4 text-base-content">
           <Link
-            href="/Dashboard/Products/All"
+            href="/admin/Products/All"
             className="p-2 rounded-xl border border-base-content/10 text-base-content/40 hover:text-base-content hover:bg-base-200 transition-colors"
             title="Back to Products"
           >
@@ -29,9 +29,9 @@ export default function ProductFormHeader({ activeStep = 1, onSaveDraft, saving 
 
           <div>
             <div className="flex items-center gap-1.5 text-[10px] font-black text-base-content/40 tracking-widest uppercase mb-0.5">
-              <Link href="/Dashboard" className="hover:text-[var(--primary)] transition-colors">Dashboard</Link>
+              <Link href="/admin" className="hover:text-[var(--primary)] transition-colors">Dashboard</Link>
               <ChevronRight className="w-3 h-3 opacity-50" />
-              <Link href="/Dashboard/Products/All" className="hover:text-[var(--primary)] transition-colors">Products</Link>
+              <Link href="/admin/Products/All" className="hover:text-[var(--primary)] transition-colors">Products</Link>
             </div>
             <h1 className="text-lg font-black text-base-content leading-none tracking-tight flex items-center gap-2">
               <ShoppingBag className="w-4 h-4" style={{ color: "var(--primary)" }} /> Add New Product

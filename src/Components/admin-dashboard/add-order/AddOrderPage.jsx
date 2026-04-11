@@ -200,7 +200,7 @@ export default function AddOrderPage() {
       if (!data.success) throw new Error(data.error || "Unknown error");
 
       toast.success(`Order ${data.displayId || "created"} successfully!`, { id: t });
-      router.push("/Dashboard/Orders/All");
+      router.push("/admin/Orders/All");
     } catch (err) {
       console.error("Add Order Error:", err);
       toast.error(`Failed: ${err.message}`, { id: t });

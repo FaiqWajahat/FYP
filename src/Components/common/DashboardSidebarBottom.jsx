@@ -57,9 +57,17 @@ const DashboardSidebarBottom = () => {
 
             <ul className="space-y-0.5">
               {[
-                { icon: User, label: 'Profile Settings', href: '/Dashboard/Profile' },
+                { 
+                  icon: User, 
+                  label: 'Profile Settings', 
+                  href: profile?.role === 'admin' ? '/admin/Profile' : '/dashboard/profile' 
+                },
                 { icon: Home, label: 'Back to Site', href: '/' },
-                { icon: Settings, label: 'Account Settings', href: '/Dashboard/Settings' },
+                { 
+                  icon: Settings, 
+                  label: 'Account Settings', 
+                  href: profile?.role === 'admin' ? '/admin/Settings' : '/dashboard/settings' 
+                },
               ].map(({ icon: Icon, label, href }) => (
                 <li key={label}>
                   <Link

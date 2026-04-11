@@ -27,7 +27,7 @@ const navGroups = [
       {
         title: "Dashboard",
         icon: LayoutDashboard,
-        href: "/Dashboard",
+        href: "/admin",
       },
     ],
   },
@@ -39,33 +39,33 @@ const navGroups = [
         icon: ShoppingBag,
 
         children: [
-          { title: "All Orders", href: "/Dashboard/Orders/All" },
-          { title: "Add Order", href: "/Dashboard/Orders/Add" },
-          { title: "Pending", href: "/Dashboard/Orders/Pending", dot: true },
-          { title: "Processing", href: "/Dashboard/Orders/Processing" },
-          { title: "Completed", href: "/Dashboard/Orders/Completed" },
+          { title: "All Orders", href: "/admin/Orders/All" },
+          { title: "Add Order", href: "/admin/Orders/Add" },
+          { title: "Pending", href: "/admin/Orders/Pending", dot: true },
+          { title: "Processing", href: "/admin/Orders/Processing" },
+          { title: "Completed", href: "/admin/Orders/Completed" },
         ],
       },
       {
         title: "Products",
         icon: Package,
         children: [
-          { title: "All Products", href: "/Dashboard/Products/All" },
-          { title: "Add Product", href: "/Dashboard/Products/Add" },
-          { title: "Low Stock", href: "/Dashboard/Products/LowStock", dot: true },
+          { title: "All Products", href: "/admin/Products/All" },
+          { title: "Add Product", href: "/admin/Products/Add" },
+          { title: "Low Stock", href: "/admin/Products/LowStock", dot: true },
         ],
       },
       {
         title: "Categories",
         icon: Layers,
-        href: "/Dashboard/Categories",
+        href: "/admin/Categories",
       },
       {
         title: "Users",
         icon: Users,
         children: [
-          { title: "All Users", href: "/Dashboard/Users/All" },
-          { title: "Admins", href: "/Dashboard/Users/Admin" },
+          { title: "All Users", href: "/admin/Users/All" },
+          { title: "Admins", href: "/admin/Users/Admin" },
         ],
       },
     ],
@@ -78,10 +78,10 @@ const navGroups = [
         title: "Invoices",
         icon: FileText,
         children: [
-          { title: "All Invoices", href: "/Dashboard/Invoices/All" },
-          { title: "Unpaid", href: "/Dashboard/Invoices/Unpaid", dot: true },
-          { title: "Paid", href: "/Dashboard/Invoices/Paid" },
-          { title: "Overdue", href: "/Dashboard/Invoices/Overdue" },
+          { title: "All Invoices", href: "/admin/Invoices/All" },
+          { title: "Unpaid", href: "/admin/Invoices/Unpaid", dot: true },
+          { title: "Paid", href: "/admin/Invoices/Paid" },
+          { title: "Overdue", href: "/admin/Invoices/Overdue" },
         ],
       },
     ],
@@ -92,18 +92,18 @@ const navGroups = [
       {
         title: "Messages",
         icon: MessageSquare,
-        href: "/Dashboard/Messages",
+        href: "/admin/Messages",
 
       },
 
-      { title: "My Profile", icon: User, href: "/Dashboard/Profile" },
+      { title: "My Profile", icon: User, href: "/admin/Profile" },
     ],
   },
 ];
 
 // ─── Single Nav Item ───────────────────────────────────────────
 const NavItem = ({ item, pathname }) => {
-  const isRoot = item.href === '/Dashboard' || item.href === '/dashboard';
+  const isRoot = item.href === '/admin' || item.href === '/admin';
   const isChildActive = item.children?.some((c) => pathname === c.href || pathname?.startsWith(c.href + "/"));
   const isActive = item.href ? (pathname === item.href || (!isRoot && pathname?.startsWith(item.href + "/"))) : isChildActive;
 
@@ -245,3 +245,4 @@ const DashboardMenu = () => {
 };
 
 export default DashboardMenu;
+

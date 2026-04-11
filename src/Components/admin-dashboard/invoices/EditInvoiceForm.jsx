@@ -80,7 +80,7 @@ export default function EditInvoiceForm({ invoiceId }) {
         } else throw new Error(data.error || "Failed to load invoice");
       } catch (err) {
         toast.error(err.message);
-        router.push("/Dashboard/Invoices");
+        router.push("/admin/Invoices");
       } finally {
         setLoadingData(false);
       }
@@ -136,7 +136,7 @@ export default function EditInvoiceForm({ invoiceId }) {
       if (!resData.success) throw new Error(resData.error);
 
       toast.success("Invoice updated successfully!");
-      router.push("/Dashboard/Invoices");
+      router.push("/admin/Invoices");
     } catch (err) {
       toast.error(err.message || "Failed to update invoice");
     } finally {
@@ -314,7 +314,7 @@ export default function EditInvoiceForm({ invoiceId }) {
           </button>
           
           <Link 
-            href="/Dashboard/Invoices"
+            href="/admin/Invoices"
             className="w-full py-3 mt-3 rounded-xl flex items-center justify-center gap-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-all"
           >
             <ArrowLeft size={14} /> Discard & Exit

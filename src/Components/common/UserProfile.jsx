@@ -80,7 +80,7 @@ const UserProfile = () => {
 
             {/* Logout Footer */}
             <div className="p-3 bg-slate-50/50 border-t border-slate-100">
-              <button 
+              <button
                 onClick={signOut}
                 className="flex w-full items-center justify-center gap-2 text-xs font-black text-slate-500 hover:text-red-600 hover:bg-red-50 py-3 rounded-2xl transition-all duration-300"
               >

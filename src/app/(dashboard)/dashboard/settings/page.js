@@ -6,7 +6,7 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <DashboardPageHeader 
         heading="General Settings" 
-        breadData={[{ name: "Dashboard", href: "/dashboard" }, { name: "Settings", href: "/dashboard/settings" }]} 
+        breadData={[{ name: "Dashboard", href: "/admin" }, { name: "Settings", href: "/admin/settings" }]} 
       />
       
       <div className="card bg-base-100 shadow-xl border border-base-300 p-6">
@@ -15,3 +15,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+

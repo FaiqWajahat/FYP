@@ -7,7 +7,7 @@ export default function UserMessagesPage() {
     <div className="space-y-6">
       <DashboardPageHeader 
         heading="Messages" 
-        breadData={[{ name: "Dashboard", href: "/dashboard" }, { name: "Messages", href: "/dashboard/messages" }]} 
+        breadData={[{ name: "Dashboard", href: "/admin" }, { name: "Messages", href: "/admin/messages" }]} 
       />
       
       {/* User view, only shows the store admin contact */}
@@ -15,3 +15,4 @@ export default function UserMessagesPage() {
     </div>
   );
 }
+
