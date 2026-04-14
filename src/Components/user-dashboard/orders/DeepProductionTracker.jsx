@@ -1,225 +1,165 @@
 "use client";
 import React from 'react';
-import {
-  FileSignature, Palette, PenTool, ClipboardCheck, Scissors,
-  Shirt, CheckCircle, PackageSearch, Truck, ChevronRight
+import { 
+  FileSignature, Palette, PenTool, ClipboardCheck, Scissors, 
+  Shirt, CheckCircle, PackageSearch, Truck, Home, Lock, ShieldCheck
 } from 'lucide-react';
 
 const PHASES = [
-  {
-    id: 1, title: 'Design & Tech Pack',
-    desc: 'Vector designs & specs finalized',
-    date: 'Oct 1', status: 'completed', icon: FileSignature,
-  },
-  {
-    id: 2, title: 'Fabric Sourcing',
-    desc: 'Procuring base fabrics & trims',
-    date: 'Oct 3', status: 'completed', icon: Palette,
-  },
-  {
-    id: 3, title: 'Pattern Making',
-    desc: 'Creating & grading patterns XS–XXL',
-    date: 'Oct 5', status: 'completed', icon: PenTool,
-  },
-  {
-    id: 4, title: 'Sampling',
-    desc: 'First physical sample & approval',
-    date: 'Oct 8', status: 'completed', icon: ClipboardCheck,
-  },
-  {
-    id: 5, title: 'Bulk Cutting',
-    desc: 'Spreading and cutting fabric lots',
-    date: 'Oct 10', status: 'completed', icon: Scissors,
-  },
-  {
-    id: 6, title: 'Printing & Embroidery',
-    desc: 'Applying logos and sub-prints',
-    activeDesc: 'Sublimation printing panels (45%)',
-    completion: 45,
-    date: 'Oct 12',
-    eta: '3 Days',
-    status: 'current',
-    icon: Shirt,
-  },
-  {
-    id: 7, title: 'Stitching & Assembly',
-    desc: 'Final sewing construction',
-    status: 'upcoming', icon: CheckCircle,
-  },
-  {
-    id: 8, title: 'Finishing & QA',
-    desc: 'Trimming, pressing & quality check',
-    status: 'upcoming', icon: PackageSearch,
-  },
-  {
-    id: 9, title: 'Packaging & Dispatch',
-    desc: 'Bagging, labeling & shipment',
-    status: 'upcoming', icon: Truck,
-  },
+  { id: 0, title: 'Design & Tech Pack', desc: 'Vector designs & specs', icon: FileSignature },
+  { id: 1, title: 'Fabric Sourcing', desc: 'Procuring fabrics & trims', icon: Palette },
+  { id: 2, title: 'Pattern Making', desc: 'XS–XXL patterns', icon: PenTool },
+  { id: 3, title: 'Sampling', desc: 'Physical sample approval', icon: ClipboardCheck },
+  { id: 4, title: 'Bulk Cutting', desc: 'Cutting fabric lots', icon: Scissors },
+  { id: 5, title: 'Printing & Embroidery', desc: 'Applying branding', icon: Shirt },
+  { id: 6, title: 'Stitching & Assembly', desc: 'Final construction', icon: CheckCircle },
+  { id: 7, title: 'Finishing & QA', desc: 'Quality control', icon: PackageSearch },
+  { id: 8, title: 'Packaging & Dispatch', desc: 'Bagging & shipment', icon: Truck },
+  { id: 9, title: 'Delivered / Complete', desc: 'Order successfully fulfilled', icon: Home },
 ];
 
-export default function DeepProductionTracker() {
-  const completedCount = PHASES.filter(p => p.status === 'completed').length;
-  const totalCount = PHASES.length;
+export default function DeepProductionTracker({ order }) {
+  if (!order) return null;
+
+  const currentStage = order.stage_index ?? 0;
+  const isDepositPaid = order.is_deposit_paid || false;
+  const isFinalPaid = order.is_final_paid || false;
+
+  // Finance gates
+  const isDepositLocked = !isDepositPaid;
+  const isFinalLocked = currentStage === 7 && !isFinalPaid;
 
   return (
-    <div className="bg-base-100 rounded-2xl shadow-sm border border-base-200 overflow-hidden flex flex-col font-sans">
-      {/* Header */}
-      <div className="p-5 border-b border-base-200/60 flex justify-between items-center shrink-0">
-        <div>
-          <h3 className="text-sm font-bold tracking-wider uppercase text-base-content/80">
-            Production Tracking
-          </h3>
-          <p className="text-[11px] text-base-content/40 mt-0.5 font-mono">
-            {completedCount} of {totalCount} phases complete
-          </p>
-        </div>
-        <span className="flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] uppercase font-bold tracking-wider border"
-          style={{
-            color: 'var(--primary)',
-            backgroundColor: 'color-mix(in srgb, var(--primary) 8%, transparent)',
-            borderColor: 'color-mix(in srgb, var(--primary) 25%, transparent)',
-          }}
-        >
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: 'var(--primary)' }} />
-            <span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ backgroundColor: 'var(--primary)' }} />
-          </span>
-          Active: Printing
-        </span>
-      </div>
+    <div className="bg-base-100 rounded-3xl shadow-sm border border-base-200 overflow-hidden flex flex-col font-sans h-full">
+      
+      {/* ── Header ── */}
+      <div className="p-6 border-b border-base-200 bg-base-50/50 flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white border border-base-200 flex items-center justify-center text-[var(--primary)] shadow-sm">
+              <Shirt size={20} />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold tracking-tight text-base-content leading-none">Production Roadmap</h3>
+              <p className="text-[10px] text-base-content/40 mt-1 uppercase tracking-widest font-bold">Real-time status tracking</p>
+            </div>
+          </div>
 
-      {/* Overall Progress Bar */}
-      <div className="px-6 pt-4 pb-2">
-        <div className="flex justify-between items-center mb-1.5">
-          <span className="text-[10px] font-bold uppercase tracking-widest text-base-content/40">Overall Progress</span>
-          <span className="text-[10px] font-bold font-mono" style={{ color: 'var(--primary)' }}>
-            {Math.round((completedCount / totalCount) * 100)}%
-          </span>
-        </div>
-        <div className="w-full bg-base-200 rounded-full h-1.5 overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all duration-700"
-            style={{
-              width: `${Math.round((completedCount / totalCount) * 100)}%`,
-              background: 'linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 70%, #a855f7))',
-            }}
-          />
+          {/* Stage counter */}
+          <div className="text-right">
+            <p className="text-[9px] font-bold text-base-content/30 uppercase tracking-widest">Stage</p>
+            <p className="text-lg font-black text-base-content leading-none">
+              {currentStage + 1}
+              <span className="text-[10px] font-bold text-base-content/30">/{PHASES.length}</span>
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Custom Timeline */}
-      <div className="px-6 py-5 flex-grow">
+      {/* ── Finance Alert Banners ── */}
+      {isDepositLocked && (
+        <div className="mx-6 mt-5 p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-start gap-3">
+          <Lock size={16} className="text-rose-500 mt-0.5 shrink-0" />
+          <div>
+            <p className="text-[11px] font-black text-rose-700 uppercase tracking-tight leading-none mb-1">Awaiting Deposit</p>
+            <p className="text-[10px] font-bold text-rose-500 leading-snug">
+              Your production pipeline is paused. Please settle the deposit invoice to begin manufacturing.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {isFinalLocked && !isDepositLocked && (
+        <div className="mx-6 mt-5 p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-start gap-3">
+          <Lock size={16} className="text-amber-500 mt-0.5 shrink-0" />
+          <div>
+            <p className="text-[11px] font-black text-amber-700 uppercase tracking-tight leading-none mb-1">Dispatch Lock</p>
+            <p className="text-[10px] font-bold text-amber-500 leading-snug">
+              Manufacturing is complete! Please settle the project balance to unlock order dispatch.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* ── Timeline ── */}
+      <div className="px-8 py-8 overflow-y-auto flex-1 custom-scrollbar min-h-[400px]">
         <div className="relative">
-          {/* Vertical connector line */}
-          <div className="absolute left-[17px] top-2 bottom-2 w-[2px] bg-base-200" />
+          {/* Vertical trace line */}
+          <div className="absolute left-[19px] top-2 bottom-10 w-[2px] bg-base-200 rounded-full" />
 
           <ul className="space-y-0">
             {PHASES.map((phase, idx) => {
               const Icon = phase.icon;
-              const isCompleted = phase.status === 'completed';
-              const isCurrent = phase.status === 'current';
-              const isUpcoming = phase.status === 'upcoming';
+              const isCompleted = idx < currentStage;
+              const isCurrent  = idx === currentStage;
+              const isUpcoming = idx > currentStage;
               const isLast = idx === PHASES.length - 1;
 
+              // Show lock on next stage if deposit not paid, or on dispatch if final not paid
+              const showLock = isUpcoming && (isDepositLocked || (idx === 8 && !isFinalPaid));
+
               return (
-                <li key={phase.id} className={`relative flex gap-4 ${isLast ? '' : 'pb-6'}`}>
-                  {/* Icon Circle */}
+                <li key={phase.id} className={`relative flex gap-6 ${isLast ? '' : 'pb-8'}`}>
+                  
+                  {/* Stage indicator */}
                   <div className="relative z-10 shrink-0">
-                    <div
-                      className={`w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all duration-300 ${
-                        isCompleted
-                          ? 'border-transparent'
-                          : isCurrent
-                          ? 'border-transparent shadow-lg'
-                          : 'border-base-200 bg-base-100'
-                      }`}
-                      style={
-                        isCompleted
-                          ? { backgroundColor: 'var(--primary)', boxShadow: 'none' }
-                          : isCurrent
-                          ? {
-                              backgroundColor: 'color-mix(in srgb, var(--primary) 12%, transparent)',
-                              borderColor: 'var(--primary)',
-                              boxShadow: '0 0 0 4px color-mix(in srgb, var(--primary) 15%, transparent)',
-                            }
-                          : {}
-                      }
-                    >
-                      <Icon
-                        size={14}
-                        className={isUpcoming ? 'text-base-content/25' : ''}
-                        style={
-                          isCompleted
-                            ? { color: 'white' }
-                            : isCurrent
-                            ? { color: 'var(--primary)' }
-                            : {}
-                        }
-                      />
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all duration-500 ${
+                      isCompleted
+                        ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm'
+                        : isCurrent
+                        ? isDepositLocked || isFinalLocked
+                          ? 'bg-rose-500 border-rose-500 text-white shadow-lg'
+                          : 'bg-white border-[var(--primary)] text-[var(--primary)] shadow-lg ring-4 ring-[var(--primary)]/5'
+                        : 'bg-white border-base-200 text-base-content/20'
+                    }`}>
+                      {showLock ? <Lock size={14} /> : <Icon size={16} />}
                     </div>
                   </div>
 
-                  {/* Content */}
-                  <div className={`flex-1 min-w-0 pt-1.5 ${isUpcoming ? 'opacity-40' : ''}`}>
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <h4
-                          className={`text-[13px] font-bold leading-tight truncate ${
-                            isCurrent ? '' : isUpcoming ? 'text-base-content/60' : 'text-base-content'
-                          }`}
-                          style={isCurrent ? { color: 'var(--primary)' } : {}}
-                        >
+                  {/* Stage text */}
+                  <div className={`flex-1 min-w-0 pt-1.5 ${isUpcoming ? 'opacity-30' : ''}`}>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h4 className={`text-[13px] font-bold tracking-tight uppercase ${
+                          isCurrent
+                            ? (isDepositLocked || isFinalLocked) ? 'text-rose-600' : 'text-[var(--primary)]'
+                            : isCompleted ? 'text-base-content/80' : 'text-base-content/40'
+                        }`}>
                           {phase.title}
                         </h4>
-                        <p className="text-[11px] text-base-content/50 mt-0.5 font-medium truncate">
-                          {isCurrent ? phase.activeDesc : phase.desc}
+                        <p className="text-[10px] font-bold text-base-content/30 mt-1 uppercase tracking-tight leading-none italic">
+                          {phase.desc}
                         </p>
                       </div>
-
-                      {!isUpcoming && (
-                        <div className="shrink-0 text-right">
-                          <span className="text-[10px] font-mono bg-base-200/60 px-2 py-0.5 rounded border border-base-200/60 text-base-content/50 uppercase tracking-widest">
-                            {phase.date}
+                      <div className="flex flex-col items-end gap-1 ml-2">
+                        {isCompleted && (
+                          <span className="flex items-center gap-1 text-[8px] font-black uppercase text-emerald-600 tracking-widest">
+                            <ShieldCheck size={10} /> Done
                           </span>
-                          {isCompleted && (
-                            <p className="text-[9px] text-success font-bold uppercase tracking-wider mt-1 text-right">Done</p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Active Phase Progress Bar */}
-                    {isCurrent && (
-                      <div className="mt-3 bg-base-200/40 rounded-lg border border-base-200/60 p-3">
-                        <div className="flex justify-between items-center mb-2 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--primary)' }}>
-                          <span>Phase Progress</span>
-                          <span>{phase.completion}%</span>
-                        </div>
-                        <div className="w-full bg-base-200 rounded-full h-2 overflow-hidden">
-                          <div
-                            className="h-full rounded-full transition-all duration-700"
-                            style={{
-                              width: `${phase.completion}%`,
-                              background: 'linear-gradient(90deg, var(--primary), color-mix(in srgb, var(--primary) 70%, #a855f7))',
-                            }}
-                          />
-                        </div>
-                        <div className="flex justify-between items-center mt-2">
-                          <p className="text-[10px] text-base-content/40 font-mono">ETA: {phase.eta}</p>
-                          <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: 'var(--primary)' }}>
-                            In Progress
-                          </span>
-                        </div>
+                        )}
+                        {isCurrent && !isDepositLocked && !isFinalLocked && (
+                          <div className="flex items-center gap-1">
+                            <span className="w-1 h-1 rounded-full bg-[var(--primary)] animate-ping" />
+                            <span className="text-[8px] font-black text-[var(--primary)] uppercase tracking-widest">Active</span>
+                          </div>
+                        )}
+                        {isCurrent && (isDepositLocked || isFinalLocked) && (
+                          <div className="flex items-center gap-1">
+                            <span className="w-1 h-1 rounded-full bg-rose-500 animate-pulse" />
+                            <span className="text-[8px] font-black text-rose-500 uppercase tracking-widest">Locked</span>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </div>
+
                 </li>
               );
             })}
           </ul>
         </div>
       </div>
+
     </div>
   );
 }

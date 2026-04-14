@@ -11,123 +11,137 @@ import { Package, Brush } from 'lucide-react';
  *  - Optional branding customization (format + addon price)
  *  - A pricing tier based on total volume
  */
-const MOCK_ORDER = {
-  product: {
-    name: 'Heavyweight Cotton Fleece Hoodie',
-    sku: 'FCT-HOOD-400',
-    image: 'https://plus.unsplash.com/premium_photo-1690034979146-59a98168f27e?q=80&w=387&auto=format&fit=crop',
-    color: 'Navy',
-    fabric: '400 GSM Cotton Fleece',
-    description: 'Premium heavyweight hoodie. Factory direct.',
-  },
-  customization: {
-    enabled: true,
-    format: 'Screen Print',
-    formatPrice: 1.50,
-  },
-  sizing: {
-    mode: 'standard',
-    totalUnits: 500,
-    breakdown: { 'XS': 50, 'S': 75, 'M': 150, 'L': 150, 'XL': 50, '2XL': 25 },
-  },
-  pricing: {
-    tierLabel: 'Volume',
-    tierRange: '501+',
-    baseUnitPrice: 15.00,
-    brandingAddon: 1.50,
-    unitPrice: 16.50,
-    subtotal: 8250.00,
-  },
-};
+export default function OrderItemsList({ order }) {
+  if (!order) return null;
 
-export default function OrderItemsList({ order = MOCK_ORDER }) {
-  const { product, customization, sizing, pricing } = order;
-  const sizes = sizing.mode === 'standard'
-    ? Object.entries(sizing.breakdown)
-    : sizing.breakdown.map(row => [row.name, row.qty]);
+  const product = {
+    name: order.product_name || order.product?.name || 'Custom Garment',
+    sku: order.sku || order.product?.sku || 'N/A',
+    image: order.mockup_url || order.product?.image || 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=200&auto=format&fit=crop',
+    color: order.customization_data?.colorName || order.customization?.colorName || order.customization?.color || 'Base Color',
+    fabric: order.customization_data?.fabricName || order.customization?.fabricName || 'Custom Blend',
+  };
+
+  const customization = {
+    enabled: !!(order.customization_data?.print_method || order.customization?.branding_format || order.pricing?.brandingAddon > 0),
+    format: order.customization_data?.print_method || order.customization?.branding_format || 'Standard Branding',
+    formatPrice: order.pricing?.brandingAddon || 0,
+  };
+
+  let totalUnits = 0;
+  let sizesEntries = [];
+  if (order.sizing) {
+    if (Array.isArray(order.sizing)) {
+      totalUnits = order.sizing.reduce((a, b) => a + (Number(b?.qty) || Number(b) || 0), 0);
+      sizesEntries = order.sizing.map(s => [s?.size || s?.label || 'Size', Number(s?.qty) || Number(s) || 0]);
+    } else {
+      const breakdown = order.sizing.breakdown || order.sizing;
+      sizesEntries = Object.entries(breakdown).map(([key, val]) => {
+        const qty = typeof val === 'object' ? (val.qty || 0) : val;
+        return [key, Number(qty) || 0];
+      });
+      totalUnits = sizesEntries.reduce((a, b) => a + b[1], 0);
+    }
+  } else {
+    totalUnits = order.pricing?.totalUnits || 0;
+    sizesEntries = [['Units', totalUnits]];
+  }
+
+  const pricing = {
+    tierLabel: order.pricing?.tierLabel || 'Volume',
+    baseUnitPrice: order.pricing?.unitPrice || 0,
+    subtotal: order.pricing?.subtotal || order.total_amount || 0,
+  };
 
   return (
-    <div className="bg-base-100 rounded-2xl shadow-sm border border-base-200 overflow-hidden font-sans">
+    <div className="bg-base-100 rounded-3xl shadow-sm border border-base-200 overflow-hidden font-sans">
       {/* Header */}
-      <div className="p-5 border-b border-base-200/60 flex justify-between items-center">
-        <h3 className="text-sm font-bold uppercase tracking-wider flex items-center gap-2 text-base-content/80">
-          <Package size={15} style={{ color: 'var(--primary)' }} />
-          Order Details
-        </h3>
-        <span className="text-[10px] font-mono text-base-content/40 uppercase tracking-widest">
-          {sizing.totalUnits.toLocaleString()} Total Units
-        </span>
+      <div className="p-6 border-b border-base-200 flex justify-between items-center bg-base-50/50">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl border border-base-200 flex items-center justify-center text-[var(--primary)] shadow-sm">
+            <Package size={20} />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold tracking-tight text-base-content leading-none">Order Specification</h3>
+            <p className="text-[10px] text-base-content/40 mt-1 uppercase tracking-widest font-bold">Product Breakdown & Sizing</p>
+          </div>
+        </div>
+        <div className="px-4 py-1.5 rounded-xl bg-base-200 text-base-content/60 text-[10px] font-black uppercase tracking-widest border border-base-300">
+          {totalUnits.toLocaleString()} Total Units
+        </div>
       </div>
 
-      <div className="p-5 space-y-5">
-        {/* Product Row */}
-        <div className="flex gap-4">
-          <div className="w-20 h-24 rounded-xl overflow-hidden bg-base-200 border border-base-200/60 shrink-0">
-            <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="font-bold text-sm text-base-content leading-snug">{product.name}</p>
-            <p className="text-[11px] font-mono text-base-content/40 mt-0.5">SKU: {product.sku}</p>
-            <div className="flex flex-wrap gap-2 mt-2.5">
-              <span className="px-2.5 py-1 bg-base-200/60 text-base-content/70 text-[10px] font-bold uppercase rounded-md border border-base-200">
-                Color: {product.color}
-              </span>
-              <span className="px-2.5 py-1 bg-base-200/60 text-base-content/70 text-[10px] font-bold uppercase rounded-md border border-base-200">
-                {product.fabric}
-              </span>
-              {customization.enabled && (
-                <span className="px-2.5 py-1 bg-[color-mix(in_srgb,var(--primary)_10%,transparent)] text-[10px] font-bold uppercase rounded-md border"
-                  style={{ color: 'var(--primary)', borderColor: 'color-mix(in srgb, var(--primary) 25%, transparent)' }}>
-                  <Brush size={10} className="inline mr-1" />
-                  {customization.format}
-                </span>
-              )}
+      <div className="p-8">
+        <div className="flex flex-col xl:flex-row gap-10">
+          {/* Product Section */}
+          <div className="flex-1 flex flex-col sm:flex-row gap-6">
+            <div className="w-32 h-40 rounded-2xl overflow-hidden bg-base-200 border border-base-200/60 shadow-inner group shrink-0">
+              <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
             </div>
-          </div>
-        </div>
+            <div className="flex-1 min-w-0 py-2">
+              <p className="text-xl font-bold text-base-content tracking-tight">{product.name}</p>
+              <p className="text-[11px] font-mono text-base-content/30 mt-1 uppercase tracking-widest">Reference SKU: {product.sku}</p>
 
-        {/* Size Breakdown */}
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-base-content/40 mb-2.5">
-            Size Breakdown ({sizing.mode === 'standard' ? 'Standard Sizes' : 'Custom Sizes'})
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {sizes.map(([size, qty]) => (
-              <div key={size} className="flex items-center border border-base-200/80 rounded-lg overflow-hidden text-xs shadow-sm">
-                <span className="px-2.5 py-1.5 bg-base-200/60 font-bold text-base-content/70 border-r border-base-200/80">{size}</span>
-                <span className="px-2.5 py-1.5 bg-base-100 font-black text-base-content">{qty}</span>
+              <div className="flex flex-wrap gap-2 mt-6">
+                <div className="flex items-center gap-2 px-3 py-1.5  border border-base-200 rounded-xl shadow-sm">
+                  <div className="w-2 h-2 rounded-full bg-[var(--primary)]" />
+                  <span className="text-[10px] font-bold text-base-content/60 uppercase tracking-tight">Color: {product.color}</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5  border border-base-200 rounded-xl shadow-sm">
+                  <div className="w-2 h-2 rounded-full border border-base-300 bg-base-50" />
+                  <span className="text-[10px] font-bold text-base-content/60 uppercase tracking-tight">{product.fabric}</span>
+                </div>
+                {customization.enabled && (
+                  <div className="flex items-center gap-2 px-3 py-1.5 bg-[var(--primary)]/5 border border-[var(--primary)]/20 rounded-xl shadow-sm">
+                    <Brush size={12} className="text-[var(--primary)]" />
+                    <span className="text-[10px] font-black text-[var(--primary)] uppercase tracking-tight">{customization.format}</span>
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
-          <p className="text-[10px] font-mono text-base-content/40 mt-2">
-            Total: {sizing.totalUnits.toLocaleString()} units
-          </p>
-        </div>
-
-        {/* Pricing Breakdown */}
-        <div className="border-t border-base-200/50 pt-4 space-y-2 text-xs">
-          <div className="flex justify-between text-base-content/60">
-            <span className="flex items-center gap-1.5">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-base-200/60 rounded text-[10px] font-bold uppercase text-base-content/50">
-                {pricing.tierLabel} Tier
-              </span>
-              {sizing.totalUnits.toLocaleString()} units × ${pricing.baseUnitPrice.toFixed(2)}
-            </span>
-            <span className="font-semibold text-base-content">${(sizing.totalUnits * pricing.baseUnitPrice).toFixed(2)}</span>
-          </div>
-          {customization.enabled && (
-            <div className="flex justify-between text-base-content/60">
-              <span>{customization.format} branding × {sizing.totalUnits.toLocaleString()} units</span>
-              <span className="font-semibold text-base-content">+${(sizing.totalUnits * customization.formatPrice).toFixed(2)}</span>
             </div>
-          )}
-          <div className="flex justify-between pt-2 border-t border-base-200/50 font-bold text-sm text-base-content">
-            <span>Production Subtotal</span>
-            <span style={{ color: 'var(--primary)' }}>${pricing.subtotal.toFixed(2)}</span>
           </div>
-          <p className="text-[10px] text-base-content/35 italic">
-            Shipping calculated separately after production completion.
-          </p>
+
+          {/* Sizing & Pricing Summary */}
+          <div className="w-full xl:w-[400px] space-y-8">
+            {/* Size Breakdown */}
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-base-content/30 mb-4">Dimension Distribution</p>
+              <div className="flex flex-wrap gap-2">
+                {sizesEntries.map(([size, qty]) => (
+                  <div key={size} className="flex items-center  border border-base-200 rounded-2xl overflow-hidden shadow-sm hover:border-[var(--primary)]/30 transition-colors">
+                    <span className="pl-4 pr-3 py-2 text-[10px] font-black text-base-content/40 uppercase border-r border-base-100">{size}</span>
+                    <span className="pl-3 pr-4 py-2 text-xs font-black text-base-content">{qty}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Price Card */}
+            <div className="bg-base-50 border border-base-200 rounded-2xl p-6 space-y-4">
+              <div className="flex justify-between items-center text-[10px] font-bold text-base-content/40 uppercase tracking-[0.1em]">
+                <span>Item Logistics</span>
+                <span className="text-[var(--primary)]">{pricing.tierLabel} Tier</span>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs font-bold text-base-content/60">
+                  <span>Base Production</span>
+                  <span>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(pricing.baseUnitPrice)} × {totalUnits}</span>
+                </div>
+                {customization.enabled && (
+                  <div className="flex justify-between text-xs font-bold text-base-content/60">
+                    <span>{customization.format} Add-on</span>
+                    <span>+ {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(customization.formatPrice)} × {totalUnits}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="pt-4 border-t border-base-200 flex justify-between items-end">
+                <p className="text-[10px] font-black text-base-content/30 uppercase tracking-widest leading-none mb-1">Subtotal (Garments)</p>
+                <p className="text-2xl font-black text-base-content tracking-tighter shadow-sm">{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(pricing.subtotal)}</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

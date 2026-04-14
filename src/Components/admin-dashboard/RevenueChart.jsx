@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   ResponsiveContainer,
   LineChart,
@@ -13,6 +13,12 @@ import {
 
 export default function RevenueChart({ aggData = { monthlyRevenue: [], weeklyRevenue: [] } }) {
   const [view, setView] = useState('month')
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
   const data = view === 'month' ? aggData.monthlyRevenue : aggData.weeklyRevenue
 
   return (
@@ -46,66 +52,72 @@ export default function RevenueChart({ aggData = { monthlyRevenue: [], weeklyRev
       </div>
 
       {/* Line Chart */}
-      <ResponsiveContainer width="100%" height={340}>
-        <LineChart
-          data={data}
-          margin={{ top: 20, right: 10, left: 10, bottom: 20 }} // increased margins
-        >
-          <defs>
-            <linearGradient id="gradRevenue" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.25} />
-              <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
-            </linearGradient>
-          </defs>
+      {mounted ? (
+        <ResponsiveContainer width="100%" height={340}>
+          <LineChart
+            data={data}
+            margin={{ top: 20, right: 10, left: 10, bottom: 20 }} // increased margins
+          >
+            <defs>
+              <linearGradient id="gradRevenue" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--primary)" stopOpacity={0.25} />
+                <stop offset="100%" stopColor="var(--primary)" stopOpacity={0} />
+              </linearGradient>
+            </defs>
 
-          <CartesianGrid strokeDasharray="3 6" vertical={false} strokeOpacity={0.06} />
+            <CartesianGrid strokeDasharray="3 6" vertical={false} strokeOpacity={0.06} />
 
-          <XAxis
-            dataKey="name"
-            stroke="currentColor"
-            tick={{ fontSize: 12, fontWeight: 500 }}
-            axisLine={false}
-            tickLine={false}
-            dy={6} // extra space below ticks
-            padding={{ left: 10, right: 10 }} // spacing on both ends
-          />
+            <XAxis
+              dataKey="name"
+              stroke="currentColor"
+              tick={{ fontSize: 12, fontWeight: 500 }}
+              axisLine={false}
+              tickLine={false}
+              dy={6} // extra space below ticks
+              padding={{ left: 10, right: 10 }} // spacing on both ends
+            />
 
-          <YAxis
-            stroke="currentColor"
-            tick={{ fontSize: 12, fontWeight: 500 }}
-            axisLine={false}
-            tickLine={false}
-            allowDecimals={false}
-            dx={-30} // spacing from chart edge
-          />
+            <YAxis
+              stroke="currentColor"
+              tick={{ fontSize: 12, fontWeight: 500 }}
+              axisLine={false}
+              tickLine={false}
+              allowDecimals={false}
+              dx={-30} // spacing from chart edge
+            />
 
-          <Tooltip
-            contentStyle={{
-              backgroundColor: 'var(--tooltip-bg, #fff)',
-              borderRadius: '6px',
-              border: '1px solid var(--tooltip-border, #e5e7eb)',
-              boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-            }}
-            itemStyle={{ color: 'var(--primary)', fontWeight: 600 }}
-            cursor={{ stroke: 'var(--primary)', strokeOpacity: 0.12, strokeWidth: 2 }}
-          />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'var(--tooltip-bg, #fff)',
+                borderRadius: '6px',
+                border: '1px solid var(--tooltip-border, #e5e7eb)',
+                boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+              }}
+              itemStyle={{ color: 'var(--primary)', fontWeight: 600 }}
+              cursor={{ stroke: 'var(--primary)', strokeOpacity: 0.12, strokeWidth: 2 }}
+            />
 
-          <Legend verticalAlign="top" align="right" height={36} />
+            <Legend verticalAlign="top" align="right" height={36} />
 
-          <Line
-            type="monotone"
-            dataKey="revenue"
-            name="Revenue"
-            stroke="var(--primary)"
-            strokeWidth={3}
-            dot={{ r: 4 }}
-            activeDot={{ r: 6 }}
-            fillOpacity={1}
-            fill="url(#gradRevenue)"
-            connectNulls
-          />
-        </LineChart>
-      </ResponsiveContainer>
+            <Line
+              type="monotone"
+              dataKey="revenue"
+              name="Revenue"
+              stroke="var(--primary)"
+              strokeWidth={3}
+              dot={{ r: 4 }}
+              activeDot={{ r: 6 }}
+              fillOpacity={1}
+              fill="url(#gradRevenue)"
+              connectNulls
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      ) : (
+        <div className="w-full h-[340px] bg-base-200/20 animate-pulse rounded-xl flex items-center justify-center">
+          <span className="loading loading-spinner loading-md opacity-20"></span>
+        </div>
+      )}
     </div>
   )
 }

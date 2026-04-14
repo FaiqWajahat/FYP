@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -29,6 +29,11 @@ const yearlyData = [
 
 export default function UserSpendChart() {
   const [view, setView] = useState("months");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const data = view === "months" ? last6MonthsData : yearlyData;
 
@@ -78,32 +83,38 @@ export default function UserSpendChart() {
       </div>
 
       <div className="flex-1 mt-4">
-         <ResponsiveContainer width="100%" height="100%" minHeight={280}>
-           <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-             <XAxis
-               dataKey="name"
-               stroke="currentColor"
-               className="text-base-content/60"
-               tick={{ fontSize: 11, fontWeight: 600 }}
-               axisLine={false}
-               tickLine={false}
-               dy={10}
-             />
-             <YAxis
-               stroke="currentColor"
-               className="text-base-content/60"
-               tick={{ fontSize: 11, fontWeight: 600 }}
-               axisLine={false}
-               tickLine={false}
-               tickFormatter={(value) => `$${value >= 1000 ? (value / 1000) + 'k' : value}`}
-             />
-             <Tooltip 
-               content={<CustomTooltip />} 
-               cursor={{ fill: 'var(--fallback-b2,oklch(var(--b2)/0.3))', radius: 8 }} 
-             />
-             <Bar dataKey="spend" fill="var(--primary)" radius={[6, 6, 0, 0]} maxBarSize={45} />
-           </BarChart>
-         </ResponsiveContainer>
+         {mounted ? (
+           <ResponsiveContainer width="100%" height="100%" minHeight={280}>
+             <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+               <XAxis
+                 dataKey="name"
+                 stroke="currentColor"
+                 className="text-base-content/60"
+                 tick={{ fontSize: 11, fontWeight: 600 }}
+                 axisLine={false}
+                 tickLine={false}
+                 dy={10}
+               />
+               <YAxis
+                 stroke="currentColor"
+                 className="text-base-content/60"
+                 tick={{ fontSize: 11, fontWeight: 600 }}
+                 axisLine={false}
+                 tickLine={false}
+                 tickFormatter={(value) => `$${value >= 1000 ? (value / 1000) + 'k' : value}`}
+               />
+               <Tooltip 
+                 content={<CustomTooltip />} 
+                 cursor={{ fill: 'var(--fallback-b2,oklch(var(--b2)/0.3))', radius: 8 }} 
+               />
+               <Bar dataKey="spend" fill="var(--primary)" radius={[6, 6, 0, 0]} maxBarSize={45} />
+             </BarChart>
+           </ResponsiveContainer>
+         ) : (
+           <div className="w-full h-[280px] bg-base-200/20 animate-pulse rounded-xl flex items-center justify-center">
+             <span className="loading loading-spinner loading-sm opacity-20"></span>
+           </div>
+         )}
       </div>
     </div>
   );

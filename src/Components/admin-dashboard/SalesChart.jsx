@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -10,6 +10,11 @@ import {
 } from "recharts";
 export default function SalesChart({ aggData = { monthlySales: [], weeklySales: [] } }) {
   const [view, setView] = useState("month");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const toggleView = (selected) => {
     setView(selected);
@@ -45,36 +50,42 @@ export default function SalesChart({ aggData = { monthlySales: [], weeklySales: 
       </div>
 
       {/* Bar Chart */}
-      <ResponsiveContainer width="100%" height={320} minHeight={300}>
-        <BarChart data={data} margin={{ top: 20, right: 10, left: -10, bottom: 5 }}>
-          <XAxis
-            dataKey="name"
-            stroke="currentColor"
-            tick={{ fontSize: 12, fontWeight: 500 }}
-            axisLine={false}
-            tickLine={false}
-          />
-          <YAxis
-            stroke="currentColor"
-            tick={{ fontSize: 12, fontWeight: 500 }}
-            axisLine={false}
-            tickLine={false}
-          />
-         <Tooltip
-  contentStyle={{
-    backgroundColor: "var(--tooltip-bg)", // we define this in Tailwind
-    borderRadius: "6px",
-    border: "1px solid var(--tooltip-border)",
-    boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
-  }}
-  itemStyle={{ color: "var(--primary)", fontWeight: 600 }}
-  cursor={{ fill: "rgba(0, 0, 0, 0 )" }}
-/>
+      {mounted ? (
+        <ResponsiveContainer width="100%" height={320} minHeight={300}>
+          <BarChart data={data} margin={{ top: 20, right: 10, left: -10, bottom: 5 }}>
+            <XAxis
+              dataKey="name"
+              stroke="currentColor"
+              tick={{ fontSize: 12, fontWeight: 500 }}
+              axisLine={false}
+              tickLine={false}
+            />
+            <YAxis
+              stroke="currentColor"
+              tick={{ fontSize: 12, fontWeight: 500 }}
+              axisLine={false}
+              tickLine={false}
+            />
+           <Tooltip
+    contentStyle={{
+      backgroundColor: "var(--tooltip-bg)", // we define this in Tailwind
+      borderRadius: "6px",
+      border: "1px solid var(--tooltip-border)",
+      boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+    }}
+    itemStyle={{ color: "var(--primary)", fontWeight: 600 }}
+    cursor={{ fill: "rgba(0, 0, 0, 0 )" }}
+  />
 
 
-          <Bar dataKey="sales" fill="var(--primary)" radius={[8, 8, 0, 0]} barSize={35} />
-        </BarChart>
-      </ResponsiveContainer>
+            <Bar dataKey="sales" fill="var(--primary)" radius={[8, 8, 0, 0]} barSize={35} />
+          </BarChart>
+        </ResponsiveContainer>
+      ) : (
+        <div className="w-full h-[320px] bg-base-200/20 animate-pulse rounded-xl flex items-center justify-center">
+          <span className="loading loading-spinner loading-md opacity-20"></span>
+        </div>
+      )}
     </div>
   );
-}
+}
