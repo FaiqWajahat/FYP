@@ -12,7 +12,8 @@ import {
   User,
   Settings,
   BrainCircuit,
-  ChevronRight
+  ChevronRight,
+  ClipboardList
 } from "lucide-react";
 
 // Menu config for User Dashboard
@@ -22,7 +23,7 @@ const navGroups = [
     items: [
       { title: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
       { title: "Orders", icon: ShoppingBag, href: "/dashboard/orders" },
-      { title: "Smart Inquiry", icon: BrainCircuit, href: "/dashboard/smart-inquiry" },
+      { title: "Inquiries", icon: ClipboardList, href: "/dashboard/inquiries" },
       { title: "Mockups", icon: Image, href: "/dashboard/mockups" },
       { title: "Invoices", icon: FileText, href: "/dashboard/invoices" },
       { title: "Messages", icon: MessageSquare, href: "/dashboard/messages" },

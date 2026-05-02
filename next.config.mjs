@@ -37,6 +37,11 @@ const nextConfig = {
         hostname: "placehold.co",
         pathname: "/**", 
       },
+      {
+        protocol: "https",
+        hostname: "pin.it",
+        pathname: "/**", 
+      },
     ],
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",

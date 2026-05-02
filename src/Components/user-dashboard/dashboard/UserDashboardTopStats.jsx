@@ -1,57 +1,81 @@
 'use client';
-import { Package, ClipboardCheck, DollarSignIcon, MessageSquare } from 'lucide-react';
+import { Package, ClipboardCheck, DollarSignIcon, Layers } from 'lucide-react';
 import React from 'react';
 import CountUp from 'react-countup';
 
-const UserDashboardTopStats = () => {
+const UserDashboardTopStats = ({ stats, loading }) => {
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 w-full">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-32 bg-base-100 rounded-2xl animate-pulse border border-base-200 shadow-sm" />
+        ))}
+      </div>
+    );
+  }
+
+  const items = [
+    {
+      label: "Total Projects",
+      value: stats?.totalOrders || 0,
+      icon: Package,
+      color: "text-primary",
+      bg: "bg-primary/5",
+      desc: "Order history count",
+      isMoney: false
+    },
+    {
+      label: "Ongoing Work",
+      value: stats?.ongoingProjects || 0,
+      icon: Layers,
+      color: "text-amber-600",
+      bg: "bg-amber-50",
+      desc: "Currently in pipeline",
+      isMoney: false
+    },
+    {
+      label: "Total Investment",
+      value: stats?.totalSpent || 0,
+      icon: DollarSignIcon,
+      color: "text-emerald-600",
+      bg: "bg-emerald-50",
+      desc: "Paid invoices sum",
+      isMoney: true
+    },
+    {
+      label: "Open Tasks",
+      value: stats?.pendingActionsCount || 0,
+      icon: ClipboardCheck,
+      color: "text-rose-500",
+      bg: "bg-rose-50",
+      desc: "Requires your review",
+      isMoney: false
+    }
+  ];
+
   return (
-    <div className="stats bg-base-100 w-full stats-vertical md:stats-horizontal overflow-hidden shadow-sm border border-base-200">
-      
-      <div className="stat">
-        <div className="stat-figure bg-primary/10 rounded-md p-2 border border-primary/20">
-          <Package className='w-8 h-8 text-primary'/>
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+      {items.map((stat, idx) => (
+        <div key={idx} className="bg-base-100 rounded-2xl px-6 py-6 shadow-sm border border-base-200 flex items-center gap-5 hover:shadow-md transition-shadow">
+          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${stat.bg} border border-black/5`}>
+            <stat.icon size={26} className={stat.color} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10px] font-black uppercase tracking-[0.15em] text-base-content/30 mb-1">{stat.label}</p>
+            <div className="text-2xl font-black text-base-content tracking-tighter flex items-center gap-1">
+              {stat.isMoney && <span className="text-lg opacity-40">$</span>}
+              <CountUp 
+                 start={0} 
+                 end={stat.value} 
+                 duration={2} 
+                 separator="," 
+                 decimals={stat.isMoney ? 0 : 0} 
+              />
+            </div>
+            <p className="text-[9px] font-bold text-base-content/20 uppercase tracking-tighter mt-1">{stat.desc}</p>
+          </div>
         </div>
-        <div className="pb-1 text-base-content/70 font-semibold tracking-wide uppercase text-xs">Active Orders</div>
-        <div className="stat-value text-base-content">
-          <CountUp start={0} end={4} duration={2.75} />
-        </div>
-        <div className="stat-desc mt-1">2 in production</div>
-      </div>
-
-      <div className="stat">
-        <div className="stat-figure bg-warning/10 rounded-md p-2 border border-warning/20">
-          <ClipboardCheck className='w-8 h-8 text-warning'/>
-        </div>
-        <div className="pb-1 text-base-content/70 font-semibold tracking-wide uppercase text-xs">Pending Approvals</div>
-        <div className="stat-value text-base-content">
-          <CountUp start={0} end={3} duration={2.75} />
-        </div>
-        <div className="stat-desc mt-1 font-medium text-warning">Requires your action</div>
-      </div>
-       
-      <div className="stat">
-        <div className="stat-figure bg-success/10 rounded-md p-2 border border-success/20">
-          <DollarSignIcon className='w-8 h-8 text-success'/>
-        </div>
-        <div className="pb-1 text-base-content/70 font-semibold tracking-wide uppercase text-xs">Total Spend</div>
-        <div className="stat-value text-base-content flex items-baseline">
-          $
-          <CountUp start={0} end={14.2} decimals={1} duration={2.75} suffix='k' />
-        </div>
-        <div className="stat-desc mt-1 text-success">Lifetime combined value</div>
-      </div>
-
-      <div className="stat">
-        <div className="stat-figure bg-secondary/10 rounded-md p-2 border border-secondary/20">
-          <MessageSquare className='w-8 h-8 text-secondary'/>
-        </div>
-        <div className="pb-1 text-base-content/70 font-semibold tracking-wide uppercase text-xs">New Messages</div>
-        <div className="stat-value text-base-content">
-          <CountUp start={0} end={1} duration={2.75} />
-        </div>
-        <div className="stat-desc mt-1">From your dedicated rep</div>
-      </div>
-
+      ))}
     </div>
   );
 }

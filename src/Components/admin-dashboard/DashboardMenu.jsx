@@ -17,6 +17,8 @@ import {
   ChevronRight,
   TrendingUp,
   Bell,
+  Image,
+  ClipboardList
 } from "lucide-react";
 
 // ─── Menu Config ──────────────────────────────────────────────
@@ -56,6 +58,17 @@ const navGroups = [
         ],
       },
       {
+        title: "Inquiries",
+        icon: ClipboardList,
+        children: [
+          { title: "All Inquiries", href: "/admin/Inquiries/All" },
+          { title: "Pending", href: "/admin/Inquiries/Pending", dot: true },
+          { title: "Quoted", href: "/admin/Inquiries/Quoted" },
+          { title: "Accepted", href: "/admin/Inquiries/Accepted" },
+          { title: "Rejected", href: "/admin/Inquiries/Rejected" },
+        ],
+      },
+      {
         title: "Categories",
         icon: Layers,
         href: "/admin/Categories",
@@ -87,15 +100,23 @@ const navGroups = [
     ],
   },
   {
+    groupLabel: "Design Studio",
+    items: [
+      {
+        title: "Mockups",
+        icon: Image,
+        href: "/admin/Mockups",
+      },
+    ],
+  },
+  {
     groupLabel: "Account",
     items: [
       {
         title: "Messages",
         icon: MessageSquare,
         href: "/admin/Messages",
-
       },
-
       { title: "My Profile", icon: User, href: "/admin/Profile" },
     ],
   },

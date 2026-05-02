@@ -2,13 +2,12 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import toast from "react-hot-toast";
-import { ShoppingBag, ShoppingCart } from "lucide-react";
+
 
 import DashboardPageHeader from "@/Components/common/DashboardPageHeader";
-import DashboardSearch from "@/Components/admin-dashboard/DashboardSearch";
-import ItemsCount from "@/Components/common/ItemsCount";
+
 import OrdersTable from "@/Components/admin-dashboard/OrdersTable";
-import Pagination from "@/Components/common/Pagination";
+
 import Loader from "@/Components/common/Loader";
 import ConfirmationDialog from "@/Components/common/ConfirmationDialog";
 import Link from "next/link";

@@ -7,113 +7,105 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  Cell
 } from "recharts";
+import { TrendingUp } from "lucide-react";
 
-const last6MonthsData = [
-  { name: "Apr", spend: 0 },
-  { name: "May", spend: 400 },
-  { name: "Jun", spend: 1200 },
-  { name: "Jul", spend: 3200 },
-  { name: "Aug", spend: 2800 },
-  { name: "Sep", spend: 5400 },
-];
-
-const yearlyData = [
-  { name: "2021", spend: 12000 },
-  { name: "2022", spend: 9500 },
-  { name: "2023", spend: 24000 },
-  { name: "2024", spend: 18000 },
-  { name: "2025", spend: 32000 },
-  { name: "2026", spend: 45000 },
-];
-
-export default function UserSpendChart() {
-  const [view, setView] = useState("months");
+export default function UserSpendChart({ data = [], loading }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const data = view === "months" ? last6MonthsData : yearlyData;
-
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-base-100 p-3 rounded-lg border border-base-200 shadow-xl">
-          <p className="font-bold text-sm mb-1">{label}</p>
-          <p className="text-primary font-bold">
+        <div className="bg-base-100 p-4 rounded-2xl border border-base-200 shadow-2xl backdrop-blur-md bg-white/90">
+          <p className="font-black text-[10px] uppercase tracking-widest text-base-content/40 mb-2">{label}</p>
+          <p className="text-primary font-black text-xl">
             ${payload[0].value.toLocaleString()}
           </p>
+          <p className="text-[9px] font-bold text-base-content/30 uppercase mt-1">Verified Payments</p>
         </div>
       );
     }
     return null;
   };
 
+  if (loading) {
+    return (
+       <div className="w-full h-full bg-base-100 rounded-2xl shadow-sm border border-base-200 p-8 flex flex-col gap-6">
+          <div className="h-6 w-32 bg-base-200 rounded-lg animate-pulse" />
+          <div className="flex-1 bg-base-200/20 rounded-xl animate-pulse" />
+       </div>
+    );
+  }
+
   return (
-    <div className="w-full h-full flex flex-col bg-base-100 rounded-xl shadow-sm border border-base-200 p-5 lg:p-6 transition-colors duration-300">
+    <div className="w-full h-full flex flex-col bg-base-100 rounded-2xl shadow-sm border border-base-200 p-5 lg:p-8">
       
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+      <div className="flex justify-between items-start mb-10">
         <div>
-           <h2 className="text-lg font-bold text-base-content flex items-center gap-2">
+           <h2 className="text-sm font-black uppercase tracking-widest text-base-content flex items-center gap-2">
              Spend History
            </h2>
-           <p className="text-xs text-base-content/60 font-mono mt-1">Tracking your B2B manufacturing volume</p>
+           <p className="text-[10px] text-base-content/40 font-bold uppercase tracking-wide mt-1">Investment across manufacturing</p>
         </div>
         
-        <div className="flex bg-base-200/50 p-1 rounded-lg">
-          <button
-            onClick={() => setView("months")}
-            className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-md transition-all ${
-              view === "months" ? "bg-base-100 shadow-sm text-primary" : "text-base-content/60 hover:text-base-content"
-            }`}
-          >
-            6 Months
-          </button>
-          <button
-            onClick={() => setView("years")}
-            className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-md transition-all ${
-               view === "years" ? "bg-base-100 shadow-sm text-primary" : "text-base-content/60 hover:text-base-content"
-            }`}
-          >
-            Yearly
-          </button>
+        <div className="flex items-center gap-4">
+           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-primary/5 border border-primary/10">
+              <TrendingUp size={14} className="text-primary" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-primary">Live Data</span>
+           </div>
         </div>
       </div>
 
-      <div className="flex-1 mt-4">
+      <div className="flex-1 min-h-[300px]">
          {mounted ? (
-           <ResponsiveContainer width="100%" height="100%" minHeight={280}>
-             <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+           <ResponsiveContainer width="100%" height="100%">
+             <BarChart data={data} margin={{ top: 0, right: 0, left: -25, bottom: 0 }}>
+               <defs>
+                 <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                   <stop offset="0%" stopColor="var(--primary)" stopOpacity={1} />
+                   <stop offset="100%" stopColor="var(--primary)" stopOpacity={0.7} />
+                 </linearGradient>
+               </defs>
                <XAxis
                  dataKey="name"
                  stroke="currentColor"
-                 className="text-base-content/60"
-                 tick={{ fontSize: 11, fontWeight: 600 }}
+                 className="text-base-content/20"
+                 tick={{ fontSize: 10, fontWeight: 800, fill: "oklch(var(--bc)/0.4)" }}
                  axisLine={false}
                  tickLine={false}
-                 dy={10}
+                 dy={15}
                />
                <YAxis
                  stroke="currentColor"
-                 className="text-base-content/60"
-                 tick={{ fontSize: 11, fontWeight: 600 }}
+                 className="text-base-content/20"
+                 tick={{ fontSize: 10, fontWeight: 800, fill: "oklch(var(--bc)/0.4)" }}
                  axisLine={false}
                  tickLine={false}
                  tickFormatter={(value) => `$${value >= 1000 ? (value / 1000) + 'k' : value}`}
                />
                <Tooltip 
                  content={<CustomTooltip />} 
-                 cursor={{ fill: 'var(--fallback-b2,oklch(var(--b2)/0.3))', radius: 8 }} 
+                 cursor={{ fill: 'var(--primary)', opacity: 0.05, radius: 12 }} 
                />
-               <Bar dataKey="spend" fill="var(--primary)" radius={[6, 6, 0, 0]} maxBarSize={45} />
+               <Bar 
+                 dataKey="spend" 
+                 fill="url(#barGradient)" 
+                 radius={[10, 10, 0, 0]} 
+                 maxBarSize={50}
+               >
+                  {data.map((entry, index) => (
+                    <Cell key={`cell-${index}`} className="transition-all hover:opacity-80" />
+                  ))}
+               </Bar>
              </BarChart>
            </ResponsiveContainer>
          ) : (
-           <div className="w-full h-[280px] bg-base-200/20 animate-pulse rounded-xl flex items-center justify-center">
-             <span className="loading loading-spinner loading-sm opacity-20"></span>
-           </div>
+           <div className="w-full h-full bg-base-200/10 rounded-xl" />
          )}
       </div>
     </div>

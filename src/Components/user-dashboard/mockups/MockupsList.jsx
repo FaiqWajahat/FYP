@@ -1,48 +1,118 @@
 "use client";
-import React, { useState } from 'react';
-import { FileText } from 'lucide-react';
-import MockupCard from './MockupCard';
-import MockupDetailModal from './MockupDetailModal';
-import StatusFilterBar from '@/Components/user-dashboard/StatusFilterBar';
+import React, { useState, useEffect, useCallback } from "react";
+import { FileText, RefreshCw, AlertCircle } from "lucide-react";
+import MockupCard from "./MockupCard";
+import MockupDetailModal from "./MockupDetailModal";
+import StatusFilterBar from "@/Components/user-dashboard/StatusFilterBar";
+import Loader from "@/Components/common/Loader";
+import toast from "react-hot-toast";
 
-const INITIAL_MOCKUPS = [
-  { id: 'MOCK-1021', orderId: 'quote-9982', type: 'Digital Tech Pack', url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=800&q=80', status: 'pending', date: 'Oct 12, 2026', notes: 'Please review the collar thickness.', version: 'v1.0' },
-  { id: 'MOCK-1019', orderId: 'quote-9980', type: 'Fabric Texture', url: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=800&q=80', status: 'approved', date: 'Oct 08, 2026', notes: 'Approved standard cotton blend.', version: 'v2.1' },
-  { id: 'MOCK-1015', orderId: 'quote-9975', type: '3D Render', url: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=800&q=80', status: 'rejected', date: 'Oct 05, 2026', notes: 'Color is too dark, please lighten by 10%.', version: 'v1.0' },
-  { id: 'MOCK-1022', orderId: 'quote-9985', type: 'Physical Sample Photo', url: 'https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?w=800&q=80', status: 'pending', date: 'Oct 14, 2026', notes: 'First physical run. Check logo placement.', version: 'v1.0' },
-  { id: 'MOCK-1018', orderId: 'quote-9978', type: 'Packaging Design', url: 'https://images.unsplash.com/photo-1607344645866-009c320b63e0?w=800&q=80', status: 'approved', date: 'Oct 07, 2026', notes: 'Final box design.', version: 'v3.0' },
-  { id: 'MOCK-1005', orderId: 'quote-9950', type: 'Digital Tech Pack', url: 'https://images.unsplash.com/photo-1485230405346-71acb9518d9c?w=800&q=80', status: 'approved', date: 'Sep 25, 2026', notes: 'Initial design block.', version: 'v1.0' }
-];
+const STATUS_COLORS = {
+  pending: "bg-warning/10 border-warning/30 text-warning-content",
+  approved: "bg-success/10 border-success/30 text-success",
+  rejected: "bg-error/10 border-error/30 text-error",
+};
 
 export default function MockupsList() {
-  const [mockups, setMockups] = useState(INITIAL_MOCKUPS);
-  const [activeTab, setActiveTab] = useState('all');
+  const [mockups, setMockups] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("all");
   const [selectedMockup, setSelectedMockup] = useState(null);
 
-  const filteredMockups = mockups.filter(m => activeTab === 'all' ? true : m.status === activeTab);
+  // ── Fetch from real API ──────────────────────────────────────────
+  const fetchMockups = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const res = await fetch("/api/user/mockups");
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || "Failed to load mockups");
+      setMockups(data.mockups || []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const handleAction = (id, newStatus) => {
-    setMockups(mockups.map(m => m.id === id ? { ...m, status: newStatus } : m));
-    if (selectedMockup && selectedMockup.id === id) {
-      setSelectedMockup({ ...selectedMockup, status: newStatus });
+  useEffect(() => { fetchMockups(); }, [fetchMockups]);
+
+  // ── Approve / Reject via API ─────────────────────────────────────
+  const handleAction = async (id, newStatus, clientFeedback = "") => {
+    try {
+      const res = await fetch("/api/user/mockups", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status: newStatus, client_feedback: clientFeedback }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error);
+
+      setMockups((prev) => prev.map((m) => m.id === id ? { ...m, status: newStatus } : m));
+      if (selectedMockup?.id === id) setSelectedMockup({ ...selectedMockup, status: newStatus });
+      toast.success(`Mockup ${newStatus === "approved" ? "approved ✅" : "rejected — revision requested"}`);
+    } catch (err) {
+      toast.error(err.message || "Failed to update mockup");
     }
   };
 
-  const statusColors = {
-    pending: 'bg-warning/10 border-warning/30 text-warning-content',
-    approved: 'bg-success/10 border-success/30 text-success',
-    rejected: 'bg-error/10 border-error/30 text-error',
-  };
+  const filteredMockups = mockups.filter((m) =>
+    activeTab === "all" ? true : m.status === activeTab
+  );
 
   const mockupTabs = [
-    { key: 'all',      label: 'All',      count: mockups.length },
-    { key: 'pending',  label: 'Pending',  count: mockups.filter(m => m.status === 'pending').length },
-    { key: 'approved', label: 'Approved', count: mockups.filter(m => m.status === 'approved').length },
-    { key: 'rejected', label: 'Rejected', count: mockups.filter(m => m.status === 'rejected').length },
+    { key: "all", label: "All", count: mockups.length },
+    { key: "pending", label: "Pending", count: mockups.filter((m) => m.status === "pending").length },
+    { key: "approved", label: "Approved", count: mockups.filter((m) => m.status === "approved").length },
+    { key: "rejected", label: "Rejected", count: mockups.filter((m) => m.status === "rejected").length },
   ];
+
+  // ── Loading ──────────────────────────────────────────────────────
+  if (loading) return <Loader message="Loading design mockups…" variant="inline" />;
+
+  // ── Error ────────────────────────────────────────────────────────
+  if (error) return (
+    <div className="bg-rose-50 p-8 rounded-3xl border border-rose-100 flex flex-col items-center gap-4 text-center">
+      <AlertCircle className="w-10 h-10 text-rose-400" />
+      <div>
+        <p className="font-black text-rose-800 tracking-tight">Unable to Load Mockups</p>
+        <p className="text-sm text-rose-500 font-medium mt-1">{error}</p>
+      </div>
+      <button onClick={fetchMockups} className="btn btn-sm bg-rose-600 text-white border-none rounded-xl uppercase tracking-widest font-black gap-2">
+        <RefreshCw size={14} /> Retry
+      </button>
+    </div>
+  );
+
+  // ── Pending mockup alert ─────────────────────────────────────────
+  const pendingCount = mockups.filter((m) => m.status === "pending").length;
 
   return (
     <>
+      {/* Pending alert banner */}
+      {pendingCount > 0 && activeTab !== "pending" && (
+        <div className="bg-[var(--primary)] text-white rounded-2xl px-7 py-5 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-xl shadow-[var(--primary)]/20 mb-6 animate-in slide-in-from-top-4">
+          <div className="flex items-center gap-4">
+            <AlertCircle size={22} />
+            <div>
+              <p className="font-black tracking-tight">
+                {pendingCount} Design{pendingCount > 1 ? "s" : ""} Awaiting Your Approval
+              </p>
+              <p className="text-[11px] font-bold opacity-70 uppercase tracking-widest">
+                Please review and approve or request changes.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setActiveTab("pending")}
+            className="btn btn-sm bg-white text-[var(--primary)] border-none rounded-xl font-black uppercase tracking-widest text-[10px]"
+          >
+            Review Now →
+          </button>
+        </div>
+      )}
+
       {/* Filter Bar */}
       <StatusFilterBar
         tabs={mockupTabs}
@@ -51,44 +121,46 @@ export default function MockupsList() {
         label="Mockup Status:"
       />
 
-      {/* Mockups Grid */}
+      {/* Grid */}
       {filteredMockups.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-6">
           {filteredMockups.map((mockup) => (
             <MockupCard
               key={mockup.id}
               mockup={mockup}
-              statusColors={statusColors}
+              statusColors={STATUS_COLORS}
               handleAction={handleAction}
               setSelectedMockup={setSelectedMockup}
             />
           ))}
         </div>
       ) : (
-        /* Empty State */
-        <div className="bg-base-100 border border-base-200/60 rounded-xl p-12 text-center flex flex-col items-center justify-center min-h-[400px]">
+        <div className="bg-base-100 border border-base-200/60 rounded-2xl p-12 text-center flex flex-col items-center justify-center min-h-[400px] mt-6">
           <div className="w-16 h-16 rounded-full bg-base-200 flex items-center justify-center mb-4">
-            <FileText size={24} className="text-base-content/40" />
+            <FileText size={24} className="text-base-content/30" />
           </div>
-          <h3 className="text-lg font-bold text-base-content mb-2 tracking-wide">No Mockups Found</h3>
-          <p className="text-sm text-base-content/60 max-w-sm mb-6">
-            {activeTab === 'all'
-              ? "There are currently no design mockups uploaded for your orders. Our team will upload them here soon."
-              : `You don't have any mockups in the "${activeTab}" status right now.`}
+          <h3 className="text-lg font-black text-base-content mb-2 tracking-wide">No Mockups Found</h3>
+          <p className="text-sm text-base-content/50 max-w-sm mb-6 font-bold">
+            {activeTab === "all"
+              ? "No design mockups have been uploaded for your orders yet. Our design team will upload them here once ready."
+              : `No mockups with "${activeTab}" status right now.`}
           </p>
-          {activeTab !== 'all' && (
-            <button onClick={() => setActiveTab('all')} className="btn btn-outline btn-sm uppercase tracking-widest text-xs">
-              Clear Filters
+          {activeTab !== "all" && (
+            <button
+              onClick={() => setActiveTab("all")}
+              className="btn btn-outline btn-sm uppercase tracking-widest text-xs rounded-xl font-black"
+            >
+              Clear Filter
             </button>
           )}
         </div>
       )}
 
-      {/* Mockup Detail Modal */}
+      {/* Detail Modal */}
       <MockupDetailModal
         selectedMockup={selectedMockup}
         setSelectedMockup={setSelectedMockup}
-        statusColors={statusColors}
+        statusColors={STATUS_COLORS}
         handleAction={handleAction}
       />
     </>

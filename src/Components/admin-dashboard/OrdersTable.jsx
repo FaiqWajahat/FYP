@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import {
-  Edit, Eye, Trash2, ShoppingCart, 
+  Edit, Eye, Trash2, ShoppingCart,
   Settings, Scissors, Shirt, PackageSearch,
   FileSignature, Palette, PenTool, ClipboardCheck, Truck, Home
 } from "lucide-react";
@@ -12,15 +12,15 @@ import ConfirmationDialog from "@/Components/common/ConfirmationDialog";
 // ─── Stage Meta ───────────────────────────────────────────────────────────────
 const STAGE_META = {
   0: { label: "Design/Tech Pack", icon: FileSignature, color: "text-blue-500" },
-  1: { label: "Fabric Sourcing",   icon: Palette,       color: "text-purple-500" },
-  2: { label: "Pattern Making",    icon: PenTool,       color: "text-indigo-500" },
-  3: { label: "Sampling",          icon: ClipboardCheck,color: "text-amber-500"  },
-  4: { label: "Bulk Cutting",      icon: Scissors,      color: "text-orange-500" },
-  5: { label: "Printing",          icon: Shirt,         color: "text-rose-500"   },
-  6: { label: "Stitching",         icon: Settings,      color: "text-teal-500"   },
-  7: { label: "Finishing & QA",    icon: PackageSearch, color: "text-cyan-500"   },
-  8: { label: "Dispatched",        icon: Truck,         color: "text-emerald-500"},
-  9: { label: "Delivered",         icon: Home,          color: "text-emerald-600"},
+  1: { label: "Fabric Sourcing", icon: Palette, color: "text-purple-500" },
+  2: { label: "Pattern Making", icon: PenTool, color: "text-indigo-500" },
+  3: { label: "Sampling", icon: ClipboardCheck, color: "text-amber-500" },
+  4: { label: "Bulk Cutting", icon: Scissors, color: "text-orange-500" },
+  5: { label: "Printing", icon: Shirt, color: "text-rose-500" },
+  6: { label: "Stitching", icon: Settings, color: "text-teal-500" },
+  7: { label: "Finishing & QA", icon: PackageSearch, color: "text-cyan-500" },
+  8: { label: "Dispatched", icon: Truck, color: "text-emerald-500" },
+  9: { label: "Delivered", icon: Home, color: "text-emerald-600" },
 };
 
 const fmt = (n) =>
@@ -52,7 +52,7 @@ export default function OrdersTable({ orders, onDelete }) {
             <th>Production Stage</th>
             <th>Value</th>
             <th>Payment</th>
-            <th className="hidden md:table-cell">Date</th>
+
             <th className="text-right">Action</th>
           </tr>
         </thead>
@@ -164,7 +164,7 @@ export default function OrdersTable({ orders, onDelete }) {
                 </td>
 
                 {/* Date (hidden on mobile, shown in Order col on mobile) */}
-                <td className="hidden md:table-cell text-[10px] text-base-content/50 font-medium">
+                <td className="hidden 2xl:table-cell text-[10px] text-base-content/50 font-medium">
                   {fmtDate(order.created_at)}
                 </td>
 

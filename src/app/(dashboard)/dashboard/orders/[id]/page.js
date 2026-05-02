@@ -65,9 +65,7 @@ export default function OrderDetailsPage({ params }) {
     totalUnits = order.pricing.totalUnits;
   }
 
-  const unitPrice = order.pricing?.unitPrice || 0;
-  const brandingAddon = order.pricing?.brandingAddon || 0;
-  const productionSubtotal = order.pricing?.subtotal || order.total_amount || 0;
+
 
   return (
     <div className="space-y-5 pb-20 w-full mx-auto">
@@ -107,7 +105,7 @@ export default function OrderDetailsPage({ params }) {
 
       {/* 1. Hero Overview */}
       <OrderOverviewCard
-        orderId={order.display_id ? `ORD-${order.display_id}` : id}
+        orderId={order.display_id ? `1000${order.display_id}` : id}
         status={orderStatus}
         date={dateStr}
         totalUnits={totalUnits}

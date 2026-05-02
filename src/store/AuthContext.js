@@ -11,12 +11,36 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const mergeGuestChat = async (currentUser) => {
+      const anonId = localStorage.getItem('factory_flow_anon_id');
+      // Only merge if we have a saved anonId AND the current user is a REAL (permanent) user
+      if (anonId && currentUser && !currentUser.is_anonymous) {
+        try {
+          await fetch('/api/chat/merge', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ anonId })
+          });
+          localStorage.removeItem('factory_flow_anon_id');
+        } catch (e) {
+          console.error('Failed to merge anonymous chat', e);
+        }
+      }
+    };
+
     // 1. Check active sessions and sets the user
     const getSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        fetchProfile(session.user.id);
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      
+      if (currentUser) {
+        if (currentUser.is_anonymous) {
+          localStorage.setItem('factory_flow_anon_id', currentUser.id);
+        } else {
+          await mergeGuestChat(currentUser);
+        }
+        fetchProfile(currentUser.id);
       } else {
         setLoading(false);
       }
@@ -30,6 +54,11 @@ export const AuthProvider = ({ children }) => {
       setUser(currentUser);
       
       if (currentUser) {
+        if (currentUser.is_anonymous) {
+          localStorage.setItem('factory_flow_anon_id', currentUser.id);
+        } else {
+          await mergeGuestChat(currentUser);
+        }
         await fetchProfile(currentUser.id);
       } else {
         setProfile(null);

@@ -197,15 +197,15 @@ export default function Navbar() {
           {/* RIGHT ACTIONS */}
           <div className="flex items-center gap-2 sm:gap-3 relative z-50 shrink-0">
 
-            {/* Smart Inquiry - Premium UI Button */}
-            <Link href="/dashboard/smart-inquiry" className="hidden lg:block">
+            {/* Get Quote - Premium UI Button */}
+            <Link href="/smart-inquiry" className="hidden lg:block">
               <motion.button
                 whileHover={{ scale: 1.02, backgroundColor: '#1e293b' }}
                 whileTap={{ scale: 0.97 }}
                 className="flex items-center gap-1.5 px-5 py-[10px] bg-slate-900 text-white rounded-full font-bold text-[13px] transition-all shadow-md hover:shadow-xl hover:shadow-slate-900/20"
               >
                 <Sparkles size={14} className="text-slate-300" />
-                Start Inquiry
+                Get Quote
               </motion.button>
             </Link>
 
@@ -350,7 +350,7 @@ export default function Navbar() {
 
                 <Link href="/smart-inquiry" onClick={() => setIsMobileOpen(false)}>
                   <button className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black flex items-center justify-center gap-2 active:scale-95 transition-transform mt-2">
-                    <Sparkles size={16} /> Start Smart Inquiry
+                    <Sparkles size={16} /> Get a Quote
                   </button>
                 </Link>
               </motion.div>
