@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Check, Upload, X, FileText, Ruler } from 'lucide-react';
+import { Check, Upload, X, FileText, Ruler, AlertCircle } from 'lucide-react';
 import { useInquiryStore } from '@/store/useInquiryStore';
 
 export default function Step5_SizingMeasurements() {
@@ -19,15 +19,21 @@ export default function Step5_SizingMeasurements() {
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.35 }}>
 
-      <h3 className="text-lg font-bold text-slate-900 mb-1">Sizing & Measurements</h3>
+      <h3 className="text-lg font-bold text-slate-900 mb-1">Sizing & Measurements <span className="inline-flex items-center ml-2 px-2 py-0.5 rounded-full bg-red-50 border border-red-200 text-[10px] font-bold text-red-600 uppercase tracking-wide">Required</span></h3>
       <p className="text-sm text-slate-500 mb-6">Set your size run quantities and provide custom measurements if needed.</p>
 
       {/* Size Run */}
       <div className="mb-6">
         <label className="block text-sm font-semibold text-slate-700 mb-3">
           <Ruler size={14} className="inline mr-1.5 text-blue-500" />
-          Size Run (Quantity per Size) <span className="text-red-500">*</span>
+          Size Run (Quantity per Size) <span className="inline-flex items-center ml-1 px-1.5 py-0.5 rounded-md bg-red-50 text-[9px] font-bold text-red-500 uppercase">Required</span>
         </label>
+        {totalQty === 0 && (
+          <div className="mb-3 p-3 rounded-xl bg-amber-50/80 border border-amber-200 flex items-start gap-2">
+            <AlertCircle size={14} className="text-amber-500 mt-0.5 shrink-0" />
+            <p className="text-xs text-amber-700">Enter quantity for at least one size to proceed. This is required for your production inquiry.</p>
+          </div>
+        )}
         <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
           {Object.keys(sizes).map((sz) => (
             <div key={sz} className="text-center">
@@ -57,7 +63,7 @@ export default function Step5_SizingMeasurements() {
 
       {/* Size Chart Upload */}
       <div className="mb-6">
-        <label className="block text-sm font-semibold text-slate-700 mb-2">Custom Size Chart</label>
+        <label className="block text-sm font-semibold text-slate-700 mb-2">Custom Size Chart <span className="text-xs font-normal text-slate-400">(Optional)</span></label>
         <p className="text-xs text-slate-400 mb-2">Upload your own size chart if you have specific measurements.</p>
         {sizeChartFile ? (
           <div className="flex items-center gap-2 p-3 rounded-xl bg-emerald-50 border border-emerald-200">
@@ -89,7 +95,7 @@ export default function Step5_SizingMeasurements() {
       {/* Custom Measurements Toggle */}
       <div className="mb-6">
         <div className="flex items-center justify-between mb-3">
-          <label className="text-sm font-semibold text-slate-700">Custom Body Measurements</label>
+          <label className="text-sm font-semibold text-slate-700">Custom Body Measurements <span className="text-xs font-normal text-slate-400">(Optional)</span></label>
           <button
             onClick={() => setCustomMeasurements(!customMeasurements)}
             className={`text-xs font-bold px-3 py-1 rounded-full transition-all ${
@@ -123,7 +129,7 @@ export default function Step5_SizingMeasurements() {
 
       {/* Grading Notes */}
       <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">Grading & Size Notes</label>
+        <label className="block text-sm font-semibold text-slate-700 mb-2">Grading & Size Notes <span className="text-xs font-normal text-slate-400">(Optional)</span></label>
         <textarea
           rows={2}
           value={gradingNotes}

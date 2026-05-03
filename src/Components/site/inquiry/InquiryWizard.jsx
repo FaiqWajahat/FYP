@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Send, Check, RotateCcw, Package, Loader2 } from 'lucide-react';
@@ -49,8 +50,14 @@ function ProgressBar({ currentStep, onStepClick }) {
                 }`}>
                 {isComplete ? <Check size={10} /> : step.id}
               </span>
-              <span className="hidden sm:inline">{step.label}</span>
-              <span className="sm:hidden">{step.shortLabel}</span>
+              <span className="hidden sm:inline">
+                {step.label}
+                {[1, 3, 5, 7].includes(step.id) && <span className={isActive ? 'text-red-300 ml-1' : 'text-red-500 ml-1'}>*</span>}
+              </span>
+              <span className="sm:hidden">
+                {step.shortLabel}
+                {[1, 3, 5, 7].includes(step.id) && <span className={isActive ? 'text-red-300 ml-0.5' : 'text-red-500 ml-0.5'}>*</span>}
+              </span>
             </button>
             {i < INQUIRY_STEPS.length - 1 && (
               <div className={`w-4 h-0.5 shrink-0 rounded-full ${isComplete ? 'bg-emerald-300' : 'bg-slate-200'}`} />
@@ -121,6 +128,41 @@ export default function InquiryWizard() {
   const [submitting, setSubmitting] = useState(false);
   const [submittedId, setSubmittedId] = useState('');
   const [showResetModal, setShowResetModal] = useState(false);
+  const searchParams = useSearchParams();
+
+  // Auto-Hydrate from URL Parameters (Bridge from Product Details)
+  useEffect(() => {
+    const category = searchParams.get('category');
+    const subCategory = searchParams.get('subCategory');
+    const imageUrl = searchParams.get('imageUrl');
+    const name = searchParams.get('productName');
+
+    if ((category || subCategory) && imageUrl) {
+      // Robust matching: Check for exact ID, exact Name, or if names contain each other (handles plurals)
+      const matchedCategory = PRODUCT_CATEGORIES.find(c => {
+        const lowerCat = (category || '').toLowerCase();
+        const lowerSub = (subCategory || '').toLowerCase();
+        const lowerName = c.name.toLowerCase();
+        const lowerId = c.id.toLowerCase();
+        
+        return lowerCat === lowerName || 
+               lowerCat === lowerId || 
+               lowerSub === lowerName ||
+               lowerSub === lowerId ||
+               lowerCat.startsWith(lowerName) || 
+               lowerName.startsWith(lowerCat) ||
+               lowerSub.startsWith(lowerName) ||
+               (lowerCat.endsWith('s') && lowerCat.slice(0, -1) === lowerName) ||
+               (lowerSub.endsWith('s') && lowerSub.slice(0, -1) === lowerName);
+      });
+      
+      if (matchedCategory) {
+        store.setCategoryId(matchedCategory.id);
+      }
+      
+      store.setUploadedDesign(imageUrl, name || 'Selected Design');
+    }
+  }, [searchParams]);
 
   const handleNext = () => {
     // Only validate truly essential fields to allow flexibility

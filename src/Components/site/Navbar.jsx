@@ -1,155 +1,248 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Sparkles, ChevronDown, LayoutDashboard, ShieldCheck, ShoppingBag, Factory, Layers } from 'lucide-react';
+import {
+  Menu, X, Sparkles, ChevronDown, LayoutDashboard,
+  ShoppingBag, Layers, ArrowRight, Zap, Globe, BadgeCheck,
+  MessageSquare, Package, User, LogOut, Shield
+} from 'lucide-react';
 
 import UserProfile from '@/Components/common/UserProfile';
 import { useConfigStore } from '@/store/useConfigStore';
 import { useAuth } from '@/store/AuthContext';
 
+// ─── Announcement bar items ─────────────────────────────────────────────────
+const ANNOUNCEMENTS = [
+  { icon: Zap,        text: '21-Day Express Turnaround' },
+  { icon: Globe,      text: 'Shipping to 40+ Countries' },
+  { icon: BadgeCheck, text: 'ISO-Certified Quality Control' },
+  { icon: Shield,     text: 'Escrow-Protected Payments' },
+];
+
+// ─── Desktop nav items ───────────────────────────────────────────────────────
+const NAV_LINKS = [
+  { href: '/',        label: 'Home'    },
+  { href: '/about',   label: 'About'   },
+  { href: '/process', label: 'Process' },
+  { href: '/contact', label: 'Contact' },
+];
+
 export default function Navbar() {
   const { user, profile } = useAuth();
-  const [categories, setCategories] = useState([]);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [isCatalogHovered, setIsCatalogHovered] = useState(false);
-  const [hoveredPath, setHoveredPath] = useState(null);
+  const { projectName }   = useConfigStore();
+  const pathname          = usePathname();
 
-  const { projectName } = useConfigStore();
-  const pathname = usePathname();
+  const [categories,       setCategories]       = useState([]);
+  const [isScrolled,       setIsScrolled]       = useState(false);
+  const [isMobileOpen,     setIsMobileOpen]     = useState(false);
+  const [isCatalogOpen,    setIsCatalogOpen]    = useState(false);
+  const [hoveredPath,      setHoveredPath]      = useState(null);
+  const [announcementIdx,  setAnnouncementIdx]  = useState(0);
+  const [showAnnouncement, setShowAnnouncement] = useState(true);
 
+  const catalogRef = useRef(null);
   const isAdminPath = pathname.startsWith('/admin');
 
+  // ── Data / listeners ───────────────────────────────────────────────────────
   useEffect(() => {
-    const fetchCats = async () => {
-      try {
-        const res = await fetch('/api/categories');
-        const data = await res.json();
-        setCategories(data.categories || []);
-      } catch (err) {
-        console.error("Navbar category fetch failed:", err);
-      }
-    };
-    fetchCats();
+    fetch('/api/categories')
+      .then(r => r.json())
+      .then(d => setCategories(d.categories || []))
+      .catch(() => {});
 
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setIsScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const NAV_LINKS = [
-    { href: '/', label: 'Home' },
-    { href: '/about', label: 'About' },
-    { href: '/contact', label: 'Contact' }
-  ];
+  // Rotate announcement ticker
+  useEffect(() => {
+    const t = setInterval(() => {
+      setAnnouncementIdx(i => (i + 1) % ANNOUNCEMENTS.length);
+    }, 3500);
+    return () => clearInterval(t);
+  }, []);
+
+  // Close mobile menu on route change
+  useEffect(() => { setIsMobileOpen(false); }, [pathname]);
+
+  // Close catalog on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (catalogRef.current && !catalogRef.current.contains(e.target)) {
+        setIsCatalogOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const activeCategories = categories.filter(c => c.status === 'Active');
 
   return (
     <>
+      {/* ── Announcement bar ─────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showAnnouncement && (
+          <motion.div
+            initial={{ height: 36, opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.4 }}
+            className="fixed top-0 inset-x-0 z-[99] bg-slate-900 overflow-hidden"
+          >
+            <div className="h-[36px] flex items-center justify-center px-4 relative">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={announcementIdx}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.35 }}
+                  className="flex items-center gap-2 text-[11px] font-semibold text-slate-300"
+                >
+                  {React.createElement(ANNOUNCEMENTS[announcementIdx].icon, {
+                    size: 12,
+                    className: 'text-blue-400 shrink-0'
+                  })}
+                  {ANNOUNCEMENTS[announcementIdx].text}
+                </motion.div>
+              </AnimatePresence>
+
+              <button
+                onClick={() => setShowAnnouncement(false)}
+                className="absolute right-4 text-slate-500 hover:text-white transition-colors"
+                aria-label="Dismiss"
+              >
+                <X size={13} />
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Main header ──────────────────────────────────────────────────── */}
       <header
-        className={`fixed top-0 inset-x-0 w-full z-[100] transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] px-4 sm:px-6 md:px-8 flex justify-center ${isScrolled ? 'py-4 md:py-5' : 'py-5 md:py-6'
-          }`}
+        className={`fixed inset-x-0 z-[100] flex justify-center px-4 sm:px-6 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+          showAnnouncement ? 'top-[36px]' : 'top-0'
+        } ${isScrolled ? 'py-3' : 'py-5'}`}
       >
         <motion.div
           layout
-          className={`relative flex items-center justify-between w-full max-w-6xl rounded-full transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] pl-4 pr-4 sm:pl-5 sm:pr-3 min-h-[64px] ${isScrolled
-            ? 'bg-white/70 backdrop-blur-xl border border-white/50 shadow-[0_8px_32px_rgba(0,0,0,0.06)]'
-            : 'bg-white/50 backdrop-blur-md border border-white/20 shadow-sm'
-            }`}
+          className={`relative flex items-center justify-between w-full max-w-6xl rounded-2xl transition-all duration-500 px-4 sm:px-5 min-h-[60px] ${
+            isScrolled
+              ? 'bg-white/80 backdrop-blur-2xl border border-white/60 shadow-[0_8px_40px_rgba(0,0,0,0.08)]'
+              : 'bg-white/60 backdrop-blur-md border border-white/30 shadow-sm'
+          }`}
         >
-          {/* LOGO SECTION */}
-          <Link href="/" className="flex items-center gap-3 group relative z-50 mr-4 sm:mr-8 shrink-0 pl-2 sm:pl-0">
-            <div className="flex flex-col">
-              <span className="text-lg font-black tracking-tight text-primary leading-none group-hover:text-primary/80 transition-colors uppercase">
+
+          {/* ── Logo ─────────────────────────────────────────────────────── */}
+          <Link
+            href="/"
+            className="flex items-center gap-3 shrink-0 group z-50"
+          >
+            {/* Icon mark */}
+            <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shadow-md shadow-blue-600/30 group-hover:shadow-blue-600/50 transition-shadow">
+              <Layers size={15} className="text-white" />
+            </div>
+            <div className="flex flex-col leading-none">
+              <span className="text-[15px] font-black tracking-tight text-slate-900 group-hover:text-blue-600 transition-colors uppercase">
                 {projectName}
               </span>
-              <span className="text-[9px] font-bold tracking-[0.2em] text-slate-500 uppercase mt-0.5 leading-none flex items-center gap-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+              <span className="text-[9px] font-bold tracking-[0.18em] text-slate-400 uppercase mt-0.5">
                 Manufacturing
               </span>
             </div>
           </Link>
 
-          {/* CENTER NAVIGATION (DESKTOP) */}
+          {/* ── Desktop nav ──────────────────────────────────────────────── */}
           <nav
-            className="hidden lg:flex items-center gap-1.5 relative pointer-events-auto"
+            className="hidden lg:flex items-center gap-0.5"
             onMouseLeave={() => setHoveredPath(null)}
           >
-            <NavItem
-              href="/"
-              label="Home"
-              active={pathname === '/'}
-              hoveredPath={hoveredPath}
-              setHoveredPath={setHoveredPath}
-            />
+            {NAV_LINKS.map(({ href, label }) => (
+              <NavItem
+                key={href}
+                href={href}
+                label={label}
+                active={pathname === href}
+                hoveredPath={hoveredPath}
+                setHoveredPath={setHoveredPath}
+              />
+            ))}
 
-            {/* Catalog Trigger */}
+            {/* ── Catalog dropdown ─────────────────────────────────────── */}
             <div
+              ref={catalogRef}
               className="relative"
-              onMouseEnter={() => {
-                setIsCatalogHovered(true);
-                setHoveredPath('catalog');
-              }}
-              onMouseLeave={() => setIsCatalogHovered(false)}
+              onMouseEnter={() => { setIsCatalogOpen(true); setHoveredPath('catalog'); }}
+              onMouseLeave={() => { setIsCatalogOpen(false); }}
             >
               <button
-                className={`relative px-4 py-2 rounded-full text-[13px] font-bold transition-colors duration-300 flex items-center gap-1.5 z-10 ${pathname.includes('/categories') || isCatalogHovered || hoveredPath === 'catalog'
-                  ? 'text-slate-900'
-                  : 'text-slate-500'
-                  }`}
+                className={`relative flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-bold transition-colors duration-200 z-10 ${
+                  pathname.includes('/categories') || isCatalogOpen
+                    ? 'text-slate-900'
+                    : 'text-slate-500 hover:text-slate-800'
+                }`}
               >
                 Catalog
-                <ChevronDown size={14} className={`transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${isCatalogHovered ? 'rotate-180' : ''}`} />
+                <ChevronDown
+                  size={13}
+                  className={`transition-transform duration-300 ${isCatalogOpen ? 'rotate-180' : ''}`}
+                />
               </button>
 
               {hoveredPath === 'catalog' && (
                 <motion.div
                   layoutId="nav-pill"
-                  className="absolute inset-0 bg-slate-100/80 rounded-full z-0 pointer-events-none"
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  className="absolute inset-0 bg-slate-100/80 rounded-xl z-0 pointer-events-none"
+                  transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                 />
               )}
 
-              {/* Animated Mega-Menu Dropdown */}
               <AnimatePresence>
-                {isCatalogHovered && (
+                {isCatalogOpen && (
                   <motion.div
-                    initial={{ opacity: 0, y: 15, scale: 0.95, filter: 'blur(4px)' }}
-                    animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95, filter: 'blur(4px)' }}
-                    transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                    className="absolute top-full left-1/2 -translate-x-1/2 pt-5 w-[380px] z-[101]"
+                    initial={{ opacity: 0, y: 12, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0,  scale: 1 }}
+                    exit={{  opacity: 0, y: 8,  scale: 0.97 }}
+                    transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                    className="absolute top-full left-1/2 -translate-x-1/2 pt-4 w-[420px] z-[110]"
                   >
-                    <div className="bg-white/95 backdrop-blur-2xl border border-slate-200/50 rounded-3xl shadow-[0_30px_60px_rgba(0,0,0,0.12)] p-4 overflow-hidden">
-                      <div className="space-y-1 max-h-[400px] overflow-y-auto no-scrollbar">
-                        {categories.filter(c => c.status === 'Active').length > 0 ? (
-                          categories.filter(c => c.status === 'Active').map((cat) => (
-                            <DropdownLink 
-                              key={cat.id}
-                              cat={cat}
-                              icon={Layers} 
-                              href={`/categories/${cat.slug}`} 
-                              label={cat.name} 
-                              description={cat.description || (cat.subcategories?.slice(0, 3).join(", "))} 
-                            />
+                    <div className="bg-white/95 backdrop-blur-2xl border border-slate-200/60 rounded-2xl shadow-[0_24px_60px_rgba(0,0,0,0.12)] overflow-hidden">
+                      {/* Header */}
+                      <div className="px-5 pt-4 pb-3 border-b border-slate-100">
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400">
+                          Product Catalog
+                        </p>
+                        <p className="text-sm font-bold text-slate-800 mt-0.5">
+                          Browse {activeCategories.length} categories
+                        </p>
+                      </div>
+
+                      {/* Category list */}
+                      <div className="p-2 max-h-[340px] overflow-y-auto no-scrollbar">
+                        {activeCategories.length > 0 ? (
+                          activeCategories.map(cat => (
+                            <CatalogItem key={cat.id} cat={cat} />
                           ))
                         ) : (
-                          <div className="py-8 text-center">
-                            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">No categories active</span>
+                          <div className="py-10 text-center text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                            No active categories
                           </div>
                         )}
                       </div>
 
-                      <div className="mt-3 pt-3 border-t border-slate-100 px-1">
-                        <Link href="/categories" className="group flex items-center justify-between w-full py-3 px-3 text-[11px] font-black uppercase tracking-widest text-slate-800 hover:text-slate-900 hover:bg-slate-50 rounded-xl transition-all">
-                          Full Collections
-                          <div className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center transition-colors">
-                            <span className="text-[10px] leading-none">→</span>
-                          </div>
+                      {/* Footer CTA */}
+                      <div className="p-3 border-t border-slate-100 bg-slate-50/50">
+                        <Link
+                          href="/categories"
+                          className="flex items-center justify-between w-full px-4 py-2.5 bg-slate-900 hover:bg-blue-600 text-white rounded-xl text-[11px] font-black uppercase tracking-widest transition-colors group"
+                        >
+                          View Full Collections
+                          <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
                         </Link>
                       </div>
                     </div>
@@ -158,35 +251,32 @@ export default function Navbar() {
               </AnimatePresence>
             </div>
 
-            <NavItem href="/about" label="About" active={pathname === '/about'} hoveredPath={hoveredPath} setHoveredPath={setHoveredPath} />
-            <NavItem href="/contact" label="Contact" active={pathname === '/contact'} hoveredPath={hoveredPath} setHoveredPath={setHoveredPath} />
-
-            {/* Dashboard / Panel Switcher - Only for Admins */}
+            {/* ── Admin/Store switcher ──────────────────────────────────── */}
             {profile?.role === 'admin' && (
               <>
-                <div className="h-5 w-px bg-slate-200 mx-2" />
+                <div className="h-4 w-px bg-slate-200 mx-1" />
                 <div
                   className="relative"
                   onMouseEnter={() => setHoveredPath('panel')}
                 >
                   <Link
                     href={isAdminPath ? '/' : '/admin'}
-                    className={`relative px-4 py-2 rounded-full text-[13px] font-bold transition-all flex items-center gap-1.5 z-10 ${isAdminPath || hoveredPath === 'panel'
-                      ? 'text-slate-900'
-                      : 'text-slate-500'
-                      }`}
+                    className={`relative flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-bold transition-colors z-10 ${
+                      isAdminPath || hoveredPath === 'panel'
+                        ? 'text-slate-900'
+                        : 'text-slate-500 hover:text-slate-800'
+                    }`}
                   >
-                    {isAdminPath ? (
-                      <><ShoppingBag size={14} /> Store</>
-                    ) : (
-                      <><LayoutDashboard size={14} /> Admin</>
-                    )}
+                    {isAdminPath
+                      ? <><ShoppingBag size={13} /> Store</>
+                      : <><LayoutDashboard size={13} /> Admin</>
+                    }
                   </Link>
                   {hoveredPath === 'panel' && (
                     <motion.div
                       layoutId="nav-pill"
-                      className="absolute inset-0 bg-slate-100/80 rounded-full z-0 pointer-events-none"
-                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                      className="absolute inset-0 bg-slate-100/80 rounded-xl z-0 pointer-events-none"
+                      transition={{ type: 'spring', stiffness: 400, damping: 30 }}
                     />
                   )}
                 </div>
@@ -194,226 +284,275 @@ export default function Navbar() {
             )}
           </nav>
 
-          {/* RIGHT ACTIONS */}
-          <div className="flex items-center gap-2 sm:gap-3 relative z-50 shrink-0">
+          {/* ── Right actions ────────────────────────────────────────────── */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0 z-50">
 
-            {/* Get Quote - Premium UI Button */}
+            {/* Get Quote CTA */}
             <Link href="/smart-inquiry" className="hidden lg:block">
               <motion.button
-                whileHover={{ scale: 1.02, backgroundColor: '#1e293b' }}
+                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
-                className="flex items-center gap-1.5 px-5 py-[10px] bg-slate-900 text-white rounded-full font-bold text-[13px] transition-all shadow-md hover:shadow-xl hover:shadow-slate-900/20"
+                className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-[13px] shadow-md shadow-blue-600/25 hover:shadow-blue-600/40 transition-all"
               >
-                <Sparkles size={14} className="text-slate-300" />
-                Get Quote
+                <Sparkles size={13} className="text-blue-200" />
+                Get a Quote
               </motion.button>
             </Link>
 
-            <div className="pl-1 sm:pl-2">
-              {user ? (
-                <UserProfile />
-              ) : (
-                <Link href="/login">
-                  <motion.button 
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-6 py-2.5 bg-primary text-primary-content rounded-full font-bold text-[13px] shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
-                  >
-                    Login
-                  </motion.button>
-                </Link>
-              )}
-            </div>
+            {/* User profile / login */}
+            {user ? (
+              <UserProfile />
+            ) : (
+              <Link href="/login" className="hidden md:block">
+                <motion.button
+                  whileHover={{ scale: 1.04 }}
+                  whileTap={{ scale: 0.96 }}
+                  className="px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold text-[13px] shadow-sm transition-all"
+                >
+                  Sign In
+                </motion.button>
+              </Link>
+            )}
 
-            {/* Mobile Toggle */}
+            {/* Mobile toggle */}
             <button
-              className="lg:hidden w-10 h-10 flex items-center justify-center bg-slate-100/50 hover:bg-slate-200 transition-colors text-slate-900 rounded-full active:scale-95 border border-slate-200/50"
-              onClick={() => setIsMobileOpen((prev) => !prev)}
+              onClick={() => setIsMobileOpen(p => !p)}
+              className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors active:scale-95 border border-slate-200/60"
+              aria-label="Toggle menu"
             >
-              <Menu size={18} strokeWidth={2.5} />
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={isMobileOpen ? 'close' : 'open'}
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0,   opacity: 1 }}
+                  exit={{   rotate:  90, opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  {isMobileOpen ? <X size={18} strokeWidth={2.5} /> : <Menu size={18} strokeWidth={2.5} />}
+                </motion.div>
+              </AnimatePresence>
             </button>
           </div>
         </motion.div>
       </header>
 
-      {/* MOBILE FULL-SCREEN DRAWER */}
+      {/* ── Mobile drawer ────────────────────────────────────────────────── */}
       <AnimatePresence>
         {isMobileOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
-            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            exit={{ opacity: 0, y: -20, filter: 'blur(10px)' }}
+            initial={{ opacity: 0, x: '100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{   opacity: 0, x: '100%' }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 bg-white/95 backdrop-blur-3xl z-[200] flex flex-col pt-24 pb-8 px-6 lg:hidden"
+            className="fixed inset-0 z-[200] bg-white flex flex-col lg:hidden"
           >
-            {/* Close Button placed precisely over the open button */}
-            <div className="absolute top-5 right-4 sm:right-6 flex justify-end">
+            {/* Drawer header */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+              <Link href="/" onClick={() => setIsMobileOpen(false)} className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shadow-md shadow-blue-600/30">
+                  <Layers size={15} className="text-white" />
+                </div>
+                <span className="text-[15px] font-black tracking-tight text-slate-900 uppercase">{projectName}</span>
+              </Link>
               <button
                 onClick={() => setIsMobileOpen(false)}
-                className="w-10 h-10 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-full transition-colors active:scale-95"
+                className="w-10 h-10 flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-colors active:scale-95"
               >
                 <X size={18} strokeWidth={2.5} />
               </button>
             </div>
 
-            <div className="flex flex-col h-full">
-              <nav className="flex-1 flex flex-col gap-6 mt-8">
-                {NAV_LINKS.map((item, i) => (
-                  <motion.div
-                    key={item.label}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.05 + 0.1, duration: 0.4 }}
-                  >
-                    <Link
-                      href={item.href}
-                      onClick={() => setIsMobileOpen(false)}
-                      className="text-3xl font-black text-slate-900 hover:text-slate-600 transition-colors flex items-center justify-between group"
-                    >
-                      {item.label}
-                      <span className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-300">→</span>
-                    </Link>
-                  </motion.div>
-                ))}
-
+            {/* Nav links */}
+            <nav className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-1">
+              {[...NAV_LINKS, { href: '/categories', label: 'Catalog' }].map(({ href, label }, i) => (
                 <motion.div
-                  initial={{ opacity: 0, x: -20 }}
+                  key={href}
+                  initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: NAV_LINKS.length * 0.05 + 0.1, duration: 0.4 }}
+                  transition={{ delay: i * 0.05 + 0.1 }}
                 >
                   <Link
-                    href="/categories"
+                    href={href}
                     onClick={() => setIsMobileOpen(false)}
-                    className="text-3xl font-black text-slate-900 hover:text-slate-600 transition-colors flex items-center justify-between group"
+                    className={`flex items-center justify-between px-4 py-4 rounded-2xl font-black text-[15px] transition-all ${
+                      pathname === href
+                        ? 'bg-blue-600 text-white'
+                        : 'text-slate-800 hover:bg-slate-50'
+                    }`}
                   >
-                    Catalog
-                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-slate-300">→</span>
+                    {label}
+                    <ArrowRight size={16} className={pathname === href ? 'text-blue-200' : 'text-slate-300'} />
                   </Link>
                 </motion.div>
-              </nav>
+              ))}
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-                className="pt-8 mt-auto border-t border-slate-100 space-y-4"
-              >
-                <div className="space-y-4">
-                  {user ? (
-                    <>
-                      {profile?.role === 'admin' && (
-                        <Link
-                          href={isAdminPath ? '/' : '/admin'}
-                          onClick={() => setIsMobileOpen(false)}
-                          className="w-full flex items-center justify-between p-4 bg-slate-50 rounded-2xl font-bold text-slate-900"
-                        >
-                          <span className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
-                              {isAdminPath ? <ShoppingBag size={14} className="text-primary" /> : <LayoutDashboard size={14} className="text-primary" />}
-                            </div>
-                            {isAdminPath ? 'Switch to User Store' : 'Switch to Admin Panel'}
-                          </span>
-                        </Link>
-                      )}
+              {/* Admin switcher in mobile */}
+              {profile?.role === 'admin' && (
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.35 }}
+                >
+                  <Link
+                    href={isAdminPath ? '/' : '/admin'}
+                    onClick={() => setIsMobileOpen(false)}
+                    className="flex items-center justify-between px-4 py-4 rounded-2xl font-black text-[15px] text-slate-800 hover:bg-slate-50 transition-all"
+                  >
+                    <span className="flex items-center gap-3">
+                      {isAdminPath
+                        ? <ShoppingBag size={16} className="text-blue-600" />
+                        : <LayoutDashboard size={16} className="text-blue-600" />
+                      }
+                      {isAdminPath ? 'User Store' : 'Admin Panel'}
+                    </span>
+                    <ArrowRight size={16} className="text-slate-300" />
+                  </Link>
+                </motion.div>
+              )}
+
+              {/* Category chips */}
+              {activeCategories.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="mt-4 pt-4 border-t border-slate-100"
+                >
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-slate-400 px-4 mb-3">
+                    Quick Category Access
+                  </p>
+                  <div className="flex flex-wrap gap-2 px-2">
+                    {activeCategories.slice(0, 6).map(cat => (
                       <Link
-                        href="/admin/profile"
+                        key={cat.id}
+                        href={`/categories/${cat.slug}`}
                         onClick={() => setIsMobileOpen(false)}
-                        className="w-full flex items-center justify-between p-4 bg-slate-50 rounded-2xl font-bold text-slate-900"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 rounded-xl text-[11px] font-bold text-slate-700 transition-colors"
                       >
-                        <span className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm overflow-hidden">
-                            {profile?.profile_image ? (
-                              <img src={profile.profile_image} alt="Avatar" className="w-full h-full object-cover" />
-                            ) : (
-                              <User size={14} className="text-slate-400" />
-                            )}
-                          </div>
-                          Account Settings
-                        </span>
+                        <Layers size={11} />
+                        {cat.name}
                       </Link>
-                    </>
-                  ) : (
-                    <Link
-                      href="/login"
-                      onClick={() => setIsMobileOpen(false)}
-                      className="w-full flex items-center justify-between p-4 bg-primary text-primary-content rounded-2xl font-bold"
-                    >
-                      <span className="flex items-center gap-3 pl-2">
-                        Login / Create Account
-                      </span>
-                      <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-                        <span className="text-[12px]">→</span>
-                      </div>
-                    </Link>
-                  )}
-                </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </nav>
 
-                <Link href="/smart-inquiry" onClick={() => setIsMobileOpen(false)}>
-                  <button className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black flex items-center justify-center gap-2 active:scale-95 transition-transform mt-2">
-                    <Sparkles size={16} /> Get a Quote
+            {/* Drawer footer */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="px-6 pb-8 pt-4 border-t border-slate-100 space-y-3"
+            >
+              <Link href="/smart-inquiry" onClick={() => setIsMobileOpen(false)}>
+                <button className="w-full flex items-center justify-center gap-2 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black text-[14px] active:scale-[0.98] transition-all shadow-lg shadow-blue-600/25">
+                  <Sparkles size={16} />
+                  Get a Free Quote
+                </button>
+              </Link>
+
+              {!user && (
+                <Link href="/login" onClick={() => setIsMobileOpen(false)}>
+                  <button className="w-full flex items-center justify-center gap-2 py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-bold text-[14px] active:scale-[0.98] transition-all">
+                    Sign In
                   </button>
                 </Link>
-              </motion.div>
-            </div>
+              )}
+
+              {user && (
+                <div className="flex items-center gap-3 px-4 py-3 bg-slate-50 rounded-2xl">
+                  <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-blue-600 font-black text-sm overflow-hidden">
+                    {profile?.profile_image
+                      ? <img src={profile.profile_image} alt="" className="w-full h-full object-cover" />
+                      : (profile?.full_name?.[0] || <User size={16} />)
+                    }
+                  </div>
+                  <div>
+                    <p className="text-[13px] font-black text-slate-900">{profile?.full_name || 'User'}</p>
+                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">
+                      {profile?.role === 'admin' ? 'Administrator' : 'Client'}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Spacing to prevent content hidden under fixed navbar */}
-      <div className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${isScrolled ? 'h-[80px]' : 'h-[104px]'} lg:h-[0px]`} />
+      {/* Spacer so page content doesn't hide behind fixed header */}
+      <div className={`transition-all duration-500 ${showAnnouncement ? 'h-[96px]' : 'h-[76px]'} ${isScrolled ? '' : ''} lg:h-0`} />
     </>
   );
 }
 
-// --- SUB-COMPONENTS ---
+// ─── Sub-components ──────────────────────────────────────────────────────────
 
-const NavItem = ({ href, label, active, hoveredPath, setHoveredPath }) => {
+function NavItem({ href, label, active, hoveredPath, setHoveredPath }) {
   const isHovered = hoveredPath === href;
-
   return (
-    <div
-      className="relative"
-      onMouseEnter={() => setHoveredPath(href)}
-    >
+    <div className="relative" onMouseEnter={() => setHoveredPath(href)}>
       <Link
         href={href}
-        className={`relative px-4 py-2 rounded-full text-[13px] font-bold transition-colors duration-300 block z-10 ${active || isHovered ? 'text-slate-900' : 'text-slate-500'
-          }`}
+        className={`relative block px-4 py-2 rounded-xl text-[13px] font-bold transition-colors duration-200 z-10 ${
+          active || isHovered ? 'text-slate-900' : 'text-slate-500 hover:text-slate-800'
+        }`}
       >
         {label}
+        {active && (
+          <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-blue-600" />
+        )}
       </Link>
-
-      {/* The Liquid Background Element */}
       {isHovered && (
         <motion.div
           layoutId="nav-pill"
-          className="absolute inset-0 bg-slate-100/80 rounded-full z-0 pointer-events-none"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          className="absolute inset-0 bg-slate-100/80 rounded-xl z-0 pointer-events-none"
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
         />
       )}
     </div>
   );
-};
+}
 
-const DropdownLink = ({ href, label, description, icon: Icon, cat }) => (
-  <Link href={href} className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 transition-all group relative overflow-hidden">
-    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-0 bg-slate-300 rounded-r-md transition-all duration-300 group-hover:h-1/2 opacity-0 group-hover:opacity-100" />
-    <div className="w-12 h-12 rounded-xl bg-slate-50 group-hover:bg-white border border-slate-100 group-hover:border-slate-200 transition-all flex items-center justify-center shrink-0 shadow-sm group-hover:shadow-md overflow-hidden bg-white">
-      {cat?.image_url ? (
-        <img src={cat.image_url} alt={label} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-      ) : (
-        Icon && <Icon size={18} className="text-slate-400 group-hover:text-slate-900 transition-colors" />
-      )}
-    </div>
-    <div className="flex flex-col">
-      <span className="text-[13px] font-black text-slate-800 group-hover:text-slate-900 transition-colors flex items-center gap-2 uppercase tracking-wide">
-        {label}
-        <span className="text-[10px] text-slate-300 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300">→</span>
-      </span>
-      <span className="text-[10px] font-bold text-slate-400 mt-0.5 line-clamp-1 uppercase tracking-widest">{description}</span>
-    </div>
-  </Link>
-);
+function CatalogItem({ cat }) {
+  return (
+    <Link
+      href={`/categories/${cat.slug}`}
+      className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-all group"
+    >
+      {/* Thumbnail */}
+      <div className="w-11 h-11 rounded-xl overflow-hidden shrink-0 bg-slate-100 border border-slate-200/60 group-hover:border-blue-200 transition-colors shadow-sm">
+        {cat.image_url ? (
+          <img
+            src={cat.image_url}
+            alt={cat.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Layers size={16} className="text-slate-400" />
+          </div>
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="min-w-0 flex-1">
+        <p className="text-[13px] font-black text-slate-800 group-hover:text-blue-600 transition-colors truncate">
+          {cat.name}
+        </p>
+        {(cat.description || cat.subcategories?.length > 0) && (
+          <p className="text-[10px] font-semibold text-slate-400 mt-0.5 truncate uppercase tracking-wide">
+            {cat.description || cat.subcategories?.slice(0, 3).join(' · ')}
+          </p>
+        )}
+      </div>
+
+      {/* Arrow */}
+      <ArrowRight
+        size={13}
+        className="text-slate-300 group-hover:text-blue-400 group-hover:translate-x-0.5 transition-all duration-200 shrink-0"
+      />
+    </Link>
+  );
+}

@@ -1,4 +1,6 @@
+import React, { Suspense } from 'react';
 import InquiryWizard from '@/Components/site/inquiry/InquiryWizard';
+import Loader from '@/Components/common/Loader';
 
 export const metadata = {
   title: 'Manufacturing Inquiry | Request a Quote',
@@ -6,5 +8,9 @@ export const metadata = {
 };
 
 export default function SmartInquiryPage() {
-  return <InquiryWizard />;
+  return (
+    <Suspense fallback={<Loader message="Initializing Inquiry Studio..." />}>
+      <InquiryWizard />
+    </Suspense>
+  );
 }

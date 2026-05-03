@@ -5,7 +5,7 @@ import FAQSection from '@/Components/site/Faqs'
 import { Contact } from 'lucide-react'
 import React from 'react'
 
-const ConatctPage = () => {
+const ContactPage = () => {
   return (
     <div>
     <ContactHero/>
@@ -16,4 +16,4 @@ const ConatctPage = () => {
   )
 }
 
-export default ConatctPage
+export default ContactPage

@@ -16,6 +16,12 @@ const PAYMENT_DIVISIONS = [
     description: '50% paid upfront to start production. Remaining 50% due before shipment.',
     icon: '✂️',
   },
+  {
+    id: 'split_30_40_30',
+    label: '30% · 40% · 30% Milestone Plan',
+    description: '30% upfront to start, 40% mid-production, and 30% due before shipment.',
+    icon: '⏳',
+  },
 ];
 
 function RadioDot({ selected, color = 'border-blue-600' }) {
@@ -27,6 +33,12 @@ function RadioDot({ selected, color = 'border-blue-600' }) {
 }
 
 export default function PaymentScheduleSection({ selectedDivision, onDivisionSelect, grandTotal }) {
+  // If order is under $200, only allow 100% full payment
+  const isBelowMinimum = grandTotal < 200;
+  const availableDivisions = isBelowMinimum 
+    ? PAYMENT_DIVISIONS.filter(d => d.id === 'full') 
+    : PAYMENT_DIVISIONS;
+
   return (
     <section className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8 shadow-sm">
       <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
@@ -37,10 +49,19 @@ export default function PaymentScheduleSection({ selectedDivision, onDivisionSel
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {PAYMENT_DIVISIONS.map((div) => {
+      {isBelowMinimum && (
+        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
+          <AlertCircle size={16} className="text-amber-600 mt-0.5 flex-shrink-0" />
+          <p className="text-xs text-amber-800 leading-relaxed">
+            <strong>Order Minimum for Splitting:</strong> Orders under $200.00 require 100% upfront payment. Payment splitting (50/50 or 30/40/30) is available for larger orders.
+          </p>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {availableDivisions.map((div) => {
           const isSelected = selectedDivision === div.id;
-          const dueNow = div.id === 'split' ? grandTotal * 0.5 : grandTotal;
+          const dueNow = div.id === 'split' ? grandTotal * 0.5 : (div.id === 'split_30_40_30' ? grandTotal * 0.3 : grandTotal);
 
           return (
             <div
@@ -63,13 +84,24 @@ export default function PaymentScheduleSection({ selectedDivision, onDivisionSel
         })}
       </div>
 
-      {/* Conditional split note */}
+      {/* Conditional split notes */}
       {selectedDivision === 'split' && (
-        <div className="mt-4 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
-          <AlertCircle size={16} className="text-amber-600 mt-0.5 flex-shrink-0" />
-          <p className="text-xs text-amber-800 leading-relaxed">
+        <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3">
+          <AlertCircle size={16} className="text-blue-600 mt-0.5 flex-shrink-0" />
+          <p className="text-xs text-blue-800 leading-relaxed">
             <strong>50% Upfront:</strong> ${(grandTotal * 0.5).toFixed(2)} due now to start production.
             The remaining <strong>50% (${(grandTotal * 0.5).toFixed(2)})</strong> will be due after order completion and before shipment.
+          </p>
+        </div>
+      )}
+
+      {selectedDivision === 'split_30_40_30' && (
+        <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-3">
+          <AlertCircle size={16} className="text-emerald-600 mt-0.5 flex-shrink-0" />
+          <p className="text-xs text-emerald-800 leading-relaxed">
+            <strong>30% Upfront:</strong> ${(grandTotal * 0.3).toFixed(2)} due now to begin production.<br/>
+            <strong>40% Midpoint:</strong> ${(grandTotal * 0.4).toFixed(2)} due upon mid-production photo approval.<br/>
+            <strong>30% Final:</strong> ${(grandTotal * 0.3).toFixed(2)} due after order completion before shipment.
           </p>
         </div>
       )}

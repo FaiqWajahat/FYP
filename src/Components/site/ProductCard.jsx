@@ -23,7 +23,16 @@ const ProductCard = ({ product }) => {
       router.push(`/login?returnTo=${encodeURIComponent(productUrl)}`);
       return;
     }
-    router.push(productUrl);
+    // Redirect to Inquiry Wizard with product data
+    const imageUrl = product.images?.[0] || '';
+    const query = new URLSearchParams({
+      category: product.category || 'Apparel',
+      subCategory: product.subCategory || '',
+      imageUrl: imageUrl,
+      productName: product.name || 'Custom Product'
+    }).toString();
+    
+    router.push(`/smart-inquiry?${query}`);
   };
 
   // Helper to determine status color

@@ -23,6 +23,9 @@ const CURRENCIES = [
 const MILESTONES = [
   { value: "deposit", label: "50% Deposit" },
   { value: "final", label: "50% Final Payment" },
+  { value: "deposit_30", label: "30% Deposit (Upfront)" },
+  { value: "midpoint_40", label: "40% Midpoint (Production)" },
+  { value: "final_30", label: "30% Final Payment (Pre-ship)" },
   { value: "full", label: "100% Full Payment" },
 ];
 
@@ -97,6 +100,17 @@ export default function AddInvoiceForm({ onSave }) {
     }
   }, [orders, prefillOrderId]);
 
+  const calculateAmount = (totalAmount, type) => {
+    if (!totalAmount) return "";
+    const num = parseFloat(totalAmount);
+    if (isNaN(num)) return "";
+    
+    if (type === 'deposit_30' || type === 'final_30') return (num * 0.3).toFixed(2);
+    if (type === 'midpoint_40') return (num * 0.4).toFixed(2);
+    if (type === 'deposit' || type === 'final') return (num * 0.5).toFixed(2);
+    return num.toFixed(2); // 'full' or unknown
+  };
+
   const handleOrderSelect = (orderId) => {
     const selectedOrder = orders.find(o => o.value === orderId);
     if (selectedOrder) {
@@ -106,14 +120,26 @@ export default function AddInvoiceForm({ onSave }) {
         orderId: rawData.id,
         displayOrderId: `ORD-${1000 + rawData.display_id}`,
         userId: rawData.user_id || prev.userId,
-        amount: rawData.total_amount,
+        amount: calculateAmount(rawData.total_amount, prev.milestoneType),
         orderName: rawData.product_name
       }));
     }
   };
 
   const handleChange = (name, value) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => {
+      const updates = { [name]: value };
+      
+      // Auto-recalculate amount if milestone changes AND we have an order
+      if (name === 'milestoneType' && prev.orderId) {
+        const selectedOrder = orders.find(o => o.value === prev.orderId);
+        if (selectedOrder && selectedOrder.rawData.total_amount) {
+           updates.amount = calculateAmount(selectedOrder.rawData.total_amount, value);
+        }
+      }
+      
+      return { ...prev, ...updates };
+    });
   };
 
   const isFormValid = formData.userId && formData.orderId && formData.amount && formData.dueDate;

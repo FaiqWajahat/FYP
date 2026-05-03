@@ -4,10 +4,10 @@ import { ArrowUpRight, Package, Box, ChevronRight } from 'lucide-react';
 
 const STAGE_STYLES = {
   "Pending Approval": "bg-amber-50 text-amber-700 border-amber-200/50",
-  "In Production":    "bg-blue-50 text-blue-700 border-blue-200/50",
-  "Quality Check":    "bg-purple-50 text-purple-700 border-purple-200/50",
-  "Dispatched":       "bg-emerald-50 text-emerald-700 border-emerald-200/50",
-  "Delivered":        "bg-base-200 text-base-content/50 border-base-300",
+  "In Production": "bg-blue-50 text-blue-700 border-blue-200/50",
+  "Quality Check": "bg-purple-50 text-purple-700 border-purple-200/50",
+  "Dispatched": "bg-emerald-50 text-emerald-700 border-emerald-200/50",
+  "Delivered": "bg-base-200 text-base-content/50 border-base-300",
 };
 
 export default function UserRecentActivity({ orders = [], loading }) {
@@ -27,12 +27,12 @@ export default function UserRecentActivity({ orders = [], loading }) {
       <div className="p-6 border-b border-base-200/60 flex justify-between items-center bg-base-100">
         <div>
           <h3 className="text-sm font-black tracking-widest uppercase text-base-content flex items-center gap-3">
-             <Package size={18} className="text-primary" /> Active Manufacturing
+            <Package size={18} className="text-primary" /> Active Manufacturing
           </h3>
           <p className="text-[10px] text-base-content/40 font-bold uppercase tracking-tight mt-1">Status of your latest projects</p>
         </div>
         <Link href="/dashboard/orders" className="btn btn-sm bg-base-200 hover:bg-base-300 border-transparent text-[10px] font-black uppercase tracking-widest rounded-xl transition-all gap-2">
-           Full Export <ArrowUpRight size={14} className="opacity-50" />
+          Full Export <ArrowUpRight size={14} className="opacity-50" />
         </Link>
       </div>
 
@@ -61,7 +61,7 @@ export default function UserRecentActivity({ orders = [], loading }) {
                       <div>
                         <div className="font-black text-xs text-base-content uppercase tracking-tight">#{order.id}</div>
                         <div className="text-[10px] font-bold text-base-content/40 uppercase mt-0.5 truncate max-w-[150px]">
-                           {order.product || "Project Sample"}
+                          {order.product || "Project Sample"}
                         </div>
                       </div>
                     </div>
@@ -79,14 +79,14 @@ export default function UserRecentActivity({ orders = [], loading }) {
                     </div>
                   </td>
                   <td className="py-6 border-b border-base-100 text-right pr-8">
-                     <div className="flex flex-col items-end gap-2">
-                        <div className={`badge badge-sm border ${style} text-[9px] font-black uppercase tracking-widest py-3 px-4 rounded-xl shadow-sm whitespace-nowrap`}>
-                          {order.stage || order.status}
-                        </div>
-                        <Link href={`/dashboard/orders/${order.rawId}`} className="text-[9px] font-black uppercase tracking-widest text-primary hover:underline flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                           Track Pipeline <ChevronRight size={10} />
-                        </Link>
-                     </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <div className={`badge badge-sm border ${style} text-[9px] font-black uppercase tracking-widest py-3 px-4 rounded-xl shadow-sm whitespace-nowrap`}>
+                        {order.stage || order.status}
+                      </div>
+                      <Link href={`/dashboard/orders/${order.rawId}`} className="text-[9px] font-black uppercase tracking-widest text-primary hover:underline flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        Track Pipeline <ChevronRight size={10} />
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               );
@@ -95,11 +95,11 @@ export default function UserRecentActivity({ orders = [], loading }) {
         </table>
 
         {!loading && orders.length === 0 && (
-           <div className="py-20 flex flex-col items-center justify-center opacity-20">
-              <Package size={48} className="mb-4" />
-              <p className="text-xs font-black uppercase tracking-widest">No Projects Found</p>
-              <p className="text-[10px] font-bold mt-1">Start your manufacturing journey today.</p>
-           </div>
+          <div className="py-20 flex flex-col items-center justify-center opacity-20">
+            <Package size={48} className="mb-4" />
+            <p className="text-xs font-black uppercase tracking-widest">No Projects Found</p>
+            <p className="text-[10px] font-bold mt-1">Start your manufacturing journey today.</p>
+          </div>
         )}
       </div>
     </div>

@@ -64,12 +64,12 @@ const UserDashboardTopStats = ({ stats, loading }) => {
             <p className="text-[10px] font-black uppercase tracking-[0.15em] text-base-content/30 mb-1">{stat.label}</p>
             <div className="text-2xl font-black text-base-content tracking-tighter flex items-center gap-1">
               {stat.isMoney && <span className="text-lg opacity-40">$</span>}
-              <CountUp 
-                 start={0} 
-                 end={stat.value} 
-                 duration={2} 
-                 separator="," 
-                 decimals={stat.isMoney ? 0 : 0} 
+              <CountUp
+                start={0}
+                end={stat.value}
+                duration={2}
+                separator=","
+                decimals={stat.isMoney ? 0 : 0}
               />
             </div>
             <p className="text-[9px] font-bold text-base-content/20 uppercase tracking-tighter mt-1">{stat.desc}</p>

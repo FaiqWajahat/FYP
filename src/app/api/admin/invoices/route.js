@@ -171,7 +171,7 @@ export async function PATCH(request) {
 
       // ── Invoice marked PAID ─────────────────────────────────────────────────
       if (newStatus === 'paid') {
-        if (milestone === 'deposit' || milestone === 'full') {
+        if (milestone === 'deposit' || milestone === 'deposit_30' || milestone === 'full') {
           orderPatches.is_deposit_paid = true;
           if (currentOrder?.status !== 'Processing') {
             orderPatches.status = 'Processing';
@@ -191,7 +191,16 @@ export async function PATCH(request) {
           });
         }
 
-        if (milestone === 'final') {
+        if (milestone === 'midpoint_40') {
+          newEvents.push({
+            date: now,
+            type: 'payment',
+            message: `💳 Midpoint (40%) invoice marked paid. Production continues.`,
+            user: 'Admin',
+          });
+        }
+
+        if (milestone === 'final' || milestone === 'final_30') {
           orderPatches.is_final_paid = true;
           orderPatches.status = 'Completed';
           newEvents.push({
@@ -211,7 +220,7 @@ export async function PATCH(request) {
 
       // ── Invoice REVERSED (unpaid from paid) ─────────────────────────────────
       if (prevStatus === 'paid' && newStatus === 'unpaid') {
-        if (milestone === 'deposit' || milestone === 'full') {
+        if (milestone === 'deposit' || milestone === 'deposit_30' || milestone === 'full') {
           orderPatches.is_deposit_paid = false;
           newEvents.push({
             date: now,
@@ -220,7 +229,15 @@ export async function PATCH(request) {
             user: 'Admin',
           });
         }
-        if (milestone === 'final') {
+        if (milestone === 'midpoint_40') {
+          newEvents.push({
+            date: now,
+            type: 'payment',
+            message: `⚠️ Midpoint payment reversed.`,
+            user: 'Admin',
+          });
+        }
+        if (milestone === 'final' || milestone === 'final_30') {
           orderPatches.is_final_paid = false;
           newEvents.push({
             date: now,
@@ -293,7 +310,7 @@ export async function DELETE(request) {
       const newEvents = [];
       const now = new Date().toISOString();
 
-      if (invoice.milestone_type === 'deposit' || invoice.milestone_type === 'full') {
+      if (invoice.milestone_type === 'deposit' || invoice.milestone_type === 'deposit_30' || invoice.milestone_type === 'full') {
         orderPatches.is_deposit_paid = false;
         newEvents.push({
           date: now,
@@ -303,7 +320,16 @@ export async function DELETE(request) {
         });
       }
 
-      if (invoice.milestone_type === 'final') {
+      if (invoice.milestone_type === 'midpoint_40') {
+        newEvents.push({
+          date: now,
+          type: 'payment',
+          message: `⚠️ Midpoint invoice was deleted while paid.`,
+          user: 'Admin',
+        });
+      }
+
+      if (invoice.milestone_type === 'final' || invoice.milestone_type === 'final_30') {
         orderPatches.is_final_paid = false;
         newEvents.push({
           date: now,

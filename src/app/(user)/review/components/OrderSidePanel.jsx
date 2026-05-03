@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { CheckCircle2, AlertCircle, ArrowRight, ShieldCheck } from 'lucide-react';
 import { PAYMENT_METHODS } from './PaymentMethodSection';
 
@@ -53,7 +54,7 @@ export default function OrderSidePanel({
         <div className="flex justify-between items-center">
           <div>
             <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              {paymentDivision === 'split' ? 'Due Now (50%)' : 'Amount Due Now'}
+              {paymentDivision === 'split' ? 'Due Now (50%)' : paymentDivision === 'split_30_40_30' ? 'Due Now (30%)' : 'Amount Due Now'}
             </p>
             <p className="text-3xl font-black text-slate-900 mt-1">${amountDueNow.toFixed(2)}</p>
           </div>
@@ -61,6 +62,12 @@ export default function OrderSidePanel({
             <div className="text-right">
               <p className="text-[10px] text-slate-400 uppercase tracking-wider">After Completion</p>
               <p className="text-sm font-bold text-slate-600">${(grandTotal * 0.5).toFixed(2)}</p>
+            </div>
+          )}
+          {paymentDivision === 'split_30_40_30' && (
+            <div className="text-right">
+              <p className="text-[10px] text-slate-400 uppercase tracking-wider">Remaining (70%)</p>
+              <p className="text-sm font-bold text-slate-600">${(grandTotal * 0.7).toFixed(2)}</p>
             </div>
           )}
         </div>
@@ -87,7 +94,7 @@ export default function OrderSidePanel({
           </div>
           <span className="text-xs text-slate-500 leading-relaxed select-none">
             I confirm all order details, sizes, and payment terms. I agree to the{' '}
-            <span className="text-slate-800 underline font-medium">Terms of Production</span>.
+            <Link href="/terms" className="text-slate-800 underline font-bold hover:text-blue-600 transition-colors">Terms of Production</Link>.
           </span>
         </div>
 

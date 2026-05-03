@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Check, Upload, X, Tag, Package } from 'lucide-react';
 import { LABEL_TYPES, LABEL_PLACEMENTS, PACKAGING_OPTIONS } from '../inquiry-data';
 import { useInquiryStore } from '@/store/useInquiryStore';
+import CustomDropdown from '@/Components/common/CustomDropdown';
 
 export default function Step6_BrandingPackaging() {
   const {
@@ -21,7 +22,7 @@ export default function Step6_BrandingPackaging() {
       {/* ── LABELS ── */}
       <h3 className="text-lg font-bold text-slate-900 mb-1">
         <Tag size={16} className="inline mr-1.5 text-blue-500" />
-        Labels & Branding
+        Labels & Branding <span className="text-xs font-normal text-slate-400 ml-1">(Optional)</span>
       </h3>
       <p className="text-sm text-slate-500 mb-5">Customize your garment labels and brand identity elements.</p>
 
@@ -50,20 +51,13 @@ export default function Step6_BrandingPackaging() {
       {/* Label Placement */}
       <div className="mb-5">
         <label className="block text-sm font-semibold text-slate-700 mb-3">Label Placement</label>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {LABEL_PLACEMENTS.map((lp) => {
-            const isSelected = labelPlacement === lp;
-            return (
-              <button key={lp} onClick={() => setLabelPlacement(lp)}
-                className={`px-3 py-2.5 rounded-xl text-sm font-medium transition-all border ${
-                  isSelected ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-slate-100 bg-white text-slate-600 hover:border-slate-200'
-                }`}>
-                {lp}
-                {isSelected && <Check size={12} className="inline ml-1.5 text-blue-500" />}
-              </button>
-            );
-          })}
-        </div>
+        <CustomDropdown
+          options={LABEL_PLACEMENTS.map((lp) => ({ value: lp, label: lp }))}
+          value={labelPlacement}
+          onChange={(val) => setLabelPlacement(val)}
+          placeholder="Select label placement..."
+          theme="light"
+        />
       </div>
 
       {/* Label Artwork Upload */}
@@ -95,7 +89,7 @@ export default function Step6_BrandingPackaging() {
       <div className="border-t border-slate-100 pt-6">
         <h3 className="text-lg font-bold text-slate-900 mb-1">
           <Package size={16} className="inline mr-1.5 text-blue-500" />
-          Packaging Options
+          Packaging Options <span className="text-xs font-normal text-slate-400 ml-1">(Optional)</span>
         </h3>
         <p className="text-sm text-slate-500 mb-5">Select all packaging requirements. Multiple options can be combined.</p>
 

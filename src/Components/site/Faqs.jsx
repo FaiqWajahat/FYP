@@ -2,8 +2,10 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Plus, Minus, HelpCircle } from 'lucide-react'
+import { useConfigStore } from '@/store/useConfigStore'
 
 const FAQSection = () => {
+  const setIsChatOpen = useConfigStore((state) => state.setIsChatOpen);
   // State to track which question is open
   const [activeIndex, setActiveIndex] = useState(null)
 
@@ -48,7 +50,7 @@ const FAQSection = () => {
             Everything you need to know.
           </h2>
           <p className="text-lg text-slate-500">
-            Can’t find the answer you’re looking for? <a href="#" className="text-indigo-600 underline decoration-indigo-200 underline-offset-4 font-semibold hover:text-indigo-800 transition-colors">Chat with our support team.</a>
+            Can’t find the answer you’re looking for? <button onClick={() => setIsChatOpen(true)} className="text-indigo-600 underline decoration-indigo-200 underline-offset-4 font-semibold hover:text-indigo-800 transition-colors">Chat with our support team.</button>
           </p>
         </div>
 

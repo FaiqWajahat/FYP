@@ -6,8 +6,12 @@ export const useConfigStore = create(
     (set) => ({
       projectName: 'Factory Flow',
       isDarkMode: false,
+      isChatOpen: false,
+      chatContext: null,
       setProjectName: (name) => set({ projectName: name }),
       toggleDarkMode: () => set((state) => ({ isDarkMode: !state.isDarkMode })),
+      setIsChatOpen: (open) => set({ isChatOpen: open }),
+      setChatContext: (context) => set({ chatContext: context }),
     }),
     {
       name: 'config-storage',

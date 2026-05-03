@@ -1,161 +1,187 @@
 "use client";
 import React from "react";
 import {
-  Eye, ThumbsUp, ThumbsDown, Trash2,
-  Download, Maximize2, Layers, Clock, Calendar
+  ThumbsUp, ThumbsDown, Trash2, Download, Maximize2,
+  CheckCircle2, XCircle, Hourglass, User2, Sparkles
 } from "lucide-react";
 
-const STATUS_STYLE = {
-  pending:  { 
-    bg: "bg-amber-50/80", 
-    border: "border-amber-200/50", 
-    text: "text-amber-700", 
-    dot: "bg-amber-500",
-    pulse: "animate-pulse"
+const STATUS_CONFIG = {
+  pending: {
+    label: "Awaiting Review",
+    icon: <Hourglass size={10} />,
+    badge: "bg-amber-400/20 text-amber-600 border-amber-400/30",
+    glow: "",
+    dot: "bg-amber-400 animate-pulse",
+    bar: "from-amber-400 to-orange-400",
   },
-  approved: { 
-    bg: "bg-emerald-50/80", 
-    border: "border-emerald-200/50", 
-    text: "text-emerald-700", 
-    dot: "bg-emerald-500",
-    pulse: ""
+  approved: {
+    label: "Approved",
+    icon: <CheckCircle2 size={10} />,
+    badge: "bg-emerald-400/20 text-emerald-600 border-emerald-400/30",
+    glow: "",
+    dot: "bg-emerald-400",
+    bar: "from-emerald-400 to-teal-400",
   },
-  rejected: { 
-    bg: "bg-rose-50/80", 
-    border: "border-rose-200/50", 
-    text: "text-rose-600", 
-    dot: "bg-rose-500",
-    pulse: ""
+  rejected: {
+    label: "Changes Needed",
+    icon: <XCircle size={10} />,
+    badge: "bg-rose-400/20 text-rose-600 border-rose-400/30",
+    glow: "",
+    dot: "bg-rose-400",
+    bar: "from-rose-400 to-pink-400",
   },
 };
 
+// Helper: initials from name
+function Initials({ name }) {
+  const parts = (name || "?").trim().split(" ");
+  const initials = parts.length >= 2
+    ? `${parts[0][0]}${parts[parts.length - 1][0]}`
+    : parts[0].slice(0, 2);
+  return (
+    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[var(--primary)]/20 to-[var(--primary)]/10 border border-[var(--primary)]/20 flex items-center justify-center shrink-0">
+      <span className="text-[9px] font-black uppercase text-[var(--primary)]">{initials.toUpperCase()}</span>
+    </div>
+  );
+}
+
 export default function AdminMockupCard({ mockup, onView, onStatusChange, onDelete }) {
-  const s = STATUS_STYLE[mockup.status] || STATUS_STYLE.pending;
-  
+  const cfg = STATUS_CONFIG[mockup.status] || STATUS_CONFIG.pending;
+  const isPending = mockup.status === "pending";
+
   const orderLabel = mockup.orders?.display_id
     ? `ORD-${1000 + mockup.orders.display_id}`
     : mockup.order_id?.slice(0, 8).toUpperCase() || "—";
-    
+
   const clientName = mockup.profiles?.full_name || "Unknown Client";
-  const dateStr = new Date(mockup.created_at).toLocaleDateString("en-US", { 
-    month: "short", 
-    day: "numeric" 
+  const dateStr = new Date(mockup.created_at).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   });
 
   return (
-    <div className="group flex flex-col bg-base-100 rounded-[2rem] shadow-sm hover:shadow-2xl border border-base-200 transition-all duration-500 hover:-translate-y-1 overflow-hidden h-full">
+    <div
+      className="group flex flex-col bg-base-100 rounded-3xl border border-base-200/80 overflow-hidden h-full transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-black/5"
+      style={{ boxShadow: "0 2px 16px 0 rgba(0,0,0,0.06)" }}
+    >
+      {/* ── Accent top bar ── */}
+      <div className={`h-0.5 w-full bg-gradient-to-r ${cfg.bar} opacity-50 group-hover:opacity-100 transition-opacity duration-500`} />
 
       {/* ── Image Section ── */}
       <div
-        className="relative aspect-[4/3] w-full bg-base-200 overflow-hidden cursor-pointer"
+        className="relative aspect-[3/2] w-full bg-gradient-to-br from-base-200 to-base-300 overflow-hidden cursor-pointer"
         onClick={() => onView(mockup)}
       >
         <img
           src={mockup.url}
           alt={mockup.title}
-          className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
 
-        {/* Gradient Overlay for better contrast */}
-        <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        {/* Bottom vignette */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-        {/* Status badge: Glassmorphism */}
-        <div className={`absolute top-4 left-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-[9px] font-black uppercase tracking-[0.15em] backdrop-blur-xl shadow-lg ring-1 ring-white/20 ${s.bg} ${s.border} ${s.text}`}>
-          <div className="relative flex items-center justify-center">
-            {s.pulse && <span className={`absolute inline-flex h-full w-full rounded-full opacity-75 ${s.dot} ${s.pulse}`} />}
-            <span className={`relative inline-flex w-1.5 h-1.5 rounded-full ${s.dot}`} />
-          </div>
-          {mockup.status}
+        {/* Status badge – top left */}
+        <div className={`absolute top-3 left-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full backdrop-blur-xl border text-[9px] font-extrabold uppercase tracking-widest shadow-md ${cfg.badge}`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+          {cfg.label}
         </div>
 
-        {/* Version: Floating pill */}
-        <div className="absolute top-4 right-4 px-3 py-1.5 rounded-xl bg-black/40 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest border border-white/10 shadow-lg">
-          {mockup.version}
-        </div>
-
-        {/* Center Hover Action */}
-        <div className="absolute inset-0 bg-[var(--primary)]/10 opacity-0 group-hover:opacity-100 transition-all duration-500 backdrop-blur-[2px] flex items-center justify-center">
-          <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-[var(--primary)] shadow-2xl scale-50 group-hover:scale-100 transition-transform duration-500">
-            <Maximize2 size={20} />
-          </div>
-        </div>
-      </div>
-
-      {/* ── Content Section ── */}
-      <div className="p-6 flex flex-col flex-1">
-        
-        {/* Title & Order ID */}
-        <div className="flex justify-between items-start mb-4 gap-4">
-          <div className="min-w-0">
-            <h4 className="font-black text-base text-base-content lowercase first-letter:uppercase tracking-tighter truncate group-hover:text-[var(--primary)] transition-colors">
-              {mockup.title || "Untitled Design"}
-            </h4>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-[10px] font-bold text-base-content/40 uppercase tracking-widest">{mockup.type}</span>
-            </div>
-          </div>
-          <div className="shrink-0 flex flex-col items-end">
-             <span className="text-[9px] font-black uppercase tracking-widest text-[var(--primary)] bg-[var(--primary)]/5 px-2.5 py-1 rounded-lg border border-[var(--primary)]/10 whitespace-nowrap shadow-sm">
-              {orderLabel}
-            </span>
-          </div>
-        </div>
-
-        {/* Client & Metadata */}
-        <div className="grid grid-cols-2 gap-4 mb-5 pt-4 border-t border-base-100">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-base-200 flex items-center justify-center text-base-content/30 group-hover:bg-[var(--primary)]/10 group-hover:text-[var(--primary)] transition-colors">
-               <Layers size={14} />
-            </div>
-            <p className="text-[10px] font-bold text-base-content/60 truncate">{clientName}</p>
-          </div>
-          <div className="flex items-center gap-2.5 justify-end">
-            <p className="text-[10px] font-bold text-base-content/30 uppercase tracking-tighter">{dateStr}</p>
-            <Calendar size={12} className="text-base-content/20" />
-          </div>
-        </div>
-
-        {/* Description / Notes snippet */}
-        {mockup.notes && (
-          <div className="mb-6 relative">
-             <p className="text-[11px] text-base-content/50 line-clamp-2 leading-relaxed italic pl-3 border-l-2 border-base-200 group-hover:border-[var(--primary)]/30 transition-colors">
-              "{mockup.notes}"
-            </p>
+        {/* Version pill – top right */}
+        {mockup.version && (
+          <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md text-white text-[9px] font-bold uppercase tracking-widest border border-white/10 shadow">
+            {mockup.version}
           </div>
         )}
 
-        {/* ── Actions Row ── */}
-        <div className="mt-auto pt-5 flex gap-2">
-          {mockup.status === "pending" ? (
+        {/* Centre expand button */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-400">
+          <div className="w-12 h-12 rounded-2xl bg-white/90 backdrop-blur-sm flex items-center justify-center text-[var(--primary)] shadow-xl scale-75 group-hover:scale-100 transition-transform duration-400">
+            <Maximize2 size={20} />
+          </div>
+        </div>
+
+        {/* Bottom hover strip */}
+        <div className="absolute bottom-0 inset-x-0 px-4 pb-3 pt-6 flex items-end justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-400">
+          <span className="text-white text-[10px] font-bold uppercase tracking-widest drop-shadow">{dateStr}</span>
+          <span className="text-white/70 text-[9px] font-medium drop-shadow">{orderLabel}</span>
+        </div>
+      </div>
+
+      {/* ── Body ── */}
+      <div className="flex flex-col flex-1 p-5 gap-4">
+
+        {/* Title + Order ID */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h4 className="font-black text-sm text-base-content tracking-tight truncate leading-snug group-hover:text-[var(--primary)] transition-colors duration-300">
+              {mockup.title || "Untitled Design"}
+            </h4>
+            <p className="text-[10px] font-semibold text-base-content/40 uppercase tracking-widest mt-0.5">
+              {mockup.type}
+            </p>
+          </div>
+          <span className="shrink-0 inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-[var(--primary)] bg-[var(--primary)]/8 px-2.5 py-1 rounded-xl border border-[var(--primary)]/15">
+            <Sparkles size={8} />
+            {orderLabel}
+          </span>
+        </div>
+
+        {/* Client row */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Initials name={clientName} />
+            <div>
+              <p className="text-[11px] font-bold text-base-content/80 leading-none">{clientName}</p>
+              <p className="text-[9px] font-medium text-base-content/35 uppercase tracking-widest mt-0.5">Client</p>
+            </div>
+          </div>
+          <p className="text-[9px] font-semibold text-base-content/30 uppercase tracking-widest">{dateStr}</p>
+        </div>
+
+        {/* Notes */}
+        {mockup.notes && (
+          <p className="text-[11px] text-base-content/50 leading-relaxed line-clamp-2 italic border-l-2 border-base-200 group-hover:border-[var(--primary)]/40 pl-3 transition-colors duration-300">
+            {mockup.notes}
+          </p>
+        )}
+
+        {/* Divider */}
+        <div className="border-t border-base-200/60" />
+
+        {/* Actions */}
+        <div className="flex gap-2 mt-auto">
+          {isPending ? (
             <>
               <button
                 onClick={() => onStatusChange(mockup.id, "approved")}
-                className="btn btn-sm flex-1 bg-emerald-600 hover:bg-emerald-700 text-white border-none rounded-xl text-[10px] font-black uppercase tracking-widest shadow-md shadow-emerald-500/10 active:scale-95 transition-all"
+                className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white text-[10px] font-black uppercase tracking-widest shadow-md shadow-emerald-500/20 transition-all duration-200"
               >
-                <ThumbsUp size={14} /> Approve
+                <ThumbsUp size={13} /> Approve
               </button>
               <button
                 onClick={() => onStatusChange(mockup.id, "rejected")}
-                className="btn btn-sm flex-1 bg-white hover:bg-rose-50 text-rose-600 border border-rose-100 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm active:scale-95 transition-all"
+                className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-xl bg-white hover:bg-rose-50 active:scale-95 text-rose-500 border border-rose-200/70 text-[10px] font-black uppercase tracking-widest shadow-sm transition-all duration-200"
               >
-                <ThumbsDown size={14} /> Reject
+                <ThumbsDown size={13} /> Reject
               </button>
             </>
           ) : (
             <>
               <button
                 onClick={() => onView(mockup)}
-                className="btn btn-ghost border-base-200 btn-sm flex-1 text-[10px] font-black uppercase tracking-widest rounded-xl bg-white hover:bg-base-200 transition-all font-sans"
+                className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-xl bg-base-200/60 hover:bg-base-200 active:scale-95 text-base-content/70 text-[10px] font-black uppercase tracking-widest transition-all duration-200"
               >
-                <Maximize2 size={14} className="mr-1" /> View High Res
+                <Maximize2 size={13} /> View Details
               </button>
               <a
                 href={mockup.url}
                 download
                 target="_blank"
                 rel="noreferrer"
-                className="btn btn-ghost border-base-200 btn-sm px-4 bg-white hover:bg-[var(--primary)] hover:text-white text-[var(--primary)] transition-all rounded-xl shadow-sm"
-                title="Download Source"
+                className="h-9 px-3.5 flex items-center justify-center rounded-xl bg-base-200/60 hover:bg-[var(--primary)] active:scale-95 text-base-content/50 hover:text-white border border-base-200/60 shadow-sm transition-all duration-200"
+                title="Download"
               >
                 <Download size={14} />
               </a>
@@ -163,8 +189,8 @@ export default function AdminMockupCard({ mockup, onView, onStatusChange, onDele
           )}
           <button
             onClick={() => onDelete(mockup.id)}
-            className="btn btn-ghost border-transparent hover:border-rose-200 btn-sm px-3 bg-transparent hover:bg-rose-50 text-base-content/20 hover:text-rose-600 transition-all rounded-xl"
-            title="Delete Mockup"
+            className="h-9 px-3 flex items-center justify-center rounded-xl bg-transparent hover:bg-rose-50 active:scale-95 text-base-content/20 hover:text-rose-500 border border-transparent hover:border-rose-200/60 transition-all duration-200"
+            title="Delete"
           >
             <Trash2 size={14} />
           </button>

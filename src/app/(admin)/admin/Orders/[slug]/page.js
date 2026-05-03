@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import toast from "react-hot-toast";
-
+import { ShoppingCart } from "lucide-react";
 
 import DashboardPageHeader from "@/Components/common/DashboardPageHeader";
 

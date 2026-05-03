@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Check, Info } from 'lucide-react';
+import { Check, Info, AlertCircle } from 'lucide-react';
 import { FABRIC_OPTIONS, PRODUCT_CATEGORIES } from '../inquiry-data';
 import { useInquiryStore } from '@/store/useInquiryStore';
 
@@ -14,12 +14,18 @@ export default function Step3_MaterialSpecs() {
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.35 }}>
 
-      <h3 className="text-lg font-bold text-slate-900 mb-1">Fabric & Material</h3>
+      <h3 className="text-lg font-bold text-slate-900 mb-1">Fabric & Material <span className="inline-flex items-center ml-2 px-2 py-0.5 rounded-full bg-red-50 border border-red-200 text-[10px] font-bold text-red-600 uppercase tracking-wide">Required</span></h3>
       <p className="text-sm text-slate-500 mb-6">Select the fabric type, weight, and finish for your {category?.name || 'garment'}.</p>
 
       {/* Fabric Type */}
       <div className="mb-6">
-        <label className="block text-sm font-semibold text-slate-700 mb-3">Fabric Type <span className="text-red-500">*</span></label>
+        <label className="block text-sm font-semibold text-slate-700 mb-3">Fabric Type <span className="inline-flex items-center ml-1 px-1.5 py-0.5 rounded-md bg-red-50 text-[9px] font-bold text-red-500 uppercase">Required</span></label>
+        {!fabricId && (
+          <div className="mb-3 p-3 rounded-xl bg-amber-50/80 border border-amber-200 flex items-start gap-2">
+            <AlertCircle size={14} className="text-amber-500 mt-0.5 shrink-0" />
+            <p className="text-xs text-amber-700">Please select a fabric type to proceed. This is a required field for your inquiry.</p>
+          </div>
+        )}
         <div className="space-y-2">
           {FABRIC_OPTIONS.map((fab) => {
             const isSelected = fabricId === fab.id;
@@ -93,7 +99,7 @@ export default function Step3_MaterialSpecs() {
 
       {/* Custom Fabric Notes */}
       <div>
-        <label className="block text-sm font-semibold text-slate-700 mb-2">Custom Fabric Notes</label>
+        <label className="block text-sm font-semibold text-slate-700 mb-2">Custom Fabric Notes <span className="text-xs font-normal text-slate-400">(Optional)</span></label>
         <p className="text-xs text-slate-400 mb-2">Specify any custom fabric requirements, blends, or certifications needed.</p>
         <textarea
           rows={3}

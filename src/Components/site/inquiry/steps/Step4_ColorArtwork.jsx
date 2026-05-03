@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Plus, Trash2, Upload, X, Palette, ChevronDown } from 'lucide-react';
 import { PRODUCT_CATEGORIES, COLOUR_PALETTE, BRANDING_TECHNIQUES, PLACEMENT_ZONES } from '../inquiry-data';
 import { useInquiryStore } from '@/store/useInquiryStore';
+import CustomDropdown from '@/Components/common/CustomDropdown';
 
 const COLOR_GROUP_LABELS = {
   neutral: 'Whites', grey: 'Greys', blue: 'Blues', teal: 'Teals',
@@ -115,31 +116,25 @@ function ArtworkPlacementCard({ placement, index, onUpdate, onRemove }) {
       {/* Zone */}
       <div>
         <label className="text-xs font-semibold text-slate-500 mb-1 block">Print Zone</label>
-        <select
+        <CustomDropdown
+          options={PLACEMENT_ZONES.map((z) => ({ value: z, label: z }))}
           value={placement.zone || ''}
-          onChange={(e) => onUpdate({ zone: e.target.value })}
-          className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-700 bg-white outline-none focus:border-blue-400"
-        >
-          <option value="">Select zone...</option>
-          {PLACEMENT_ZONES.map((z) => (
-            <option key={z} value={z}>{z}</option>
-          ))}
-        </select>
+          onChange={(val) => onUpdate({ zone: val })}
+          placeholder="Select zone..."
+          theme="light"
+        />
       </div>
 
       {/* Technique */}
       <div>
         <label className="text-xs font-semibold text-slate-500 mb-1 block">Branding Technique</label>
-        <select
+        <CustomDropdown
+          options={BRANDING_TECHNIQUES.map((t) => ({ value: t.id, label: t.name, subLabel: t.desc }))}
           value={placement.technique || ''}
-          onChange={(e) => onUpdate({ technique: e.target.value })}
-          className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-700 bg-white outline-none focus:border-blue-400"
-        >
-          <option value="">Select technique...</option>
-          {BRANDING_TECHNIQUES.map((t) => (
-            <option key={t.id} value={t.id}>{t.name} — {t.desc}</option>
-          ))}
-        </select>
+          onChange={(val) => onUpdate({ technique: val })}
+          placeholder="Select technique..."
+          theme="light"
+        />
       </div>
 
       {/* File */}
@@ -183,6 +178,21 @@ export default function Step4_ColorArtwork() {
   const category = PRODUCT_CATEGORIES.find((c) => c.id === categoryId);
   const zones = category?.colorZones || ['Body'];
 
+  // Determine which zones are visible based on colorType
+  const visibleZones = colorType === 'solid' ? zones.slice(0, 1)
+    : colorType === 'two-tone' ? zones.slice(0, 2)
+    : zones;
+
+  // Seed default colors into store for visible zones so Review page stays in sync
+  useEffect(() => {
+    visibleZones.forEach((zone) => {
+      if (!zoneColors[zone]) {
+        setZoneColor(zone, '#111111');
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [colorType, categoryId]);
+
   return (
     <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.35 }}>
 
@@ -219,10 +229,7 @@ export default function Step4_ColorArtwork() {
           Color Zones — {category?.name || 'Garment'}
         </label>
         <div className="space-y-2">
-          {(colorType === 'solid' ? zones.slice(0, 1) :
-            colorType === 'two-tone' ? zones.slice(0, 2) :
-            zones
-          ).map((zone) => (
+          {visibleZones.map((zone) => (
             <ZoneColorPicker
               key={zone}
               zone={zone}

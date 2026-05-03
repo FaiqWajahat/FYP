@@ -164,6 +164,18 @@ export default function AdminProductionManager({ order, onAdvance }) {
         </div>
       )}
 
+      {currentStage === 8 && (
+        <div className="mx-6 mt-5 p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-start gap-3">
+          <Truck size={16} className="text-blue-500 mt-0.5 shrink-0" />
+          <div>
+            <p className="text-[11px] font-black text-blue-700 uppercase tracking-tight leading-none mb-1">Dispatch Ready</p>
+            <p className="text-[10px] font-bold text-blue-500 leading-snug">
+              Order is ready for logistics. Please enter the tracking number and carrier in the <strong>Logistics</strong> tab.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* ── Timeline ── */}
       <div className="px-8 py-8 overflow-y-auto flex-1 custom-scrollbar">
         <div className="relative">

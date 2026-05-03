@@ -1,141 +1,160 @@
 "use client";
 import React from "react";
-import { Eye, ThumbsUp, ThumbsDown, Maximize2, Download, Clock, Image as ImageIcon, CheckCircle2 } from "lucide-react";
+import {
+  Eye, ThumbsUp, ThumbsDown, Maximize2, Download,
+  Clock, CheckCircle2, XCircle, Hourglass, Sparkles
+} from "lucide-react";
 
-export default function MockupCard({ mockup, statusColors, handleAction, setSelectedMockup }) {
-  // Normalize date and display ID
+const STATUS_CONFIG = {
+  pending: {
+    label: "Awaiting Review",
+    icon: <Hourglass size={10} />,
+    badge: "bg-amber-400/20 text-amber-600 border-amber-400/30",
+    glow: "shadow-amber-500/10",
+    dot: "bg-amber-400 animate-pulse",
+    bar: "from-amber-400 to-orange-400",
+  },
+  approved: {
+    label: "Approved",
+    icon: <CheckCircle2 size={10} />,
+    badge: "bg-emerald-400/20 text-emerald-600 border-emerald-400/30",
+    glow: "shadow-emerald-500/10",
+    dot: "bg-emerald-400",
+    bar: "from-emerald-400 to-teal-400",
+  },
+  rejected: {
+    label: "Changes Needed",
+    icon: <XCircle size={10} />,
+    badge: "bg-rose-400/20 text-rose-600 border-rose-400/30",
+    glow: "shadow-rose-500/10",
+    dot: "bg-rose-400",
+    bar: "from-rose-400 to-pink-400",
+  },
+};
+
+export default function MockupCard({ mockup, handleAction, setSelectedMockup }) {
+  const cfg = STATUS_CONFIG[mockup.status] || STATUS_CONFIG.pending;
+  const isPending  = mockup.status === "pending";
+  const isApproved = mockup.status === "approved";
+
   const dateStr = mockup.created_at
-    ? new Date(mockup.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+    ? new Date(mockup.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
     : mockup.date || "N/A";
 
   const displayId = mockup.orders?.display_id
     ? `ORD-${1000 + mockup.orders.display_id}`
     : mockup.orderId || "—";
 
-  // Handle status specific styling
-  const isPending = mockup.status === "pending";
-  const isApproved = mockup.status === "approved";
-  const isRejected = mockup.status === "rejected";
-
-  const statusStyle = isPending
-    ? "bg-amber-50/90 text-amber-700 border-amber-200/50"
-    : isApproved
-      ? "bg-emerald-50/90 text-emerald-700 border-emerald-200/50"
-      : "bg-rose-50/90 text-rose-700 border-rose-200/50";
-
   return (
-    <div className="group flex flex-col bg-base-100 rounded-[2rem] shadow-sm hover:shadow-2xl border border-base-200 transition-all duration-700 hover:-translate-y-2 overflow-hidden h-full">
+    <div
+      className={`group flex flex-col bg-base-100 rounded-3xl border border-base-200/80 overflow-hidden h-full transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl ${cfg.glow}`}
+      style={{ boxShadow: "0 2px 16px 0 rgba(0,0,0,0.06)" }}
+    >
+      {/* ── Accent top bar ── */}
+      <div className={`h-0.5 w-full bg-gradient-to-r ${cfg.bar} opacity-60 group-hover:opacity-100 transition-opacity duration-500`} />
 
-      {/* ── Visual Section ── */}
+      {/* ── Image Section ── */}
       <div
-        className="relative aspect-[4/3] w-full bg-base-200 overflow-hidden cursor-pointer"
+        className="relative aspect-[3/2] w-full bg-gradient-to-br from-base-200 to-base-300 overflow-hidden cursor-pointer"
         onClick={() => setSelectedMockup(mockup)}
       >
         <img
           src={mockup.url}
           alt={mockup.title || mockup.type}
-          className="w-full h-full object-cover transition-transform duration-1000 ease-out group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
         />
 
-        {/* Dynamic Status Overlay */}
-        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        {/* Bottom vignette */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-        {/* Glassmorphism Badge */}
-        <div className={`absolute top-5 left-5 px-3.5 py-1.5 rounded-full backdrop-blur-xl border text-[9px] font-black uppercase tracking-[0.15em] shadow-xl ring-1 ring-white/20 transition-all duration-500 group-hover:scale-105 ${statusStyle}`}>
-          <div className="flex items-center gap-1.5">
-            {isPending && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />}
-            {isApproved && <CheckCircle2 size={10} className="text-emerald-500" />}
-            {mockup.status}
+        {/* Status badge – top left */}
+        <div className={`absolute top-3 left-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full backdrop-blur-xl border text-[9px] font-extrabold uppercase tracking-widest shadow-md ${cfg.badge}`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+          {cfg.label}
+        </div>
+
+        {/* Version pill – top right */}
+        {mockup.version && (
+          <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-black/50 backdrop-blur-md text-white text-[9px] font-bold uppercase tracking-widest border border-white/10 shadow">
+            {mockup.version}
+          </div>
+        )}
+
+        {/* Centre expand button */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-400">
+          <div className="w-12 h-12 rounded-2xl bg-white/90 backdrop-blur-sm flex items-center justify-center text-[var(--primary)] shadow-xl scale-75 group-hover:scale-100 transition-transform duration-400">
+            <Maximize2 size={20} />
           </div>
         </div>
 
-        {/* Version Badge */}
-        <div className="absolute top-5 right-5 px-3 py-1.5 rounded-2xl bg-black/40 backdrop-blur-lg text-white text-[9px] font-black uppercase tracking-widest border border-white/10 shadow-xl transition-all group-hover:bg-[var(--primary)] group-hover:border-transparent">
-          {mockup.version}
-        </div>
-
-        {/* Quick View Trigger */}
-        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-all backdrop-blur-[1px] flex items-center justify-center">
-          <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center text-[var(--primary)] shadow-2xl scale-50 group-hover:scale-100 transition-all duration-500 hover:bg-[var(--primary)] hover:text-white">
-            <Maximize2 size={24} />
-          </div>
+        {/* Bottom info strip (appears on hover) */}
+        <div className="absolute bottom-0 inset-x-0 px-4 pb-3 pt-6 flex items-end justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-400">
+          <span className="text-white text-[10px] font-bold uppercase tracking-widest drop-shadow">{dateStr}</span>
+          <span className="text-white/70 text-[9px] font-medium drop-shadow">{displayId}</span>
         </div>
       </div>
 
-      {/* ── Information Section ── */}
-      <div className="p-7 flex flex-col flex-1">
+      {/* ── Body ── */}
+      <div className="flex flex-col flex-1 p-5 gap-4">
 
-        {/* Title & Category Line */}
-        <div className="flex justify-between items-start mb-4">
+        {/* Title row */}
+        <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h4 className="font-black text-base text-base-content lowercase first-letter:uppercase tracking-tighter truncate leading-tight group-hover:text-[var(--primary)] transition-colors">
-              {mockup.title || mockup.type}
+            <h4 className="font-black text-sm text-base-content tracking-tight truncate leading-snug group-hover:text-[var(--primary)] transition-colors duration-300">
+              {mockup.title || mockup.type || "Untitled Design"}
             </h4>
-            <span className="text-[10px] font-bold text-base-content/40 uppercase tracking-widest mt-1 block">
+            <p className="text-[10px] font-semibold text-base-content/40 uppercase tracking-widest mt-0.5">
               {mockup.type}
-            </span>
+            </p>
           </div>
-          <div className="shrink-0">
-            <span className="text-[9px] font-black uppercase tracking-widest text-[var(--primary)] bg-[var(--primary)]/5 px-3 py-1.5 rounded-xl border border-[var(--primary)]/15 shadow-sm">
-              {displayId}
-            </span>
-          </div>
+          <span className="shrink-0 inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-[var(--primary)] bg-[var(--primary)]/8 px-2.5 py-1 rounded-xl border border-[var(--primary)]/15">
+            <Sparkles size={8} />
+            {displayId}
+          </span>
         </div>
 
-        {/* Meta Info Grid */}
-        <div className="grid grid-cols-2 gap-4 py-4 border-y border-base-100/50 mb-6">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-base-100 border border-base-200 flex items-center justify-center text-base-content/20 group-hover:text-[var(--primary)] group-hover:border-[var(--primary)]/20 transition-all duration-500">
-              <Clock size={14} />
-            </div>
-            <p className="text-[10px] font-black text-base-content/40 uppercase tracking-tighter">{dateStr}</p>
-          </div>
-          <div className="flex items-center gap-2.5 justify-end">
-            <div className="w-8 h-8 rounded-xl bg-base-100 border border-base-200 flex items-center justify-center text-base-content/20">
-              <ImageIcon size={14} />
-            </div>
-          </div>
-        </div>
-
-        {/* Narrative / Notes snippet */}
-        <div className="relative mb-6">
-          <p className="text-[11px] text-base-content/40 font-medium leading-relaxed italic line-clamp-2 pl-4 border-l-2 border-base-200 group-hover:border-[var(--primary)]/40 transition-colors">
-            {mockup.notes || "The design team has uploaded this version for your review."}
+        {/* Notes */}
+        {(mockup.notes) && (
+          <p className="text-[11px] text-base-content/50 leading-relaxed line-clamp-2 italic border-l-2 border-base-200 group-hover:border-[var(--primary)]/40 pl-3 transition-colors duration-300">
+            {mockup.notes}
           </p>
-        </div>
+        )}
 
-        {/* ── Action Integration ── */}
-        <div className="mt-auto pt-4 flex gap-3 font-sans">
+        {/* ── Divider ── */}
+        <div className="border-t border-base-200/60" />
+
+        {/* ── Actions ── */}
+        <div className="flex gap-2 mt-auto">
           {isPending ? (
             <>
               <button
                 onClick={() => handleAction(mockup.id, "approved")}
-                className="btn btn-sm h-11 flex-1 bg-[var(--primary)] hover:brightness-110 text-white border-none rounded-[1.2rem] text-[10px] font-black uppercase tracking-widest shadow-lg shadow-[var(--primary)]/20 active:scale-95 transition-all"
+                className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-xl bg-emerald-500 hover:bg-emerald-600 active:scale-95 text-white text-[10px] font-black uppercase tracking-widest shadow-md shadow-emerald-500/20 transition-all duration-200"
               >
-                <ThumbsUp size={14} /> Approve Design
+                <ThumbsUp size={13} /> Approve
               </button>
               <button
                 onClick={() => handleAction(mockup.id, "rejected")}
-                className="btn btn-sm h-11 flex-1 bg-white hover:bg-rose-50 text-rose-600 border border-rose-100 rounded-[1.2rem] text-[10px] font-black uppercase tracking-widest shadow-sm active:scale-95 transition-all"
+                className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-xl bg-white hover:bg-rose-50 active:scale-95 text-rose-500 border border-rose-200/70 text-[10px] font-black uppercase tracking-widest shadow-sm transition-all duration-200"
               >
-                <ThumbsDown size={14} /> Reject
+                <ThumbsDown size={13} /> Reject
               </button>
             </>
           ) : (
             <>
               <button
                 onClick={() => setSelectedMockup(mockup)}
-                className="btn btn-sm h-11 flex-[2] bg-base-100 hover:bg-base-200 border-base-200 text-base-content/70 rounded-[1.2rem] text-[10px] font-black uppercase tracking-widest shadow-sm transition-all"
+                className="flex-1 flex items-center justify-center gap-1.5 h-9 rounded-xl bg-base-200/60 hover:bg-base-200 active:scale-95 text-base-content/70 text-[10px] font-black uppercase tracking-widest transition-all duration-200"
               >
-                <Eye size={16} /> Full Specifications
+                <Eye size={13} /> View Details
               </button>
               {isApproved && (
                 <button
                   onClick={(e) => { e.stopPropagation(); window.open(mockup.url, "_blank"); }}
-                  className="btn btn-sm h-11 px-4 bg-emerald-50 hover:bg-emerald-600 text-emerald-600 hover:text-white border-emerald-100/50 rounded-[1.2rem] shadow-sm transition-all"
-                  title="Download Final Asset"
+                  className="h-9 px-3.5 rounded-xl bg-emerald-50 hover:bg-emerald-500 active:scale-95 text-emerald-600 hover:text-white border border-emerald-200/60 shadow-sm transition-all duration-200"
+                  title="Download"
                 >
-                  <Download size={16} />
+                  <Download size={14} />
                 </button>
               )}
             </>

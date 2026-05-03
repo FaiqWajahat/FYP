@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Paperclip, Send } from "lucide-react";
 import { useAuth } from "@/store/AuthContext";
+import { useConfigStore } from "@/store/useConfigStore";
 import { supabase } from "@/lib/supabase";
 
 function generateGuestId() {
@@ -12,7 +13,7 @@ function generateGuestId() {
 
 export default function ChatWidget() {
   const { user } = useAuth();
-  const [isOpen, setIsOpen] = useState(false);
+  const { isChatOpen: isOpen, setIsChatOpen: setIsOpen, chatContext, setChatContext } = useConfigStore();
   const [msg, setMsg] = useState("");
   const [messages, setMessages] = useState([]);
   const [conversation, setConversation] = useState(null);
@@ -34,7 +35,14 @@ export default function ChatWidget() {
     if (isOpen && !user) {
       supabase.auth.signInAnonymously().catch(err => console.error("Anon sign in failed", err));
     }
-  }, [isOpen, user]);
+    
+    // Auto-fill context message if available
+    if (isOpen && chatContext && !msg) {
+      setMsg(chatContext);
+      // Optional: clear context after use so it doesn't re-appear if manually deleted
+      setChatContext(null);
+    }
+  }, [isOpen, user, chatContext]);
 
   // Handle initialization & fetching
   useEffect(() => {

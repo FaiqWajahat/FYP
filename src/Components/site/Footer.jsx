@@ -41,11 +41,11 @@ const Footer = () => {
   ];
 
   const productLinks = [
-    { name: "Sportswear & Activewear", href: "/products/sportswear" },
-    { name: "Casual Wear & Streetwear", href: "/products/casual-wear" },
-    { name: "Jackets & Hoodies", href: "/products/jackets" },
-    { name: "Team Uniforms", href: "/products/uniforms" },
-    { name: "Custom Manufacturing", href: "/products/custom" },
+    { name: "Sportswear & Activewear", href: "/categories/sportswear" },
+    { name: "Casual Wear & Streetwear", href: "/categories/casual-wear" },
+    { name: "Jackets & Hoodies", href: "/categories/jackets" },
+    { name: "Team Uniforms", href: "/categories/uniforms" },
+    { name: "Custom Manufacturing", href: "/categories/custom" },
   ];
 
   return (

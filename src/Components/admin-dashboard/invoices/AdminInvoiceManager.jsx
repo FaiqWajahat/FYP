@@ -107,7 +107,7 @@ export default function AdminInvoiceManager({ slug = "All" }) {
   return (
     <div className="space-y-6">
       {/* ─── Stats Board ─── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { label: "Total Invoices", value: counts.All, Icon: FileText, color: "text-blue-600", bg: "bg-blue-50" },
           { label: "Unpaid Count", value: counts.Unpaid, Icon: Clock, color: "text-amber-600", bg: "bg-amber-50" },
@@ -124,37 +124,37 @@ export default function AdminInvoiceManager({ slug = "All" }) {
             <p className="text-[10px] font-bold text-base-content/40 uppercase tracking-widest mt-1">{label}</p>
           </div>
         ))}
-      </div>
+      </div> */}
 
       {/* ─── Main Content Card ─── */}
       <div className="w-full bg-base-100 rounded-xl shadow-lg p-4 lg:p-6">
-        
+
         {/* Header Section (Unified with Users Page Style) */}
         <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
-           {/* Filters & Search */}
-           <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-              <label className="input input-sm h-11 flex items-center gap-2 bg-base-100 border-base-200 rounded-lg w-full md:w-64 shadow-sm">
-                <Search size={16} className="text-base-content/40" />
-                <input 
-                  type="search" 
-                  value={search} 
-                  onChange={e => setSearch(e.target.value)}
-                  placeholder="ID, Client, Order..." 
-                  className="grow text-xs font-bold" 
-                />
-              </label>
-           </div>
+          {/* Filters & Search */}
+          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+            <label className="input input-sm h-10 flex items-center gap-2 rounded-lg w-full md:w-64 shadow-sm">
+              <Search size={16} className="text-base-content/40" />
+              <input
+                type="search"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder="ID, Client, Order..."
 
-           {/* Action */}
-           <div className="w-full md:w-auto flex justify-end">
-              <Link
-                href="/admin/Invoices/Add"
-                className="btn bg-[var(--primary)] text-white border-transparent hover:brightness-110 rounded-lg gap-2 text-sm font-medium shadow-sm transition-all active:scale-95 h-11 px-6 w-full md:w-auto"
-              >
-                <Plus size={18} strokeWidth={3} />
-                Issue New Invoice
-              </Link>
-           </div>
+              />
+            </label>
+          </div>
+
+          {/* Action */}
+          <div className="w-full md:w-auto flex justify-end">
+            <Link
+              href="/admin/Invoices/Add"
+              className="btn bg-[var(--primary)] text-white border-transparent hover:brightness-110 rounded-lg gap-2 text-sm font-medium shadow-sm transition-all active:scale-95 h-11 px-6 w-full md:w-auto"
+            >
+              <Plus size={18} strokeWidth={3} />
+              Issue New Invoice
+            </Link>
+          </div>
         </div>
 
         {/* Table Area (Base-50 Wrap Pattern) */}
@@ -176,10 +176,10 @@ export default function AdminInvoiceManager({ slug = "All" }) {
                   const sm = STATUS_META[inv.status] || STATUS_META.unpaid;
                   return (
                     <tr key={inv.id} className="hover:bg-base-200/40 transition-all duration-200 group">
-                      
+
                       {/* SKU Pattern ID */}
                       <td className="font-mono text-[10px] opacity-40 font-black tracking-tighter whitespace-nowrap">
-                         #{inv.display_id || inv.id.slice(0, 8)}
+                        #{inv.display_id || inv.id.slice(0, 8)}
                       </td>
 
                       {/* Primary Info (User Pattern) */}
@@ -187,14 +187,14 @@ export default function AdminInvoiceManager({ slug = "All" }) {
                         <div className="flex items-center gap-3">
                           <div className="avatar">
                             <div className="w-10 h-10 rounded-lg overflow-hidden ring-1 ring-base-300 ring-offset-1 bg-base-200 flex items-center justify-center">
-                               <FileText size={18} className="text-base-content/40" />
+                              <FileText size={18} className="text-base-content/40" />
                             </div>
                           </div>
                           <div className="flex flex-col">
                             <h3 className="font-medium text-xs text-base-content">{inv.profiles?.full_name || "Guest Client"}</h3>
                             <div className="flex items-center gap-1 mt-0.5">
-                               <span className={`w-1.5 h-1.5 rounded-full ${inv.status === 'paid' ? 'bg-success' : 'bg-warning'}`}></span>
-                               <span className="text-[9px] font-medium text-base-content/40 uppercase tracking-tight">Active Record</span>
+                              <span className={`w-1.5 h-1.5 rounded-full ${inv.status === 'paid' ? 'bg-success' : 'bg-warning'}`}></span>
+                              <span className="text-[9px] font-medium text-base-content/40 uppercase tracking-tight">Active Record</span>
                             </div>
                           </div>
                         </div>
@@ -217,10 +217,10 @@ export default function AdminInvoiceManager({ slug = "All" }) {
 
                       {/* Stock Pattern Financials */}
                       <td>
-                         <div className="flex flex-col">
-                            <span className="font-extrabold text-sm text-base-content">{fmt(inv.amount, inv.currency)}</span>
-                            <span className="text-[10px] opacity-40 font-medium">Due {fmtDate(inv.due_date)}</span>
-                         </div>
+                        <div className="flex flex-col">
+                          <span className="font-extrabold text-sm text-base-content">{fmt(inv.amount, inv.currency)}</span>
+                          <span className="text-[10px] opacity-40 font-medium">Due {fmtDate(inv.due_date)}</span>
+                        </div>
                       </td>
 
                       {/* Action Patterns */}

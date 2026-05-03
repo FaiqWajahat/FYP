@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState, use } from 'react';
+import Link from 'next/link';
 import DashboardPageHeader from '@/Components/common/DashboardPageHeader';
 import DeepProductionTracker from '@/Components/user-dashboard/orders/DeepProductionTracker';
 import MockupApprovalSection from '@/Components/user-dashboard/orders/MockupApprovalSection';
@@ -8,6 +9,8 @@ import OrderOverviewCard from '@/Components/user-dashboard/orders/OrderOverviewC
 import SplitPaymentModule from '@/Components/user-dashboard/orders/SplitPaymentModule';
 import OrderItemsList from '@/Components/user-dashboard/orders/OrderItemsList';
 import OrderActivityLog from '@/Components/user-dashboard/orders/OrderActivityLog';
+import OrderShippingTracker from '@/Components/user-dashboard/orders/OrderShippingTracker';
+import UserShippingPreference from '@/Components/user-dashboard/orders/UserShippingPreference';
 import Loader from '@/Components/common/Loader';
 import { AlertCircle } from 'lucide-react';
 
@@ -17,23 +20,24 @@ export default function OrderDetailsPage({ params }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        setLoading(true);
-        const res = await fetch(`/api/user/orders?id=${id}`);
-        const data = await res.json();
-        if (data.success) {
-          setOrder(data.order);
-        } else {
-          setError(data.error);
-        }
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+  const fetchOrder = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`/api/user/orders?id=${id}`);
+      const data = await res.json();
+      if (data.success) {
+        setOrder(data.order);
+      } else {
+        setError(data.error);
       }
-    };
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchOrder();
   }, [id]);
 
@@ -131,6 +135,7 @@ export default function OrderDetailsPage({ params }) {
         {/* Center: Live Production Engine (4 cols) */}
         <div className="md:col-span-12 lg:col-span-6  flex flex-col gap-8">
           <DeepProductionTracker order={order} />
+          <OrderShippingTracker order={order} />
         </div>
 
         {/* Right: Spec Engine & Verification (4 cols) */}
@@ -148,6 +153,9 @@ export default function OrderDetailsPage({ params }) {
         </div>
          <div className="md:col-span-12 lg:col-span-6 xl:col-span-6 flex flex-col gap-8">
           <OrderFilesAndSpecs order={order} />
+          {!['Dispatched', 'In Transit', 'Delivered'].includes(order.shipping_status) && (
+            <UserShippingPreference order={order} onUpdate={fetchOrder} />
+          )}
         </div>
       </div>
     </div>

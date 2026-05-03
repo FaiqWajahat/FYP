@@ -153,6 +153,25 @@ export async function PATCH(request) {
       });
     }
 
+    // ── 5. Shipping Updates ──────────────────────────────────────────────────
+    if (updates.shipping_status && updates.shipping_status !== current?.shipping_status) {
+      newEvents.push({
+        date: now,
+        type: 'shipping',
+        message: `🚚 Shipping status updated to: ${updates.shipping_status}`,
+        user: 'Admin',
+      });
+    }
+
+    if (updates.shipping_tracking_number && updates.shipping_tracking_number !== current?.shipping_tracking_number) {
+      newEvents.push({
+        date: now,
+        type: 'shipping',
+        message: `📦 Tracking number assigned: ${updates.shipping_tracking_number} (${updates.shipping_carrier || 'No carrier'})`,
+        user: 'Admin',
+      });
+    }
+
     const mergedLog = [...existingLog, ...newEvents];
 
     const { data, error } = await supabase
@@ -170,6 +189,13 @@ export async function PATCH(request) {
         total_amount: updates.total_amount,
         product_name: updates.product_name,
         activity_log: mergedLog,
+        // New Shipping Fields
+        shipping_method: updates.shipping_method,
+        shipping_carrier: updates.shipping_carrier,
+        shipping_tracking_number: updates.shipping_tracking_number,
+        shipping_address: updates.shipping_address,
+        shipping_cost: updates.shipping_cost,
+        shipping_status: updates.shipping_status,
       })
       .eq('id', id)
       .select()

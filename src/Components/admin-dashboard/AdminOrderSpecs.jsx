@@ -1,6 +1,7 @@
 "use client";
 import React from 'react';
 import { Layers, Box, Scissors, Link as LinkIcon, FileText, Download, Ruler, ExternalLink } from 'lucide-react';
+import AdminShippingDetails from '@/Components/admin-dashboard/AdminShippingDetails';
 
 export default function AdminOrderSpecs({ order }) {
   const [activeTab, setActiveTab] = React.useState('specs');
@@ -28,6 +29,7 @@ export default function AdminOrderSpecs({ order }) {
     { id: 'specs', label: 'Technical Specs', badge: null },
     { id: 'designs', label: 'Design Assets', badge: designAssets.length > 0 ? designAssets.length : null },
     { id: 'sizechart', label: 'Size Chart', badge: sizeChartUrl ? 1 : null },
+    { id: 'logistics', label: 'Logistics', badge: order.shipping_tracking_number ? '✓' : null },
   ];
 
   return (
@@ -333,6 +335,13 @@ export default function AdminOrderSpecs({ order }) {
                 </p>
               </div>
             )}
+          </div>
+        )}
+
+        {/* ── TAB: LOGISTICS & SHIPPING ── */}
+        {activeTab === 'logistics' && (
+          <div className="p-0 h-full animate-in slide-in-from-right-2 duration-500">
+             <AdminShippingDetails order={order} />
           </div>
         )}
 

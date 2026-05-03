@@ -5,6 +5,7 @@ import { ClipboardCheck, MessageCircle, Sparkles, ArrowRight } from 'lucide-reac
 import { useRouter } from 'next/navigation';
 import { useOrderStore } from '@/store/useOrderStore';
 import { useAuth } from '@/store/AuthContext';
+import { useConfigStore } from '@/store/useConfigStore';
 import { toast } from 'react-hot-toast';
 
 export default function OrderSummary({
@@ -26,6 +27,8 @@ export default function OrderSummary({
   const router = useRouter();
   const { user } = useAuth();
   const setOrderData = useOrderStore((state) => state.setOrderData);
+  const setIsChatOpen = useConfigStore((state) => state.setIsChatOpen);
+  const setChatContext = useConfigStore((state) => state.setChatContext);
 
   const handleReview = async () => {
     // 1. Auth Gate
@@ -231,14 +234,30 @@ export default function OrderSummary({
       {/* SECONDARY ACTIONS */}
       <div className="grid grid-cols-2 gap-3">
         <button
-          onClick={() => handleAuthGate("Live Chat Support")}
+          onClick={() => {
+            if (handleAuthGate("Live Chat Support")) {
+              setChatContext(`I have a question about ${product.name} (SKU: ${product.sku})`);
+              setIsChatOpen(true);
+            }
+          }}
           className="py-3 bg-white border-2 border-slate-200 text-slate-700 rounded-xl font-bold hover:border-slate-300 hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
         >
           <MessageCircle size={18} className="text-slate-500" /> Live Chat
         </button>
 
         <button
-          onClick={() => handleAuthGate("Smart Inquiry Pipeline")}
+          onClick={() => {
+            if (handleAuthGate("Smart Inquiry Pipeline")) {
+              const imageUrl = product.images?.[0] || '';
+              const query = new URLSearchParams({
+                category: product.category || 'Apparel',
+                subCategory: product.subCategory || '',
+                imageUrl: imageUrl,
+                productName: product.name || 'Custom Product'
+              }).toString();
+              router.push(`/smart-inquiry?${query}`);
+            }
+          }}
           className="py-3 bg-blue-50 border-2 border-blue-100 text-blue-700 rounded-xl font-bold hover:bg-blue-100 transition-all flex items-center justify-center gap-2 shadow-sm"
         >
           <Sparkles size={18} className="text-blue-500" /> Smart Inquiry

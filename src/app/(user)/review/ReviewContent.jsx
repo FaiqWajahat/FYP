@@ -8,6 +8,7 @@ import { CheckCircle2, ChevronRight, ArrowLeft } from 'lucide-react';
 import { useOrderStore } from '@/store/useOrderStore';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
+import { useAuth } from '@/store/AuthContext';
 import OrderSummarySection from './components/OrderSummarySection';
 import PaymentMethodSection from './components/PaymentMethodSection';
 import PaymentScheduleSection from './components/PaymentScheduleSection';
@@ -25,15 +26,25 @@ export default function ReviewContent() {
 
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [user, setUser] = useState(null);
+  const { user } = useAuth();
 
+  // Safe extraction for useEffect
+  const pricing = orderData?.pricing;
+  const paymentMethod = orderData?.paymentMethod;
+  const paymentDivision = orderData?.paymentDivision;
+  const setPaymentDivision = orderData?.setPaymentDivision;
+
+  // Dynamic calculations
+  const baseTotal = pricing?.subtotal || 0;
+  const transferFee = calcTransferFee(paymentMethod, baseTotal);
+  const grandTotal = baseTotal + transferFee;
+
+  // Enforce minimum $200 for splitting (must be called before early returns)
   useEffect(() => {
-    async function getUser() {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
+    if (grandTotal > 0 && grandTotal < 200 && paymentDivision !== 'full' && setPaymentDivision) {
+      setPaymentDivision('full');
     }
-    getUser();
-  }, []);
+  }, [grandTotal, paymentDivision, setPaymentDivision]);
 
   if (!orderData || !orderData.product) {
     return (
@@ -52,19 +63,13 @@ export default function ReviewContent() {
 
   const {
     orderId,
-    pricing,
-    paymentMethod,
-    paymentDivision,
-    setPaymentMethod,
-    setPaymentDivision
+    setPaymentMethod
   } = orderData;
 
-  // Dynamic calculations
-  const baseTotal = pricing?.subtotal || 0;
-  const transferFee = calcTransferFee(paymentMethod, baseTotal);
-  const grandTotal = baseTotal + transferFee;
+  let amountDueNow = grandTotal;
+  if (paymentDivision === 'split') amountDueNow = grandTotal * 0.5;
+  if (paymentDivision === 'split_30_40_30') amountDueNow = grandTotal * 0.3;
 
-  const amountDueNow = paymentDivision === 'split' ? grandTotal * 0.5 : grandTotal;
   const canSubmit = paymentMethod && paymentDivision && agreedToTerms;
 
   const handleSubmit = async () => {

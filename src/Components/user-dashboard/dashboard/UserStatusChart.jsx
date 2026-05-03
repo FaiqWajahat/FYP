@@ -11,20 +11,20 @@ import {
 import { Info } from "lucide-react";
 
 const COLORS = [
-  "var(--primary)", 
-  "#3b82f6", 
-  "#60a5fa", 
-  "#93c5fd", 
+  "var(--primary)",
+  "#3b82f6",
+  "#60a5fa",
+  "#93c5fd",
   "#bfdbfe",
   "#dbeafe"
 ];
 
 const STAGE_COLORS = {
   "Pending Approval": "#f59e0b",
-  "In Production":    "#155DFC",
-  "Quality Check":    "#8b5cf6",
-  "Dispatched":       "#10b981",
-  "Delivered":        "#64748b",
+  "In Production": "#155DFC",
+  "Quality Check": "#8b5cf6",
+  "Dispatched": "#10b981",
+  "Delivered": "#64748b",
 };
 
 export default function UserStatusChart({ data = [] }) {
@@ -95,27 +95,27 @@ export default function UserStatusChart({ data = [] }) {
                   stroke="none"
                 >
                   {data.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={STAGE_COLORS[entry.name] || COLORS[index % COLORS.length]} 
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={STAGE_COLORS[entry.name] || COLORS[index % COLORS.length]}
                       className="transition-all hover:opacity-80 outline-none"
                     />
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
-                <Legend 
-                   verticalAlign="bottom" 
-                   align="center"
-                   iconType="circle"
-                   formatter={(value) => <span className="text-[10px] font-black uppercase tracking-widest text-base-content/60 ml-1">{value}</span>}
+                <Legend
+                  verticalAlign="bottom"
+                  align="center"
+                  iconType="circle"
+                  formatter={(value) => <span className="text-[10px] font-black uppercase tracking-widest text-base-content/60 ml-1">{value}</span>}
                 />
               </PieChart>
             </ResponsiveContainer>
           ) : (
-             <div className="flex flex-col items-center justify-center gap-3 opacity-20">
-                <div className="w-16 h-16 rounded-full border-4 border-dashed border-base-content" />
-                <p className="text-[10px] font-black uppercase tracking-widest">No Active Projects</p>
-             </div>
+            <div className="flex flex-col items-center justify-center gap-3 opacity-20">
+              <div className="w-16 h-16 rounded-full border-4 border-dashed border-base-content" />
+              <p className="text-[10px] font-black uppercase tracking-widest">No Active Projects</p>
+            </div>
           )
         ) : (
           <div className="w-40 h-40 rounded-full border-[12px] border-base-200 animate-pulse" />
