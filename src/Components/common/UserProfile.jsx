@@ -8,7 +8,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/store/AuthContext';
 
 const UserProfile = () => {
-  const { profile, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
   const pathname = usePathname();
@@ -29,7 +29,14 @@ const UserProfile = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  if (!profile) return null;
+  const displayProfile = profile || (user ? {
+    full_name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'User',
+    email: user.email,
+    role: 'user',
+    profile_image: ''
+  } : null);
+
+  if (!displayProfile) return null;
 
   return (
     <div className="relative z-[1001] hidden md:block" ref={containerRef}>
@@ -43,18 +50,18 @@ const UserProfile = () => {
           }`}
       >
         <div className={`h-9 w-9 rounded-xl flex items-center justify-center overflow-hidden transition-colors ${isOpen ? 'bg-blue-600' : 'bg-slate-100'}`}>
-          {profile.profile_image ? (
-            <img src={profile.profile_image} alt={profile.full_name} className="w-full h-full object-cover" />
+          {displayProfile.profile_image ? (
+            <img src={displayProfile.profile_image} alt={displayProfile.full_name} className="w-full h-full object-cover" />
           ) : (
             <User size={20} className={isOpen ? 'text-white' : 'text-slate-500'} />
           )}
         </div>
         <div className="flex flex-col items-start mr-1">
           <span className={`text-[11px] font-black uppercase tracking-wider leading-none ${isOpen ? 'text-white' : 'text-slate-900'}`}>
-            {profile.full_name?.split(' ')[0] || 'User'}
+            {displayProfile.full_name?.split(' ')[0] || 'User'}
           </span>
           <span className={`text-[9px] font-bold mt-0.5 leading-none ${isOpen ? 'text-blue-200' : 'text-slate-400'}`}>
-            {profile.role === 'admin' ? 'Administrator' : 'Client'}
+            {displayProfile.role === 'admin' ? 'Administrator' : 'Client'}
           </span>
         </div>
         <ChevronDown size={14} className={`transition-transform duration-500 ease-out ${isOpen ? 'rotate-180 text-white' : 'text-slate-400'}`} />

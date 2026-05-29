@@ -28,27 +28,8 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
-    // 1. Check active sessions and sets the user
-    const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      
-      if (currentUser) {
-        if (currentUser.is_anonymous) {
-          localStorage.setItem('factory_flow_anon_id', currentUser.id);
-        } else {
-          await mergeGuestChat(currentUser);
-        }
-        fetchProfile(currentUser.id);
-      } else {
-        setLoading(false);
-      }
-    };
-
-    getSession();
-
-    // 2. Listen for changes on auth state (logged in, signed out, etc.)
+    // 1. Listen for changes on auth state (logged in, signed out, etc.)
+    // Note: onAuthStateChange automatically fires the initial session status (INITIAL_SESSION) immediately on subscription
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
@@ -59,7 +40,7 @@ export const AuthProvider = ({ children }) => {
         } else {
           await mergeGuestChat(currentUser);
         }
-        await fetchProfile(currentUser.id);
+        await fetchProfile(currentUser);
       } else {
         setProfile(null);
         setLoading(false);
@@ -71,7 +52,9 @@ export const AuthProvider = ({ children }) => {
     };
   }, []);
 
-  const fetchProfile = async (userId) => {
+  const fetchProfile = async (currentUser, retryCount = 0) => {
+    if (!currentUser) return;
+    const userId = currentUser.id;
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -80,7 +63,24 @@ export const AuthProvider = ({ children }) => {
         .single();
 
       if (error) {
-        console.warn("Could not fetch profile, might not exist yet:", error.message);
+        console.warn(`[AuthContext] Profile fetch failed (attempt ${retryCount + 1}):`, error.message);
+        
+        // Provide immediate fallback from session metadata to prevent blank navbar
+        if (currentUser) {
+          setProfile({
+            id: currentUser.id,
+            email: currentUser.email,
+            full_name: currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'User',
+            role: 'user',
+            profile_image: '',
+            is_fallback: true
+          });
+        }
+
+        // Retry up to 3 times (with 1.5s delay) to catch database triggers creating the profile row
+        if (retryCount < 3) {
+          setTimeout(() => fetchProfile(currentUser, retryCount + 1), 1500);
+        }
       } else {
         setProfile(data);
       }
@@ -92,9 +92,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.warn("Supabase auth signout error (proceeding with local state clear):", err.message);
+    }
     setUser(null);
     setProfile(null);
+    // Perform full reload-redirect to clear all client caching/state and reroute public pages
+    window.location.href = '/';
   };
 
   const signInWithGoogle = async () => {
@@ -108,7 +114,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signOut, signInWithGoogle, refreshProfile: () => fetchProfile(user?.id) }}>
+    <AuthContext.Provider value={{ user, profile, loading, signOut, signInWithGoogle, refreshProfile: () => fetchProfile(user) }}>
       {children}
     </AuthContext.Provider>
   );

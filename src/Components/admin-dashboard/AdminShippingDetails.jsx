@@ -101,6 +101,18 @@ export default function AdminShippingDetails({ order, onUpdate }) {
       {/* Content */}
       <div className="p-8 space-y-8 flex-1 overflow-y-auto custom-scrollbar">
         
+        {order.stage_index < 8 && (
+          <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-start gap-3">
+            <AlertCircle size={16} className="text-amber-500 mt-0.5 shrink-0" />
+            <div>
+              <p className="text-[11px] font-black text-amber-700 uppercase tracking-tight leading-none mb-1">Production In Progress</p>
+              <p className="text-[10px] font-bold text-amber-500 leading-snug">
+                Manufacturing is currently at Stage {order.stage_index + 1} ({order.production_stage}). Logistics status updates will unlock once production reaches Stage 9 (Packaging & Dispatch).
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Row 1: Method & Status */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-3">
@@ -140,11 +152,11 @@ export default function AdminShippingDetails({ order, onUpdate }) {
                 className="select select-bordered w-full rounded-xl text-sm font-bold focus:ring-2 focus:ring-[var(--primary)]/20"
               >
                 <option value="Pending">Pending</option>
-                <option value="Packaging">Packaging</option>
-                <option value="Ready for Pickup">Ready for Pickup</option>
-                <option value="Dispatched">Dispatched</option>
-                <option value="In Transit">In Transit</option>
-                <option value="Delivered">Delivered</option>
+                <option value="Packaging" disabled={order.stage_index < 8}>Packaging (Requires Stage 9)</option>
+                <option value="Ready for Pickup" disabled={order.stage_index < 8}>Ready for Pickup (Requires Stage 9)</option>
+                <option value="Dispatched" disabled={order.stage_index < 8}>Dispatched (Requires Stage 9)</option>
+                <option value="In Transit" disabled={order.stage_index < 8}>In Transit (Requires Stage 9)</option>
+                <option value="Delivered" disabled={order.stage_index < 8}>Delivered (Requires Stage 9)</option>
               </select>
             ) : (
               <div className={`p-4 rounded-2xl border flex items-center justify-between ${

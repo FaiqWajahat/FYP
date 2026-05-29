@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
+import { sendOrderConfirmationEmail } from '@/lib/mail'
 
 const getSupabase = () => {
   return createServerClient(
@@ -29,6 +30,43 @@ export async function POST(request) {
 
     const supabase = getSupabase()
 
+    // 0. Ensure the profile row exists to prevent orders_user_id_fkey constraint failures
+    if (userId) {
+      const { data: profileExists } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', userId)
+        .maybeSingle()
+
+      if (!profileExists) {
+        console.log(`[Auto-Heal] Profile for user ${userId} is missing. On-the-fly creating...`);
+        try {
+          const { data: authUserData, error: authError } = await supabase.auth.admin.getUserById(userId)
+          if (!authError && authUserData?.user) {
+            const authUser = authUserData.user
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert({
+                id: userId,
+                email: authUser.email,
+                full_name: authUser.user_metadata?.full_name || authUser.email.split('@')[0],
+                role: 'user',
+                created_at: authUser.created_at || new Date().toISOString()
+              })
+            if (insertError) {
+              console.error("[Auto-Heal] Failed to insert profile row:", insertError.message)
+            } else {
+              console.log(`[Auto-Heal] Profile row for user ${userId} healed!`)
+            }
+          } else {
+            console.error("[Auto-Heal] Failed to fetch auth user details:", authError?.message)
+          }
+        } catch (healErr) {
+          console.error("[Auto-Heal] Exception during profile healing:", healErr)
+        }
+      }
+    }
+
     // 1. Insert into orders table
     const { data, error } = await supabase
       .from('orders')
@@ -38,7 +76,7 @@ export async function POST(request) {
         sku: product.sku,
         total_amount: pricing?.totalWithFees || pricing?.subtotal || 0,
         currency: 'USD',
-        status: 'payment pending',
+        status: 'Payment Pending',
         customization: customization || {},
         customization_data: customization || {}, 
         design_assets: body.design_assets || [], // New persistent URLs
@@ -46,7 +84,7 @@ export async function POST(request) {
         sizing_data: sizing || {}, 
         pricing: pricing || {},
         production_stage: 'Design & Tech Pack',
-        stage_index: 1, 
+        stage_index: 0, 
         mockup_url: product.image,
         activity_log: [{ date: new Date().toISOString(), message: "Order initialized." }],
         payment_method: paymentMethod || 'Wire Transfer',
@@ -66,6 +104,52 @@ export async function POST(request) {
         }, { status: 400 });
       }
       throw error
+    }
+
+    // 2. Fetch customer details and trigger email confirmation
+    let customerEmail = null
+    let customerName = 'Customer'
+
+    if (userId) {
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('email, full_name')
+        .eq('id', userId)
+        .single()
+      
+      if (!profileError && profile) {
+        customerEmail = profile.email
+        customerName = profile.full_name || 'Customer'
+      }
+    }
+
+    if (!customerEmail && body.customerMeta) {
+      customerEmail = body.customerMeta.email
+      customerName = body.customerMeta.name || 'Customer'
+    }
+
+    if (customerEmail) {
+      const host = request.headers.get('host') || 'localhost:3000'
+      const protocol = request.headers.get('x-forwarded-proto') || 'http'
+      const siteUrl = `${protocol}://${host}`
+      const orderUrl = `${siteUrl}/dashboard/orders/${data.id}`
+
+      try {
+        await sendOrderConfirmationEmail({
+          recipientEmail: customerEmail,
+          userName: customerName,
+          displayId: `ORD-${1000 + (data.display_id || 0)}`,
+          product: product || {},
+          customization: customization || {},
+          sizing: sizing || {},
+          pricing: pricing || {},
+          paymentMethod: paymentMethod || 'Wire Transfer',
+          paymentDivision: paymentDivision || 'full',
+          orderUrl
+        })
+      } catch (mailErr) {
+        console.error("Failed to send order confirmation email:", mailErr)
+      }
     }
 
     return NextResponse.json({ 

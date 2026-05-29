@@ -14,6 +14,25 @@ const getSupabase = () => {
   )
 }
 
+function getOrderStatus(isDepositPaid, isFinalPaid, stageIndex, shippingStatus) {
+  if (!isDepositPaid) {
+    return 'Payment Pending';
+  }
+  if (shippingStatus === 'Delivered') {
+    return 'Completed';
+  }
+  if (shippingStatus === 'Dispatched' || shippingStatus === 'In Transit') {
+    return 'Shipped';
+  }
+  const stage = stageIndex ?? 0;
+  if (stage === 0) {
+    return 'Processing';
+  } else if (stage >= 1 && stage <= 8) {
+    return 'Production';
+  }
+  return 'Processing';
+}
+
 export async function POST(request) {
   try {
     const body = await request.json()
@@ -158,70 +177,53 @@ export async function PATCH(request) {
     // ── Sync order when invoice status changes ────────────────────────────────
     if (orderId && newStatus !== prevStatus) {
 
-      // Fetch current order log + payment state
+      // Fetch current order log + status
       const { data: currentOrder } = await supabase
         .from('orders')
-        .select('activity_log, is_deposit_paid, is_final_paid, status')
+        .select('activity_log, is_deposit_paid, is_final_paid, status, shipping_status, stage_index')
         .eq('id', orderId)
         .single();
+
+      // Fetch ALL invoices for this order to compute flags based on actual DB state
+      const { data: siblingInvoices } = await supabase
+        .from('invoices')
+        .select('milestone_type, status')
+        .eq('order_id', orderId);
 
       const existingLog = Array.isArray(currentOrder?.activity_log) ? currentOrder.activity_log : [];
       const orderPatches = {};
       const newEvents = [];
 
-      // ── Invoice marked PAID ─────────────────────────────────────────────────
-      if (newStatus === 'paid') {
-        if (milestone === 'deposit' || milestone === 'deposit_30' || milestone === 'full') {
-          orderPatches.is_deposit_paid = true;
-          if (currentOrder?.status !== 'Processing') {
-            orderPatches.status = 'Processing';
-          }
+      let nextDepositPaid = false;
+      let nextFinalPaid = false;
+
+      const hasFullInvoice = siblingInvoices.some(inv => inv.milestone_type === 'full');
+      if (hasFullInvoice) {
+        const fullPaid = siblingInvoices.some(inv => inv.milestone_type === 'full' && inv.status === 'paid');
+        nextDepositPaid = fullPaid;
+        nextFinalPaid = fullPaid;
+      } else {
+        nextDepositPaid = siblingInvoices.some(inv => (inv.milestone_type === 'deposit' || inv.milestone_type === 'deposit_30') && inv.status === 'paid');
+        nextFinalPaid = siblingInvoices.some(inv => (inv.milestone_type === 'final' || inv.milestone_type === 'final_30') && inv.status === 'paid');
+      }
+
+      // Check differences and prepare patches
+      if (nextDepositPaid !== currentOrder?.is_deposit_paid) {
+        orderPatches.is_deposit_paid = nextDepositPaid;
+        if (nextDepositPaid) {
           newEvents.push({
             date: now,
             type: 'payment',
-            message: `💳 Deposit invoice marked paid. Production pipeline unlocked.`,
+            message: `💳 Deposit confirmed. Production pipeline unlocked.`,
             user: 'Admin',
           });
-          // Log the pipeline unlock as a separate production event
           newEvents.push({
             date: now,
             type: 'production',
-            message: `🔓 Production pipeline is now active — deposit confirmed.`,
+            message: `🔓 Production pipeline is now active.`,
             user: 'System',
           });
-        }
-
-        if (milestone === 'midpoint_40') {
-          newEvents.push({
-            date: now,
-            type: 'payment',
-            message: `💳 Midpoint (40%) invoice marked paid. Production continues.`,
-            user: 'Admin',
-          });
-        }
-
-        if (milestone === 'final' || milestone === 'final_30') {
-          orderPatches.is_final_paid = true;
-          orderPatches.status = 'Completed';
-          newEvents.push({
-            date: now,
-            type: 'payment',
-            message: `💳 Final balance invoice marked paid. Project fully funded.`,
-            user: 'Admin',
-          });
-          newEvents.push({
-            date: now,
-            type: 'status',
-            message: `✅ Order marked as Completed — all payments cleared.`,
-            user: 'System',
-          });
-        }
-      }
-
-      // ── Invoice REVERSED (unpaid from paid) ─────────────────────────────────
-      if (prevStatus === 'paid' && newStatus === 'unpaid') {
-        if (milestone === 'deposit' || milestone === 'deposit_30' || milestone === 'full') {
-          orderPatches.is_deposit_paid = false;
+        } else {
           newEvents.push({
             date: now,
             type: 'payment',
@@ -229,16 +231,24 @@ export async function PATCH(request) {
             user: 'Admin',
           });
         }
-        if (milestone === 'midpoint_40') {
+      }
+
+      if (nextFinalPaid !== currentOrder?.is_final_paid) {
+        orderPatches.is_final_paid = nextFinalPaid;
+        if (nextFinalPaid) {
           newEvents.push({
             date: now,
             type: 'payment',
-            message: `⚠️ Midpoint payment reversed.`,
+            message: `💳 Final balance confirmed. Project fully funded.`,
             user: 'Admin',
           });
-        }
-        if (milestone === 'final' || milestone === 'final_30') {
-          orderPatches.is_final_paid = false;
+          newEvents.push({
+            date: now,
+            type: 'status',
+            message: `✅ Order status updated — all payments cleared.`,
+            user: 'System',
+          });
+        } else {
           newEvents.push({
             date: now,
             type: 'payment',
@@ -246,6 +256,36 @@ export async function PATCH(request) {
             user: 'Admin',
           });
         }
+      }
+
+      // Special logs for midpoint invoice updates (which doesn't toggle order is_deposit/is_final paid directly)
+      if (milestone === 'midpoint_40') {
+        if (newStatus === 'paid') {
+          newEvents.push({
+            date: now,
+            type: 'payment',
+            message: `💳 Midpoint (40%) invoice marked paid. Production continues.`,
+            user: 'Admin',
+          });
+        } else if (newStatus === 'unpaid') {
+          newEvents.push({
+            date: now,
+            type: 'payment',
+            message: `⚠️ Midpoint payment reversed.`,
+            user: 'Admin',
+          });
+        }
+      }
+
+      // Calculate next dynamic status
+      const nextStatus = getOrderStatus(
+        nextDepositPaid,
+        nextFinalPaid,
+        currentOrder?.stage_index ?? 0,
+        currentOrder?.shipping_status || 'Pending'
+      );
+      if (nextStatus !== currentOrder?.status) {
+        orderPatches.status = nextStatus;
       }
 
       // Apply order patches + merged log
@@ -297,49 +337,70 @@ export async function DELETE(request) {
       throw error
     }
 
-    // 3. Revert order status if the invoice was paid
-    if (invoice && invoice.status === 'paid' && invoice.order_id) {
+    // 3. Revert order status if the invoice was deleted and we need to recalculate payment flags
+    if (invoice && invoice.order_id) {
       const { data: currentOrder } = await supabase
         .from('orders')
-        .select('activity_log, is_deposit_paid, is_final_paid')
+        .select('activity_log, is_deposit_paid, is_final_paid, status, shipping_status, stage_index')
         .eq('id', invoice.order_id)
         .single();
         
+      // Fetch sibling invoices remaining AFTER deletion
+      const { data: siblingInvoices } = await supabase
+        .from('invoices')
+        .select('milestone_type, status')
+        .eq('order_id', invoice.order_id);
+
       const existingLog = Array.isArray(currentOrder?.activity_log) ? currentOrder.activity_log : [];
       const orderPatches = {};
       const newEvents = [];
       const now = new Date().toISOString();
 
-      if (invoice.milestone_type === 'deposit' || invoice.milestone_type === 'deposit_30' || invoice.milestone_type === 'full') {
-        orderPatches.is_deposit_paid = false;
+      let nextDepositPaid = false;
+      let nextFinalPaid = false;
+
+      const hasFullInvoice = siblingInvoices.some(inv => inv.milestone_type === 'full');
+      if (hasFullInvoice) {
+        const fullPaid = siblingInvoices.some(inv => inv.milestone_type === 'full' && inv.status === 'paid');
+        nextDepositPaid = fullPaid;
+        nextFinalPaid = fullPaid;
+      } else {
+        nextDepositPaid = siblingInvoices.some(inv => (inv.milestone_type === 'deposit' || inv.milestone_type === 'deposit_30') && inv.status === 'paid');
+        nextFinalPaid = siblingInvoices.some(inv => (inv.milestone_type === 'final' || inv.milestone_type === 'final_30') && inv.status === 'paid');
+      }
+
+      if (nextDepositPaid !== currentOrder?.is_deposit_paid) {
+        orderPatches.is_deposit_paid = nextDepositPaid;
         newEvents.push({
           date: now,
           type: 'payment',
-          message: `⚠️ Deposit invoice was deleted while paid. Production pipeline locked.`,
+          message: `⚠️ Deposit invoice was deleted/removed. Recalculated deposit paid to: ${nextDepositPaid ? 'CONFIRMED' : 'REVERSED'}.`,
           user: 'Admin',
         });
       }
 
-      if (invoice.milestone_type === 'midpoint_40') {
+      if (nextFinalPaid !== currentOrder?.is_final_paid) {
+        orderPatches.is_final_paid = nextFinalPaid;
         newEvents.push({
           date: now,
           type: 'payment',
-          message: `⚠️ Midpoint invoice was deleted while paid.`,
+          message: `⚠️ Final invoice was deleted/removed. Recalculated final paid to: ${nextFinalPaid ? 'CONFIRMED' : 'REVERSED'}.`,
           user: 'Admin',
         });
       }
 
-      if (invoice.milestone_type === 'final' || invoice.milestone_type === 'final_30') {
-        orderPatches.is_final_paid = false;
-        newEvents.push({
-          date: now,
-          type: 'payment',
-          message: `⚠️ Final payment invoice was deleted while paid. Dispatch lock re-activated.`,
-          user: 'Admin',
-        });
+      // Calculate next dynamic status
+      const nextStatus = getOrderStatus(
+        nextDepositPaid,
+        nextFinalPaid,
+        currentOrder?.stage_index ?? 0,
+        currentOrder?.shipping_status || 'Pending'
+      );
+      if (nextStatus !== currentOrder?.status) {
+        orderPatches.status = nextStatus;
       }
 
-      if (Object.keys(orderPatches).length > 0) {
+      if (Object.keys(orderPatches).length > 0 || newEvents.length > 0) {
         await supabase
           .from('orders')
           .update({

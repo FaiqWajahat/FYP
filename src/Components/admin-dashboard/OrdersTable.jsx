@@ -19,8 +19,7 @@ const STAGE_META = {
   5: { label: "Printing", icon: Shirt, color: "text-rose-500" },
   6: { label: "Stitching", icon: Settings, color: "text-teal-500" },
   7: { label: "Finishing & QA", icon: PackageSearch, color: "text-cyan-500" },
-  8: { label: "Dispatched", icon: Truck, color: "text-emerald-500" },
-  9: { label: "Delivered", icon: Home, color: "text-emerald-600" },
+  8: { label: "Packaging & Dispatch", icon: Truck, color: "text-emerald-500" },
 };
 
 const fmt = (n) =>
@@ -145,7 +144,7 @@ export default function OrdersTable({ orders, onDelete }) {
                     <div className="w-24 bg-base-300 rounded-full h-1 overflow-hidden">
                       <div
                         className="h-full bg-[var(--primary)] transition-all duration-700"
-                        style={{ width: `${((stageIdx) / 9) * 100}%` }}
+                        style={{ width: `${((stageIdx) / 8) * 100}%` }}
                       />
                     </div>
                   </div>

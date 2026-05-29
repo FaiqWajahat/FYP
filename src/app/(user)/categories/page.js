@@ -25,7 +25,7 @@ const itemVariants = {
 };
 
 const breadData = [
-  { label: 'Catalog', href: '/shop' },
+  { label: 'Catalog', href: '/categories' },
   { label: 'All Categories', href: '/categories' },
 ];
 

@@ -23,6 +23,9 @@ const CURRENCIES = [
 const MILESTONES = [
   { value: "deposit", label: "50% Deposit" },
   { value: "final", label: "50% Final Payment" },
+  { value: "deposit_30", label: "30% Deposit (Upfront)" },
+  { value: "midpoint_40", label: "40% Midpoint (Production)" },
+  { value: "final_30", label: "30% Final Payment (Pre-ship)" },
   { value: "full", label: "100% Full Payment" },
 ];
 

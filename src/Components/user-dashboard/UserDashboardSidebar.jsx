@@ -1,26 +1,37 @@
 'use client';
 
-import React from 'react'
+import React from 'react';
 import UserDashboardMenu from './UserDashboardMenu';
 import DashboardSidebarHead from '@/Components/common/DashboardSidebarHead';
 import DashboardSidebarBottom from '@/Components/common/DashboardSidebarBottom';
 
 const UserDashboardSidebar = ({ sidebarOpen, setSidebarOpen }) => {
   return (
-    <div className='w-full h-screen max-h-screen bg-base-100  flex flex-col justify-between pt-4 pb-2 '>
-      <div className='px-4 flex-none border-b border-base-300 pb-4'>
+    <aside
+      className={`
+        relative h-screen max-h-screen bg-base-100 flex flex-col 
+        border-r border-base-200 transition-all duration-300 ease-in-out
+        ${sidebarOpen ? 'w-full' : 'w-0 opacity-0 overflow-hidden'}
+      `}
+    >
+      {/* Header section */}
+      <div className="flex-none px-4 py-4 border-b border-base-300">
         <DashboardSidebarHead sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       </div>
-      <div className='flex-1 w-full p-2 mt-4 overflow-y-auto overflow-x-hidden'>
-        <UserDashboardMenu />
+
+      {/* Scrollable menu section */}
+      <div className="flex-1 w-full px-3 py-4 overflow-y-auto no-scrollbar overflow-x-hidden">
+        <div className="pb-4">
+          <UserDashboardMenu />
+        </div>
       </div>
 
-      <div className='flex-none px-2 pt-2 border-t border-base-300'>
+      {/* Bottom user card section */}
+      <div className="flex-none p-3 border-t border-base-200/50">
         <DashboardSidebarBottom role="User" />
       </div>
-    </div>
-  )
-}
+    </aside>
+  );
+};
 
-export default UserDashboardSidebar
-
+export default UserDashboardSidebar;

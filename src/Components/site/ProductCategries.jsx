@@ -12,7 +12,7 @@ const CATEGORIES = [
     subtitle: 'Fleece, Cotton & Poly-Blends',
     count: '50+ GSM Options',
     image: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?q=80&w=2070&auto=format&fit=crop', // Hoodie Image
-    link: '/shop/hoodies',
+    link: '/categories/hoodies',
     size: 'large' // Spans 2 rows
   },
   {
@@ -21,7 +21,7 @@ const CATEGORIES = [
     subtitle: 'Leather Sleeves & Wool Body',
     count: 'Custom Embroidery',
     image: 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?q=80&w=1936&auto=format&fit=crop', // Jacket Image
-    link: '/shop/jackets',
+    link: '/categories/jackets',
     size: 'small'
   },
   {
@@ -30,7 +30,7 @@ const CATEGORIES = [
     subtitle: 'Trinda, Polyester & Taslan',
     count: 'Sublimation Ready',
     image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=2020&auto=format&fit=crop', // Tracksuit/Model Image
-    link: '/shop/tracksuits',
+    link: '/categories/tracksuits',
     size: 'small'
   },
   {
@@ -39,7 +39,7 @@ const CATEGORIES = [
     subtitle: '100% Cotton & Jersey',
     count: 'Screen Printing',
     image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=2080&auto=format&fit=crop', // T-Shirt Image
-    link: '/shop/t-shirts',
+    link: '/categories/t-shirts',
     size: 'wide' // Spans 2 columns
   }
 ];
@@ -57,7 +57,7 @@ const ProductCategories = () => {
               Explore Our Production Lines
             </h2>
           </div>
-          <Link href="/shop" className="group flex items-center gap-2 text-slate-600 font-semibold hover:text-blue-600 transition-colors">
+          <Link href="/categories" className="group flex items-center gap-2 text-slate-600 font-semibold hover:text-blue-600 transition-colors">
             View All Categories 
             <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
           </Link>

@@ -87,9 +87,9 @@ export default function HeroSection() {
             transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             className="d-font text-[42px] md:text-[56px] lg:text-[72px] font-extrabold text-slate-900 leading-[1.05] tracking-tight mb-6 max-w-5xl"
           >
-            The Operating System{' '}
+            Custom Apparel,{' '} Direct
             <br className="hidden sm:block" />
-            for <span className="bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">Modern Apparel</span>.
+             from   <span className="bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">the Factory</span>.
           </motion.h1>
 
           {/* Sub-heading */}
@@ -97,9 +97,9 @@ export default function HeroSection() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="text-base md:text-lg text-slate-500 max-w-xl mx-auto leading-relaxed mb-10 font-medium"
+            className="text-base md:text-lg text-slate-500 max-w-2xl mx-auto leading-relaxed mb-10 font-medium"
           >
-            {projectName} is the first verified B2B ecosystem bridging premium global brands and automated factory floors.
+            {projectName} simplifies B2B apparel manufacturing. Configure custom sizing breakdowns, choose premium branding methods, and track your production line in real-time.
           </motion.p>
 
           {/* CTAs */}

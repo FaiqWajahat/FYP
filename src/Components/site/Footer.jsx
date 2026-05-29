@@ -36,7 +36,7 @@ const Footer = () => {
     { name: "Home", href: "/" },
     { name: "About Factory Flow", href: "/about" },
     { name: "Manufacturing Process", href: "/process" },
-    { name: "Global Exports", href: "/exports" },
+    { name: "Global Exports", href: "/process" },
     { name: "Contact", href: "/contact" },
   ];
 

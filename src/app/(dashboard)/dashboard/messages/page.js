@@ -4,10 +4,13 @@ import ChatApp from '@/Components/common/ChatApp';
 
 export default function UserMessagesPage() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans pb-16 animate-in fade-in duration-700">
       <DashboardPageHeader 
         heading="Messages" 
-        breadData={[{ name: "Dashboard", href: "/admin" }, { name: "Messages", href: "/admin/messages" }]} 
+        breadData={[
+          { name: "Dashboard", href: "/dashboard" }, 
+          { name: "Messages", href: "/dashboard/messages" }
+        ]} 
       />
       
       {/* User view, only shows the store admin contact */}
@@ -15,4 +18,3 @@ export default function UserMessagesPage() {
     </div>
   );
 }
-

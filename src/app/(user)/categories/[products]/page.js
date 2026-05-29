@@ -128,7 +128,7 @@ export default function ShopPage({ params }) {
   };
 
   const breadcrumbLinks = [
-    { label: 'Catalog', href: '/shop' },
+    { label: 'Catalog', href: '/categories' },
     { label: getCategoryTitle(), href: pathname },
   ];
 

@@ -39,7 +39,6 @@ const PHASES = [
   { title: 'Stitching & Assembly' },
   { title: 'Finishing & QA' },
   { title: 'Packaging & Dispatch' },
-  { title: 'Delivered / Complete' },
 ];
 
 export default function OrderList() {

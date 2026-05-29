@@ -81,7 +81,6 @@ const OrderDetailsContent = () => {
     { title: 'Stitching & Assembly' },
     { title: 'Finishing & QA' },
     { title: 'Packaging & Dispatch' },
-    { title: 'Delivered / Complete' },
   ];
 
   if (loading) return (

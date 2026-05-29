@@ -1,7 +1,7 @@
 import { createServerClient, parseCookieHeader } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 
-export async function middleware(req) {
+export async function proxy(req) {
   const { pathname } = req.nextUrl;
 
   let response = NextResponse.next({
@@ -9,6 +9,15 @@ export async function middleware(req) {
       headers: req.headers,
     },
   })
+
+  const isAdminPath = pathname.startsWith('/admin');
+  const isUserPath = pathname.startsWith('/dashboard');
+  const isAuthPath = pathname.startsWith('/login') || pathname.startsWith('/signup');
+
+  // Early return for public paths to avoid blocking network roundtrips on every request
+  if (!isAdminPath && !isUserPath && !isAuthPath) {
+    return response;
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -39,8 +48,6 @@ export async function middleware(req) {
   } = await supabase.auth.getUser()
 
   // 1. Protection Logic
-  const isAdminPath = pathname.startsWith('/admin');
-  const isUserPath = pathname.startsWith('/dashboard');
   
   if ((isAdminPath || isUserPath) && !user) {
     const url = req.nextUrl.clone();
@@ -70,7 +77,6 @@ export async function middleware(req) {
     // For now, let's just ensure users can't enter admin. 
 
     // 2c. Smart Auth Redirection: If already logged in, redirect away from login/signup to their dashboard
-    const isAuthPath = pathname.startsWith('/login') || pathname.startsWith('/signup');
     if (isAuthPath) {
       const url = req.nextUrl.clone();
       url.pathname = role === 'admin' ? '/admin' : '/dashboard';

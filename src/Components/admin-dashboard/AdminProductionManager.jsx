@@ -17,7 +17,6 @@ const PHASES = [
   { id: 6, title: 'Stitching & Assembly', desc: 'Final construction', icon: CheckCircle },
   { id: 7, title: 'Finishing & QA', desc: 'Quality control', icon: PackageSearch },
   { id: 8, title: 'Packaging & Dispatch', desc: 'Bagging & shipment', icon: Truck },
-  { id: 9, title: 'Delivered / Complete', desc: 'Order successfully fulfilled', icon: Home },
 ];
 
 export default function AdminProductionManager({ order, onAdvance }) {
@@ -28,19 +27,32 @@ export default function AdminProductionManager({ order, onAdvance }) {
   const isDepositPaid = order?.is_deposit_paid || false;
   const isFinalPaid = order?.is_final_paid || false;
 
-  // Finance gates
-  const isDepositLocked = !isDepositPaid; // ALL production requires deposit
-  const isFinalLocked = currentStage === 7 && !isFinalPaid; // Dispatch requires final payment
+  // Midpoint gate logic (active only for split_30_40_30)
+  const invoices = order?.invoices || [];
+  const midpointInvoice = invoices.find(inv => inv.milestone_type === 'midpoint_40');
+  const isMidpointPaid = midpointInvoice ? midpointInvoice.status === 'paid' : false;
 
-  const canAdvance = !isAdvancing && currentStage < PHASES.length - 1 && !isDepositLocked && !isFinalLocked;
+  // Finance gates
+  const isDepositLocked = !isDepositPaid; 
+  const isMidpointLocked = order?.payment_division === 'split_30_40_30' && !isMidpointPaid;
+  const isFinalLocked = !isFinalPaid;
+
+  const isDepositBlocked = currentStage === 0 && isDepositLocked;
+  const isMidpointBlocked = currentStage === 3 && isMidpointLocked;
+  const isFinalBlocked = currentStage === 7 && isFinalLocked;
+  const isCurrentStageLocked = isDepositBlocked || isMidpointBlocked || isFinalBlocked;
+
+  const canAdvance = !isAdvancing && currentStage < PHASES.length - 1 && !isCurrentStageLocked;
   const canGoBack = !isReverting && currentStage > 0;
 
   const handleAdvance = async () => {
     if (!canAdvance) {
-      if (isDepositLocked) {
+      if (isDepositBlocked) {
         toast.error("Production on hold — confirm deposit payment first.");
-      } else if (isFinalLocked) {
-        toast.error("Dispatch locked — confirm final payment first.");
+      } else if (isMidpointBlocked) {
+        toast.error("Sampling complete — confirm midpoint payment (40%) to unlock bulk cutting and production.");
+      } else if (isFinalBlocked) {
+        toast.error("Finishing complete — confirm final payment (30%) to unlock packaging and dispatch.");
       }
       return;
     }
@@ -109,9 +121,9 @@ export default function AdminProductionManager({ order, onAdvance }) {
             onClick={handleAdvance}
             disabled={isAdvancing || isReverting || currentStage >= PHASES.length - 1}
             className={`flex-1 btn btn-sm h-10 gap-2 rounded-xl border-none text-white transition-all active:scale-95 ${
-              isDepositLocked
+              isDepositBlocked
                 ? 'bg-rose-500 cursor-not-allowed'
-                : isFinalLocked
+                : isMidpointBlocked || isFinalBlocked
                 ? 'bg-amber-500 cursor-not-allowed'
                 : currentStage >= PHASES.length - 1
                 ? 'bg-base-300 text-base-content/30 cursor-not-allowed'
@@ -120,16 +132,20 @@ export default function AdminProductionManager({ order, onAdvance }) {
           >
             {isAdvancing
               ? <span className="loading loading-spinner loading-xs" />
-              : isDepositLocked
+              : isDepositBlocked
               ? <Lock size={14} />
-              : isFinalLocked
+              : isMidpointBlocked
+              ? <Lock size={14} />
+              : isFinalBlocked
               ? <Lock size={14} />
               : <PlayCircle size={14} />
             }
             <span className="text-[10px] font-black uppercase tracking-widest">
-              {isDepositLocked
+              {isDepositBlocked
                 ? 'Awaiting Deposit'
-                : isFinalLocked
+                : isMidpointBlocked
+                ? 'Awaiting Midpoint'
+                : isFinalBlocked
                 ? 'Awaiting Final Payment'
                 : currentStage >= PHASES.length - 1
                 ? 'Completed'
@@ -152,7 +168,19 @@ export default function AdminProductionManager({ order, onAdvance }) {
         </div>
       )}
 
-      {isFinalLocked && !isDepositLocked && (
+      {isMidpointLocked && !isDepositLocked && currentStage >= 3 && (
+        <div className="mx-6 mt-5 p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-start gap-3">
+          <Lock size={16} className="text-amber-500 mt-0.5 shrink-0" />
+          <div>
+            <p className="text-[11px] font-black text-amber-700 uppercase tracking-tight leading-none mb-1">Midpoint Payment Lock</p>
+            <p className="text-[10px] font-bold text-amber-500 leading-snug">
+              Sampling complete! Please confirm the client's midpoint payment (40%) to unlock bulk cutting and printing.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {isFinalLocked && !isDepositLocked && !isMidpointLocked && currentStage >= 7 && (
         <div className="mx-6 mt-5 p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-start gap-3">
           <Lock size={16} className="text-amber-500 mt-0.5 shrink-0" />
           <div>
@@ -190,8 +218,12 @@ export default function AdminProductionManager({ order, onAdvance }) {
               const isUpcoming = idx > currentStage;
               const isLast = idx === PHASES.length - 1;
 
-              // Show lock on next stage if deposit not paid, or on dispatch if final not paid
-              const showLock = isUpcoming && (isDepositLocked || (idx === 8 && !isFinalPaid));
+              // Show lock if the stage is upcoming and blocked by a gate
+              const showLock = isUpcoming && (
+                isDepositLocked || 
+                (idx >= 4 && isMidpointLocked) || 
+                (idx >= 8 && !isFinalPaid)
+              );
 
               return (
                 <li key={phase.id} className={`relative flex gap-6 ${isLast ? '' : 'pb-8'}`}>
@@ -202,7 +234,7 @@ export default function AdminProductionManager({ order, onAdvance }) {
                       isCompleted
                         ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm'
                         : isCurrent
-                        ? isDepositLocked
+                        ? isDepositBlocked || isMidpointBlocked || isFinalBlocked
                           ? 'bg-rose-500 border-rose-500 text-white shadow-lg'
                           : 'bg-white border-[var(--primary)] text-[var(--primary)] shadow-lg ring-4 ring-[var(--primary)]/5'
                         : 'bg-white border-base-200 text-base-content/20'
@@ -217,7 +249,7 @@ export default function AdminProductionManager({ order, onAdvance }) {
                       <div>
                         <h4 className={`text-[13px] font-bold tracking-tight uppercase ${
                           isCurrent
-                            ? isDepositLocked ? 'text-rose-600' : 'text-[var(--primary)]'
+                            ? isCurrentStageLocked ? 'text-rose-600' : 'text-[var(--primary)]'
                             : isCompleted ? 'text-base-content/80' : 'text-base-content/40'
                         }`}>
                           {phase.title}
@@ -232,13 +264,13 @@ export default function AdminProductionManager({ order, onAdvance }) {
                             <ShieldCheck size={10} /> Done
                           </span>
                         )}
-                        {isCurrent && !isDepositLocked && (
+                        {isCurrent && !isCurrentStageLocked && (
                           <div className="flex items-center gap-1">
                             <span className="w-1 h-1 rounded-full bg-[var(--primary)] animate-ping" />
                             <span className="text-[8px] font-black text-[var(--primary)] uppercase tracking-widest">Active</span>
                           </div>
                         )}
-                        {isCurrent && isDepositLocked && (
+                        {isCurrent && isCurrentStageLocked && (
                           <div className="flex items-center gap-1">
                             <span className="w-1 h-1 rounded-full bg-rose-500 animate-pulse" />
                             <span className="text-[8px] font-black text-rose-500 uppercase tracking-widest">Locked</span>

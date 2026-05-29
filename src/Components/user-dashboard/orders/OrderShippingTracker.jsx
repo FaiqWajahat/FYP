@@ -13,8 +13,10 @@ export default function OrderShippingTracker({ order }) {
     shipping_address
   } = order;
 
-  // If no shipping info yet, show a placeholder or pending state
-  if (!shipping_method && !shipping_tracking_number && shipping_status === 'Pending') {
+  const stageIndex = order.stage_index ?? 0;
+
+  // If no shipping info yet AND production is still active, show a placeholder
+  if (stageIndex < 8 && !shipping_method && !shipping_tracking_number && shipping_status === 'Pending') {
     return (
       <div className="bg-white rounded-3xl p-8 border border-base-200 shadow-sm">
         <div className="flex items-center gap-4 mb-6">
@@ -23,13 +25,13 @@ export default function OrderShippingTracker({ order }) {
           </div>
           <div>
             <h3 className="text-lg font-black text-base-content tracking-tight">Logistics & Delivery</h3>
-            <p className="text-xs font-bold text-base-content/30 uppercase tracking-widest">Awaiting dispatch details</p>
+            <p className="text-xs font-bold text-base-content/30 uppercase tracking-widest">Awaiting production completion</p>
           </div>
         </div>
         <div className="p-6 bg-base-50 rounded-2xl border border-dashed border-base-200 text-center">
            <Clock size={32} className="mx-auto text-base-content/10 mb-3" />
-           <p className="text-sm font-bold text-base-content/40 uppercase tracking-widest">
-             Shipping information will be updated once production is complete.
+           <p className="text-xs font-black text-base-content/40 uppercase tracking-widest">
+             Logistics updates will begin once production is completed at Stage 9 (Packaging & Dispatch).
            </p>
         </div>
       </div>
@@ -74,6 +76,19 @@ export default function OrderShippingTracker({ order }) {
           </a>
         )}
       </div>
+
+      {/* Production Complete / Awaiting Pickup Banner */}
+      {shipping_status === 'Pending' && stageIndex === 8 && (
+        <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-start gap-3">
+          <Clock size={16} className="text-blue-500 mt-0.5 shrink-0 animate-pulse" />
+          <div>
+            <p className="text-[11px] font-black text-blue-700 uppercase tracking-tight leading-none mb-1">Production Completed</p>
+            <p className="text-[10px] font-bold text-blue-500 leading-snug">
+              Manufacturing is complete! Your order is currently at the warehouse being prepared for packaging and courier handover.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Visual Progress Bar */}
       <div className="relative pt-4 pb-8">

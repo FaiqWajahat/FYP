@@ -4,10 +4,10 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Box, Cpu, Factory, Hammer, Truck, Star } from 'lucide-react';
-import LoginForm from '@/Components/auth/LoginForm';
+import ForgotPasswordForm from '@/Components/auth/ForgotPasswordForm';
 import { useConfigStore } from '@/store/useConfigStore';
 
-// Interactive demo component for supply chain pipeline
+// Reusable supply chain demo component for design consistency
 function SupplyChainDemo() {
   const [activeStep, setActiveStep] = useState(0);
 
@@ -57,12 +57,9 @@ function SupplyChainDemo() {
         </div>
       </div>
 
-      {/* Connection Line & Nodes */}
       <div className="relative flex justify-between items-center mb-8 px-4">
-        {/* Background Line */}
         <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-100 -translate-y-1/2 z-0" />
         
-        {/* Active Line Progress */}
         <motion.div 
           className="absolute top-1/2 left-0 h-0.5 bg-blue-500 -translate-y-1/2 z-0 origin-left"
           initial={{ scaleX: 0 }}
@@ -100,7 +97,6 @@ function SupplyChainDemo() {
         })}
       </div>
 
-      {/* Terminal-like Status Log */}
       <div className="mt-12 bg-slate-900 rounded-2xl p-4 font-mono text-left relative overflow-hidden shadow-inner">
         <div className="absolute top-2 right-3 flex gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-red-500/60" />
@@ -133,7 +129,7 @@ function SupplyChainDemo() {
   );
 }
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
   const { projectName } = useConfigStore();
 
   return (
@@ -143,8 +139,8 @@ export default function LoginPage() {
         
         {/* Simple Header */}
         <div className="flex items-center justify-between">
-          <Link href="/" className="inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-wider">
-            <ArrowLeft size={14} /> Back to site
+          <Link href="/login" className="inline-flex items-center gap-2 text-xs font-bold text-slate-400 hover:text-slate-900 transition-colors uppercase tracking-wider">
+            <ArrowLeft size={14} /> Back to login
           </Link>
           <div className="flex items-center gap-1.5">
             <div className="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center shadow-md shadow-blue-500/20">
@@ -162,7 +158,7 @@ export default function LoginPage() {
             transition={{ duration: 0.6, ease: "easeOut" }}
             className="w-full"
           >
-            <LoginForm />
+            <ForgotPasswordForm />
           </motion.div>
         </div>
 
@@ -174,10 +170,8 @@ export default function LoginPage() {
 
       {/* Right Column - Brand Graphics */}
       <div className="hidden lg:flex w-1/2 bg-slate-50 relative overflow-hidden items-center justify-center p-12 border-l border-slate-100">
-        {/* Shifting radial gradient lights */}
         <div className="absolute inset-0 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:24px_24px] opacity-60" />
         
-        {/* Glowing floating blobs */}
         <motion.div 
           animate={{ 
             x: [0, 40, -20, 0],
@@ -201,24 +195,21 @@ export default function LoginPage() {
            transition={{ duration: 0.8, delay: 0.1 }}
            className="relative z-10 w-full max-w-lg text-slate-900"
         >
-          {/* Header */}
           <div className="w-12 h-12 bg-white border border-slate-200 rounded-2xl flex items-center justify-center mb-8 shadow-[0_4px_10px_rgba(0,0,0,0.02)]">
              <Box size={22} className="text-blue-600" />
           </div>
           <h1 className="text-4xl sm:text-5xl font-black leading-[1.1] tracking-tight mb-5">
-            The Digital Engine for <br />
-            <span className="text-blue-600 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Modern Supply Chains.</span>
+            Reset Your Access. <br />
+            <span className="text-blue-600 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Recover in Seconds.</span>
           </h1>
           <p className="text-base text-slate-500 font-semibold leading-relaxed mb-8">
-            Log in to manage your tech packs, track production live, and seamlessly connect with global manufacturing partners.
+            Provide your registered email address and we'll secure your pipeline link to let you safely choose a new password.
           </p>
           
-          {/* Interactive Pipeline Demo */}
           <div className="mb-8">
             <SupplyChainDemo />
           </div>
 
-          {/* Frosted Testimonial Card */}
           <div className="p-6 bg-white/70 backdrop-blur-md border border-slate-200/50 rounded-3xl shadow-[0_8px_30px_rgba(15,23,42,0.03)] hover:border-blue-200 transition-all duration-300 group">
             <div className="flex items-center justify-between mb-4">
               <div className="flex gap-0.5">
@@ -229,13 +220,13 @@ export default function LoginPage() {
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Enterprise Verified</span>
             </div>
             <p className="text-xs font-semibold text-slate-600 leading-relaxed italic">
-              "{projectName} completely revolutionized how we handle our FW25 collection. We cut prototype times by 40% while maintaining absolute quality control."
+              "We lost credentials right during a live production check, and the automated recovery allowed us to log back in and sign off on logistics inside 2 minutes."
             </p>
             <div className="mt-4 flex items-center gap-3 border-t border-slate-100 pt-4">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-extrabold text-xs">SJ</div>
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-extrabold text-xs">MK</div>
               <div>
-                <p className="text-xs font-black text-slate-900">Sarah Jenkins</p>
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Head of Production · Modus Collective</p>
+                <p className="text-xs font-black text-slate-900">Marcus Kael</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Director of Supply · Vanguard Wear</p>
               </div>
             </div>
           </div>

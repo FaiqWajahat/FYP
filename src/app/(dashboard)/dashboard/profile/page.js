@@ -23,12 +23,12 @@ export default function ProfileSettingsPage() {
   }
 
   const breadData = [
-    { name: "Dashboard", href: "/admin" }, 
-    { name: "Profile", href: "/admin/profile" }
+    { name: "Dashboard", href: "/dashboard" }, 
+    { name: "Profile", href: "/dashboard/profile" }
   ];
 
   return (
-    <div className="space-y-8 font-sans pb-12 w-full max-w-7xl mx-auto overflow-x-hidden md:overflow-visible">
+    <div className="space-y-8 font-sans pb-12 w-full max-w-7xl mx-auto overflow-x-hidden md:overflow-visible animate-in fade-in duration-700">
       <DashboardPageHeader 
         heading="Profile & Settings" 
         breadData={breadData} 

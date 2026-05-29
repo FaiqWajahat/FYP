@@ -55,7 +55,7 @@ export default function UserDashboardLayout({ children }) {
         {/* Footer */}
         <footer className="h-10 flex items-center justify-center bg-base-100 text-xs text-gray-500 shrink-0">
           Made with love by{" "}
-          <span className="text-primary ml-1 font-bold">Faiq Wajahat</span>
+          <span className="text-primary ml-1 font-bold">Factory Flow</span>
         </footer>
       </div>
     </div>

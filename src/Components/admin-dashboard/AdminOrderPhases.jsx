@@ -15,7 +15,6 @@ const PHASES = [
   { id: 7, title: 'Stitching & Assembly', icon: Settings, desc: 'Final garment construction and sewing' },
   { id: 8, title: 'Finishing & QA', icon: PackageSearch, desc: 'Trimming, pressing, and 100% quality audit' },
   { id: 9, title: 'Packaging & Dispatch', icon: Truck, desc: 'Bagging, labeling, and handover to courier' },
-  { id: 10, title: 'Delivered / Complete', icon: Home, desc: 'Order successfully fulfilled and shipped' },
 ];
 
 export default function AdminOrderPhases({ currentStage = 1, onAdvance }) {

@@ -14,6 +14,25 @@ const getSupabase = () => {
   )
 }
 
+function getOrderStatus(isDepositPaid, isFinalPaid, stageIndex, shippingStatus) {
+  if (!isDepositPaid) {
+    return 'Payment Pending';
+  }
+  if (shippingStatus === 'Delivered') {
+    return 'Completed';
+  }
+  if (shippingStatus === 'Dispatched' || shippingStatus === 'In Transit') {
+    return 'Shipped';
+  }
+  const stage = stageIndex ?? 0;
+  if (stage === 0) {
+    return 'Processing';
+  } else if (stage >= 1 && stage <= 8) {
+    return 'Production';
+  }
+  return 'Processing';
+}
+
 // ─── Helper: append events to an order's activity_log ────────────────────────
 async function appendOrderEvents(supabase, orderId, newEvents) {
   // Fetch the current log first
@@ -83,7 +102,7 @@ export async function PATCH(request) {
     // Fetch current state to diff against
     const { data: current } = await supabase
       .from('orders')
-      .select('production_stage, stage_index, status, is_deposit_paid, is_final_paid, activity_log')
+      .select('production_stage, stage_index, status, is_deposit_paid, is_final_paid, shipping_status, activity_log')
       .eq('id', id)
       .single();
 
@@ -110,16 +129,24 @@ export async function PATCH(request) {
       });
     }
 
-    // ── 2. Order Status Change ────────────────────────────────────────────────
-    if (
-      updates.status !== undefined &&
-      updates.status !== current?.status
-    ) {
+    // ── 2. Order Status Auto-Transition ───────────────────────────────────────
+    let finalStatus = updates.status;
+    if (finalStatus === undefined) {
+      finalStatus = getOrderStatus(
+        updates.is_deposit_paid !== undefined ? updates.is_deposit_paid : (current?.is_deposit_paid || false),
+        updates.is_final_paid !== undefined ? updates.is_final_paid : (current?.is_final_paid || false),
+        updates.stage_index !== undefined ? updates.stage_index : (current?.stage_index ?? 0),
+        updates.shipping_status !== undefined ? updates.shipping_status : (current?.shipping_status || 'Pending')
+      );
+    }
+
+    if (finalStatus !== current?.status) {
+      updates.status = finalStatus;
       newEvents.push({
         date: now,
         type: 'status',
-        message: `📋 Order status changed to: ${updates.status}`,
-        user: 'Admin',
+        message: `📋 Order status changed to: ${finalStatus}`,
+        user: 'System',
       });
     }
 
