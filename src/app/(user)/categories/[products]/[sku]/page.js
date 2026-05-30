@@ -213,6 +213,18 @@ export default function ProductDetailPage() {
     });
   };
 
+  const handleStandardQtySet = (size, val) => {
+    setStandardQuantities(prev => {
+      const newObj = { ...prev };
+      if (val <= 0) {
+        delete newObj[size];
+      } else {
+        newObj[size] = val;
+      }
+      return newObj;
+    });
+  };
+
   const handleSizeChartUpload = (e) => {
     const file = e.target.files[0];
     if (file) setSizeChartFile(file);
@@ -288,6 +300,7 @@ export default function ProductDetailPage() {
                 standardSizes={dbProduct.standardSizes}
                 standardQuantities={standardQuantities}
                 handleStandardQtyChange={handleStandardQtyChange}
+                handleStandardQtySet={handleStandardQtySet}
                 customRows={customRows}
                 handleAddCustomRow={() => setCustomRows([...customRows, { id: Date.now(), name: "New Size", qty: 0 }])}
                 handleUpdateCustomRow={(id, field, val) => setCustomRows(rows => rows.map(r => r.id === id ? { ...r, [field]: val } : r))}

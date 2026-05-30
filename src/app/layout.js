@@ -1,6 +1,7 @@
 import { AuthProvider } from "@/store/AuthContext";
 import { Toaster } from "react-hot-toast";
 import NextTopLoader from 'nextjs-toploader';
+import ScrollToTop from "@/Components/common/ScrollToTop";
 import "../app/globals.css";
 
 export default function RootLayout({ children }) {
@@ -27,6 +28,7 @@ export default function RootLayout({ children }) {
         />
         <Toaster position="top-right" reverseOrder={false} />
         <AuthProvider>
+          <ScrollToTop />
           {children}
         </AuthProvider>
       </body>

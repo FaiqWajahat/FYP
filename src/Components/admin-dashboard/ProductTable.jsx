@@ -48,9 +48,7 @@ export default function ProductsTable({ products, onRefresh }) {
             <th>Product</th>
             <th>Category</th>
             <th>Price</th>
-            <th>Ratings</th>
             <th>Orders</th>
-            <th>Stock</th>
             <th className="hidden md:table-cell">Created At</th>
             <th>Action</th>
           </tr>
@@ -112,46 +110,12 @@ export default function ProductsTable({ products, onRefresh }) {
                 ${product.pricingTiers?.[0]?.price || product.price || "0.00"}
               </td>
 
-              {/* Ratings */}
-              <td>
-                <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  <span className="text-sm">
-                    {product.rating || product.ratings || '0.0'}
-                  </span>
-                  {product.reviewCount && (
-                    <span className="text-xs text-base-content/60">
-                      ({product.reviewCount})
-                    </span>
-                  )}
-                </div>
-              </td>
 
               {/* Orders */}
               <td className="font-medium">
                 {product.orders || product.orderCount || 0}
               </td>
 
-              {/* Stock */}
-              <td>
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-2">
-                    <span className={`font-black text-sm ${
-                      (product.quantity || product.stock || 0) <= (product.threshold || 5)
-                        ? 'text-error' 
-                        : (product.quantity || product.stock || 0) <= 20 
-                        ? 'text-warning' 
-                        : 'text-success'
-                    }`}>
-                      {product.quantity || product.stock || 0}
-                    </span>
-                    {(product.quantity || product.stock || 0) <= (product.threshold || 5) && (
-                      <span className="px-1.5 py-0.5 rounded bg-error/10 text-error text-[9px] font-black uppercase">Low</span>
-                    )}
-                  </div>
-                  <div className="text-[10px] opacity-40 font-medium">Units</div>
-                </div>
-              </td>
 
               {/* Created At */}
               <td className="hidden md:table-cell text-xs opacity-60">

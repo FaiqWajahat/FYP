@@ -90,7 +90,6 @@ export default function EditProductPage() {
        const hasEmptyPrices = form.pricingTiers.some(t => !t.price);
        if (hasEmptyPrices) next.pricingTiers = "Please enter valid prices for all tiers";
     }
-    if (!form.quantity) next.quantity = "Required";
     setErrors(next);
     return Object.keys(next).length === 0;
   };

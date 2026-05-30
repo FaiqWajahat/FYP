@@ -10,19 +10,28 @@ const BackgroundImage = ({ src, stageWidth, stageHeight }) => {
   const [image] = useImage(src, 'anonymous');
   const imgProps = useMemo(() => {
     if (!image || !stageWidth || !stageHeight) return { width: 0, height: 0, x: 0, y: 0 };
+    
+    // Add 24px of padding around the canvas for a premium centered display
+    const padding = 24;
+    const availableWidth = stageWidth - padding * 2;
+    const availableHeight = stageHeight - padding * 2;
+    
     const imageRatio = image.width / image.height;
-    const stageRatio = stageWidth / stageHeight;
+    const stageRatio = availableWidth / availableHeight;
     let newWidth, newHeight, newX, newY;
+    
     if (stageRatio > imageRatio) {
-      newWidth = stageWidth;
-      newHeight = stageWidth / imageRatio;
-      newX = 0;
-      newY = (stageHeight - newHeight) / 2;
+      // Height is the limiting factor
+      newHeight = availableHeight;
+      newWidth = availableHeight * imageRatio;
+      newX = padding + (availableWidth - newWidth) / 2;
+      newY = padding;
     } else {
-      newHeight = stageHeight;
-      newWidth = stageHeight * imageRatio;
-      newX = (stageWidth - newWidth) / 2;
-      newY = 0;
+      // Width is the limiting factor
+      newWidth = availableWidth;
+      newHeight = availableWidth / imageRatio;
+      newX = padding;
+      newY = padding + (availableHeight - newHeight) / 2;
     }
     return { width: newWidth, height: newHeight, x: newX, y: newY };
   }, [image, stageWidth, stageHeight]);
@@ -125,7 +134,7 @@ const ProductStudio = forwardRef(function ProductStudio({
   return (
     <div className="w-full lg:w-[45%] space-y-6">
       <div className="sticky top-32">
-        <div ref={containerRef} className="relative aspect-[4/5] bg-slate-100 rounded-2xl overflow-hidden border border-slate-200 shadow-sm group mb-4">
+        <div ref={containerRef} className="relative aspect-[4/5] bg-white rounded-2xl overflow-hidden border border-slate-200/80 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05),_inset_0_1px_2px_rgba(255,255,255,0.5)] group mb-4 transition-all duration-300 hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.08)]">
           {stageSize.width > 0 && (
             <Stage 
               ref={stageRef}

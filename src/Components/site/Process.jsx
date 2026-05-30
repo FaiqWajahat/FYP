@@ -14,119 +14,112 @@ import {
 
 const STEPS = [
   {
-    id: 1,
-    title: 'Draft Your Vision',
-    description: 'Use our Smart Inquiry tool to customize base products or upload your own sketches/tech packs.',
-    icon: <PenTool size={32} />,
-    color: 'bg-blue-100 text-blue-600',
-    delay: 0.2
+    number: '01',
+    title: 'Submit Spec Sheet',
+    description: 'Provide your design sketches, material requirements, and target quantity using our smart inquiry form.',
+    icon: PenTool,
   },
   {
-    id: 2,
-    title: 'Receive Smart Quote',
-    description: 'Our system analyzes material costs and GSM to give you an estimated wholesale quote instantly.',
-    icon: <FileText size={32} />,
-    color: 'bg-indigo-100 text-indigo-600',
-    delay: 0.4
+    number: '02',
+    title: 'Review Instant Quote',
+    description: 'Get a precise, itemized wholesale price estimate calculated automatically based on raw materials.',
+    icon: FileText,
   },
   {
-    id: 3,
-    title: 'Live Production',
-    description: 'Track your order status (Cutting, Stitching, Packing) in real-time via your client dashboard.',
-    icon: <Settings size={32} className="animate-spin-slow" />, // Custom slow spin class or remove animation
-    color: 'bg-purple-100 text-purple-600',
-    delay: 0.6
+    number: '03',
+    title: 'Track Live Production',
+    description: 'Monitor your order stages (Cutting, Stitching, and Quality Control) directly from the factory floor.',
+    icon: Settings,
   },
   {
-    id: 4,
-    title: 'Global Delivery',
-    description: 'Your bulk order is packed and shipped directly from Sialkot to your doorstep anywhere in the world.',
-    icon: <Truck size={32} />,
-    color: 'bg-green-100 text-green-600',
-    delay: 0.8
+    number: '04',
+    title: 'Receive Global Delivery',
+    description: 'Your quality-certified bulk order is packed and shipped directly from Sialkot to your doorstep.',
+    icon: Truck,
   }
 ];
 
 const Process = () => {
   return (
-    <section className="py-20 bg-slate-50  relative overflow-hidden">
+    <section className="py-20 bg-slate-50 relative overflow-hidden">
       
-      {/* Background Decor (Optional Gears/Pattern) */}
-      <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
-        <div className="absolute right-0 top-20 w-96 h-96 bg-slate-900 rounded-full blur-3xl"></div>
-        <div className="absolute left-0 bottom-20 w-72 h-72 bg-blue-600 rounded-full blur-3xl"></div>
+      {/* Background Decor */}
+      <div className="absolute top-0 left-0 w-full h-full opacity-[0.03] pointer-events-none">
+        <div className="absolute right-0 top-20 w-96 h-96 bg-slate-900 rounded-full blur-3xl" />
+        <div className="absolute left-0 bottom-20 w-72 h-72 bg-blue-600 rounded-full blur-3xl" />
       </div>
 
-      <div className="container max-w-7xl mx-auto px-4 md:px-8 relative z-10">
+      <div className="container max-w-6xl mx-auto px-6 md:px-8 relative z-10">
         
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-16">
           <span className="text-blue-600 font-bold tracking-wider uppercase text-sm">
-            The Factory Flow Process
+            How it works
           </span>
-          <h2 className="text-3xl md:text-4xl font-black text-slate-900 mt-3 mb-4">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight mt-3 mb-4">
             From Concept to Doorstep
           </h2>
-          <p className="text-slate-600 text-lg">
-            We've simplified the complex manufacturing process. Here is how your 
-            <span className="font-bold text-slate-900"> Smart Inquiry</span> comes to life.
+          <p className="text-slate-500 font-medium text-base md:text-lg leading-relaxed">
+            We have simplified B2B apparel sourcing. Our streamlined platform manages your order from design specifications to final dispatch.
           </p>
         </div>
 
         {/* Steps Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
+        <div className="relative grid grid-cols-1 md:grid-cols-4 gap-6">
           
           {/* Connecting Line (Desktop Only) */}
-          <div className="hidden md:block absolute top-12 left-[10%] right-[10%] h-0.5 z-[-10] "></div>
+          <div className="hidden md:block absolute top-[44px] left-[10%] right-[10%] h-[1px] bg-slate-200/80 -z-10" />
 
-          {STEPS.map((step) => (
-            <motion.div
-              key={step.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: step.delay }}
-              className="relative group bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:-translate-y-2 transition-all duration-300"
-            >
-              {/* Step Number Badge */}
-              <div className="absolute -top-4 left-6 bg-slate-900 text-white text-xs font-bold w-8 h-8 flex items-center justify-center rounded-full border-4 border-slate-50">
-                {step.id}
-              </div>
+          {STEPS.map((step, idx) => {
+            const Icon = step.icon;
+            return (
+              <motion.div
+                key={step.number}
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: idx * 0.1 }}
+                className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-300 flex flex-col gap-5 text-left"
+              >
+                {/* Number & Icon Row */}
+                <div className="flex justify-between items-center">
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                    <Icon size={16} />
+                  </div>
+                  <span className="text-4xl font-black text-slate-100 font-mono tracking-tight leading-none select-none">
+                    {step.number}
+                  </span>
+                </div>
 
-              {/* Icon */}
-              <div className={`w-16 h-16 rounded-2xl ${step.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                {step.icon}
-              </div>
-
-              {/* Content */}
-              <h3 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-blue-600 transition-colors">
-                {step.title}
-              </h3>
-              <p className="text-slate-500 text-sm leading-relaxed">
-                {step.description}
-              </p>
-
-              {/* Hover Effect Line */}
-              <div className="absolute bottom-0 left-0 w-0 h-1 bg-blue-600 group-hover:w-full transition-all duration-500 rounded-b-2xl"></div>
-            </motion.div>
-          ))}
+                {/* Text Content */}
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 mb-2">
+                    {step.title}
+                  </h3>
+                  <p className="text-sm text-slate-500 leading-relaxed">
+                    {step.description}
+                  </p>
+                </div>
+              </motion.div>
+            );
+          })}
 
         </div>
 
-        {/* CTA */}
+        {/* Action Button */}
         <div className="mt-16 text-center">
           <Link href="/smart-inquiry">
             <motion.button 
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-lg font-bold text-lg shadow-xl hover:bg-blue-700 transition-colors"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="inline-flex items-center gap-2 px-7 py-3.5 bg-slate-900 hover:bg-blue-600 text-white rounded-xl font-bold text-base shadow-sm transition-colors cursor-pointer"
             >
-              Start Your Inquiry Now <ArrowRight size={20} />
+              Start Your Inquiry <ArrowRight size={16} />
             </motion.button>
           </Link>
-          <p className="mt-4 text-sm text-slate-500 flex items-center justify-center gap-2">
-            <CheckCircle2 size={16} className="text-green-500" />
-            No credit card required for initial quote
+          <p className="mt-3 text-sm text-slate-400 flex items-center justify-center gap-1.5 font-medium">
+            <CheckCircle2 size={13} className="text-emerald-500" />
+            No setup fees or credit card required
           </p>
         </div>
 

@@ -14,7 +14,6 @@ export default function Home() {
       <LandingPage/>
     {/* <ProductCategories/> */}
      
-      {/* <ServicesTimeline/> */}
       <Process/>
       <FeaturedProducts/>
        <StatsSection/>

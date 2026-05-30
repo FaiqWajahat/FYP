@@ -32,7 +32,7 @@ export default function AddProductPage() {
     ],
     brandingOptions: [],
     leadTime: "",
-    quantity: "",
+    quantity: "9999",
     description: "",
     colors: "",
     sizes: "",
@@ -82,7 +82,6 @@ export default function AddProductPage() {
     if (!form.sizes || !form.sizes.trim()) next.sizes = "Select at least one size";
     if (!form.images || form.images.length === 0) next.images = "At least one product image is required";
 
-    if (!form.quantity) next.quantity = "Required";
     setErrors(next);
     return Object.keys(next).length === 0;
   };

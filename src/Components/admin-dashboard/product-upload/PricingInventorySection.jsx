@@ -156,39 +156,6 @@ export default function PricingInventorySection({ form, setField, errors }) {
              {errors.pricingTiers && <p className="text-error text-xs font-bold mt-2 flex items-center gap-1.5"><AlertCircle className="w-3.5 h-3.5" /> {errors.pricingTiers}</p>}
         </div>
 
-        {/* Global Inventory Details */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-base-content/10">
-            <div className="form-control w-full group">
-              <label className="label py-1 mb-1">
-                <span className="label-text text-[10px] uppercase font-black tracking-widest text-base-content/50 group-focus-within:text-base-content transition-colors flex items-center gap-1.5">
-                  <Package className="w-3.5 h-3.5" /> Total Stock <span className="text-error">*</span>
-                </span>
-              </label>
-              <input
-                type="number"
-                placeholder="Total units available"
-                min="0"
-                className={`w-full px-4 py-3 rounded-xl bg-base-200 border text-base-content outline-none text-sm font-semibold transition-all duration-300 ${
-                  errors.quantity ? "border-error focus:border-error focus:bg-base-100 focus:ring-4 focus:ring-error/10" : "border-base-content/10 focus:border-[var(--primary)] focus:bg-base-100 focus:ring-4"
-                }`}
-                style={errors.quantity ? {} : { '--tw-ring-color': 'color-mix(in srgb, var(--primary) 15%, transparent)' }}
-                value={form.quantity || ""}
-                onChange={(e) => setField("quantity", e.target.value)}
-              />
-              {errors.quantity && <p className="text-error text-[10px] font-bold mt-1.5 px-1">{errors.quantity}</p>}
-            </div>
-
-            <div className="form-control w-full group">
-              <label className="label py-1 mb-1">
-                <span className="label-text text-[10px] uppercase font-black tracking-widest text-base-content/50 group-focus-within:text-base-content transition-colors">
-                  Stock Alert Level
-                </span>
-              </label>
-              <div className="px-4 py-3 rounded-xl bg-base-200 border border-base-content/10 italic text-[11px] text-base-content/40 font-medium leading-relaxed">
-                  Low stock alerts are automatically triggered when quantity drops below 5 units.
-              </div>
-            </div>
-        </div>
 
         {/* Info Banner */}
         <div className="bg-base-200 rounded-xl p-4 flex gap-3 items-start border border-base-content/10">

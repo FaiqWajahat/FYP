@@ -6,7 +6,7 @@ import { Ruler, Minus, Plus, UploadCloud, FileText, CheckCircle2, Trash2, Table,
 
 export default function SizingModule({
   sizingMode, setSizingMode,
-  standardSizes, standardQuantities, handleStandardQtyChange,
+  standardSizes, standardQuantities, handleStandardQtyChange, handleStandardQtySet,
   customRows, handleAddCustomRow, handleUpdateCustomRow, handleDeleteCustomRow,
   sizeChartFile, handleSizeChartUpload, removeSizeChart, sizeChartInputRef, sizeChartData
 }) {
@@ -38,10 +38,20 @@ export default function SizingModule({
                          <span className="text-xs font-bold text-slate-900">{size}</span>
                          {qty > 0 && <span className="text-[10px] font-bold text-blue-600">{qty} pcs</span>}
                       </div>
-                      <div className="flex items-center justify-between bg-slate-100 rounded-md">
-                         <button onClick={() => handleStandardQtyChange(size, -10)} className="p-1.5 hover:text-red-500 transition-colors"><Minus size={14}/></button>
-                         <span className="text-xs font-bold text-slate-700 w-8 text-center">{qty || '-'}</span>
-                         <button onClick={() => handleStandardQtyChange(size, 10)} className="p-1.5 hover:text-blue-600 transition-colors"><Plus size={14}/></button>
+                      <div className="flex items-center justify-between bg-slate-100 rounded-md px-1 py-0.5">
+                         <button type="button" onClick={() => handleStandardQtyChange(size, -10)} className="p-1 hover:text-red-500 transition-colors shrink-0"><Minus size={12}/></button>
+                         <input 
+                           type="number" 
+                           min="0"
+                           value={qty || ""}
+                           onChange={(e) => {
+                             const val = parseInt(e.target.value);
+                             handleStandardQtySet(size, isNaN(val) ? 0 : val);
+                           }}
+                           placeholder="0"
+                           className="w-12 text-center text-xs font-bold text-slate-700 bg-transparent border-0 focus:ring-0 p-0 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                         />
+                         <button type="button" onClick={() => handleStandardQtyChange(size, 10)} className="p-1 hover:text-blue-600 transition-colors shrink-0"><Plus size={12}/></button>
                       </div>
                    </div>
                  )

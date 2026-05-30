@@ -82,12 +82,20 @@ function ProductImagePanel() {
         {displayImage ? (
           <>
             <div className="absolute inset-0 bg-slate-100" />
-            <Image
-              src={displayImage}
-              alt={category?.name || 'Your Product'}
-              fill
-              className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
-            />
+            {displayImage.startsWith("data:") ? (
+              <img
+                src={displayImage}
+                alt={category?.name || 'Your Product'}
+                className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+              />
+            ) : (
+              <Image
+                src={displayImage}
+                alt={category?.name || 'Your Product'}
+                fill
+                className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+              />
+            )}
             {/* Subtle inner shadow/border */}
             <div className="absolute inset-0 border border-black/5 rounded-3xl pointer-events-none" />
 
@@ -399,7 +407,7 @@ export default function InquiryWizard() {
           </div>
 
           {/* Navigation */}
-          <div className="flex items-center justify-between mt-4 p-3 bg-white rounded-2xl border border-slate-100 shadow-sm">
+          <div className="flex items-center justify-between mt-4 p-3 pr-24 bg-white rounded-2xl border border-slate-100 shadow-sm">
             <button onClick={prevStep} disabled={currentStep === 1}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${currentStep === 1 ? 'text-slate-300 cursor-not-allowed' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}>

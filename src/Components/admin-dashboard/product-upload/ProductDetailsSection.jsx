@@ -1,10 +1,49 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { FileText, Palette, Maximize, Hash, X, Plus, Table, Paintbrush, ChevronDown } from "lucide-react";
+import { FileText, Palette, Maximize, Hash, X, Plus, Table, Paintbrush, ChevronDown, Sparkles } from "lucide-react";
 import { useProductOptionsStore } from "@/store/productOptionsStore";
+import { toast } from "react-hot-toast";
 
 export default function ProductDetailsSection({ form, setField, errors }) {
   const [newTag, setNewTag] = useState("");
+  const [customColorName, setCustomColorName] = useState("");
+  const [customColorHex, setCustomColorHex] = useState("#1e3a8a");
+  const [customSizeName, setCustomSizeName] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleGenerateDescription = async () => {
+    if (!form.name?.trim()) {
+      toast.error("Please fill in the Product Name in Step 1 first!");
+      return;
+    }
+    setIsGenerating(true);
+    try {
+      const res = await fetch("/api/ai/generate-description", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productName: form.name,
+          category: form.category,
+          subCategory: form.subCategory,
+          fabric: form.fabric,
+          gsm: form.gsm,
+          colors: form.colors ? form.colors.split(",").map(c => c.split(":")[0]).join(", ") : ""
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setField("description", data.text);
+        toast.success("Description generated successfully!");
+      } else {
+        toast.error(data.error || "Failed to generate description");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("An error occurred during description generation.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const presetSizes = useProductOptionsStore(state => state.presetSizes);
   const DEFAULT_BRANDING = useProductOptionsStore(state => state.defaultBranding);
@@ -29,6 +68,25 @@ export default function ProductDetailsSection({ form, setField, errors }) {
     setField("colors", current.filter(Boolean).join(","));
   };
 
+  const handleAddCustomColor = () => {
+    if (!customColorName.trim()) return;
+    const name = customColorName.trim();
+    const hex = customColorHex;
+    
+    // Check if color exists (by hex or name)
+    const current = form.colors ? form.colors.split(",") : [];
+    const exists = current.some(c => {
+      const [n, h] = c.split(":");
+      return h === hex || n.toLowerCase() === name.toLowerCase();
+    });
+    
+    if (!exists) {
+      const colorStr = `${name}:${hex}`;
+      setField("colors", [...current, colorStr].filter(Boolean).join(","));
+      setCustomColorName("");
+    }
+  };
+
   // Branding Logic
   const toggleBrandingOption = (optionId, defaultPrice) => {
     const options = form.brandingOptions || [];
@@ -48,6 +106,44 @@ export default function ProductDetailsSection({ form, setField, errors }) {
 
 
   // Sizing & Tag Logic
+  const getTypicalMeasurements = (size) => {
+    const measurements = {
+      // Alpha Standard
+      "XS": { chest: "36", length: "27", sleeve: "7.5" },
+      "S": { chest: "38", length: "28", sleeve: "8.0" },
+      "SM": { chest: "38", length: "28", sleeve: "8.0" },
+      "M": { chest: "40", length: "29", sleeve: "8.5" },
+      "L": { chest: "42", length: "30", sleeve: "9.0" },
+      "XL": { chest: "44", length: "31", sleeve: "9.5" },
+      "2XL": { chest: "46", length: "32", sleeve: "10.0" },
+      "3XL": { chest: "48", length: "33", sleeve: "10.5" },
+      "4XL": { chest: "50", length: "34", sleeve: "11.0" },
+      // Numeric Waist
+      "28": { chest: "--", length: "30", sleeve: "--" },
+      "30": { chest: "--", length: "30", sleeve: "--" },
+      "32": { chest: "--", length: "32", sleeve: "--" },
+      "34": { chest: "--", length: "32", sleeve: "--" },
+      "36": { chest: "--", length: "32", sleeve: "--" },
+      "38": { chest: "--", length: "34", sleeve: "--" },
+      "40": { chest: "--", length: "34", sleeve: "--" },
+      // Kids Wear
+      "2Y": { chest: "21", length: "15", sleeve: "12" },
+      "4Y": { chest: "23", length: "17", sleeve: "14" },
+      "6Y": { chest: "25", length: "19", sleeve: "16" },
+      "8Y": { chest: "27", length: "21", sleeve: "18" },
+      "10Y": { chest: "29", length: "23", sleeve: "20" },
+      "12Y": { chest: "31", length: "25", sleeve: "22" },
+      // Footwear
+      "7": { chest: "--", length: "9.6", sleeve: "--" },
+      "8": { chest: "--", length: "10.0", sleeve: "--" },
+      "9": { chest: "--", length: "10.3", sleeve: "--" },
+      "10": { chest: "--", length: "10.6", sleeve: "--" },
+      "11": { chest: "--", length: "11.0", sleeve: "--" },
+      "12": { chest: "--", length: "11.3", sleeve: "--" }
+    };
+    return measurements[size] || { chest: "", length: "", sleeve: "" };
+  };
+
   const togglePresetSize = (size) => {
     const currentSizes = form.sizes ? form.sizes.split(" ") : [];
     const currentChart = form.sizeChart || [];
@@ -59,7 +155,36 @@ export default function ProductDetailsSection({ form, setField, errors }) {
     } else {
       // Add size and new chart row securely mapped to this size
       setField("sizes", [...currentSizes, size].join(" ").trim());
-      setField("sizeChart", [...currentChart, { size: size, chest: "", length: "", sleeve: "" }]);
+      const typical = getTypicalMeasurements(size);
+      setField("sizeChart", [...currentChart, { size: size, ...typical }]);
+    }
+  };
+
+  const applySizePreset = (sizesArray) => {
+    setField("sizes", sizesArray.join(" "));
+    
+    // Build size chart and preserve existing measurements if size matches
+    const currentChart = form.sizeChart || [];
+    const newChart = sizesArray.map(sz => {
+      const existingRow = currentChart.find(row => row.size === sz);
+      if (existingRow) return existingRow;
+      const typical = getTypicalMeasurements(sz);
+      return { size: sz, ...typical };
+    });
+    setField("sizeChart", newChart);
+  };
+
+  const handleAddCustomSize = () => {
+    if (!customSizeName.trim()) return;
+    const size = customSizeName.trim().replace(/\s+/g, "-");
+    const currentSizes = form.sizes ? form.sizes.split(" ") : [];
+    const currentChart = form.sizeChart || [];
+    
+    if (!currentSizes.includes(size)) {
+      setField("sizes", [...currentSizes, size].join(" ").trim());
+      const typical = getTypicalMeasurements(size);
+      setField("sizeChart", [...currentChart, { size: size, ...typical }]);
+      setCustomSizeName("");
     }
   };
 
@@ -90,8 +215,16 @@ export default function ProductDetailsSection({ form, setField, errors }) {
 
   const updateSizeChartRow = (idx, field, val) => {
     const current = [...form.sizeChart];
-    current[idx][field] = val;
+    const oldSize = current[idx].size;
+    const sanitizedVal = field === "size" ? val.replace(/\s+/g, "-") : val;
+    current[idx][field] = sanitizedVal;
     setField("sizeChart", current);
+    
+    if (field === "size") {
+      const currentSizes = form.sizes ? form.sizes.split(" ") : [];
+      const updatedSizes = currentSizes.map(s => s === oldSize ? sanitizedVal : s);
+      setField("sizes", updatedSizes.join(" ").trim());
+    }
   };
 
 
@@ -110,9 +243,34 @@ export default function ProductDetailsSection({ form, setField, errors }) {
         {/* Description */}
         <div className="form-control w-full group">
           <label className="label py-1 mb-1">
-            <span className="label-text text-[10px] uppercase font-black tracking-widest text-base-content/50 group-focus-within:text-base-content transition-colors flex justify-between w-full">
+            <span className="label-text text-[10px] uppercase font-black tracking-widest text-base-content/50 group-focus-within:text-base-content transition-colors flex justify-between items-center w-full">
                <span>Full Product Description</span>
-               <span className="text-base-content/40 font-medium tracking-normal normal-case">{form.description?.length || 0}/1000 characters</span>
+               <div className="flex items-center gap-3">
+                 <button
+                   type="button"
+                   onClick={handleGenerateDescription}
+                   disabled={isGenerating}
+                   className={`flex items-center gap-1.5 px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all duration-200 cursor-pointer ${
+                     isGenerating 
+                       ? "bg-base-300 text-base-content/40 cursor-not-allowed" 
+                       : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-sm hover:shadow active:scale-95"
+                   }`}
+                   title="Instantly draft B2B search-optimized description using Gemini AI"
+                 >
+                   {isGenerating ? (
+                     <>
+                       <span className="w-2.5 h-2.5 rounded-full border-2 border-slate-300 border-t-transparent animate-spin"></span>
+                       <span>Drafting...</span>
+                     </>
+                   ) : (
+                     <>
+                       <Sparkles className="w-2.5 h-2.5" />
+                       <span>Auto-Draft</span>
+                     </>
+                   )}
+                 </button>
+                 <span className="text-base-content/40 font-medium tracking-normal normal-case">{form.description?.length || 0}/1000 characters</span>
+               </div>
             </span>
           </label>
           <textarea
@@ -174,6 +332,43 @@ export default function ProductDetailsSection({ form, setField, errors }) {
                             </button>
                         );
                     })}
+                </div>
+
+                {/* Custom Color Shade Creator */}
+                <div className="pt-4 border-t border-base-content/10 w-full">
+                   <p className="w-full text-[10px] uppercase font-bold text-base-content/40 mb-2">Create Custom Color Shade:</p>
+                   <div className="flex flex-wrap items-end gap-4 bg-base-200/40 p-4 rounded-xl border border-base-content/10 max-w-xl animate-in fade-in zoom-in-95 duration-200">
+                      <div className="flex flex-col gap-1.5 grow min-w-[180px]">
+                         <span className="text-[9px] uppercase tracking-wider font-semibold text-base-content/50">Shade Name</span>
+                         <input 
+                           type="text" 
+                           placeholder="e.g., Space Gray, Sage Green" 
+                           className="px-3 py-1.5 rounded-lg border border-base-content/10 bg-base-100 outline-none text-xs font-semibold text-base-content focus:border-[var(--primary)]"
+                           value={customColorName}
+                           onChange={(e) => setCustomColorName(e.target.value)}
+                           onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomColor())}
+                         />
+                      </div>
+                      <div className="flex flex-col gap-1.5 shrink-0">
+                         <span className="text-[9px] uppercase tracking-wider font-semibold text-base-content/50">Color Shade</span>
+                         <div className="flex items-center gap-2">
+                           <input 
+                             type="color" 
+                             className="w-8 h-8 rounded-lg cursor-pointer border border-base-content/20 bg-transparent shrink-0"
+                             value={customColorHex}
+                             onChange={(e) => setCustomColorHex(e.target.value)}
+                           />
+                           <span className="text-xs font-mono font-bold uppercase text-base-content/75">{customColorHex}</span>
+                         </div>
+                      </div>
+                      <button 
+                        type="button"
+                        onClick={handleAddCustomColor}
+                        className="btn btn-xs bg-[var(--primary)] text-white hover:brightness-110 border-transparent rounded-lg px-3 py-2 h-auto min-h-0 text-[10px] font-bold shrink-0 self-end mb-[2px]"
+                      >
+                        + Add Custom Shade
+                      </button>
+                   </div>
                 </div>
                 </div>
             </div>
@@ -238,6 +433,73 @@ export default function ProductDetailsSection({ form, setField, errors }) {
             {errors.sizes && <p className="text-error text-[10px] font-bold mt-1.5 px-1">{errors.sizes}</p>}
           </div>
 
+          {/* Size Preset Auto-generator & Custom Add */}
+          <div className="p-4 rounded-2xl border border-base-content/10 bg-base-200/30 space-y-4 animate-in fade-in duration-300">
+            <div>
+              <p className="text-[10px] text-base-content/50 uppercase font-black tracking-widest mb-2">⚡ Auto-Generate Size Presets:</p>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => applySizePreset(["XS", "SM", "M", "L", "XL", "2XL"])}
+                  className="px-2.5 py-1 text-[10px] font-bold rounded-lg border border-base-content/10 bg-base-100 hover:bg-base-200 text-base-content transition-colors"
+                >
+                  Standard Alpha (XS - 2XL)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applySizePreset(["XS", "SM", "M", "L", "XL", "2XL", "3XL", "4XL"])}
+                  className="px-2.5 py-1 text-[10px] font-bold rounded-lg border border-base-content/10 bg-base-100 hover:bg-base-200 text-base-content transition-colors"
+                >
+                  Extended Alpha (XS - 4XL)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applySizePreset(["28", "30", "32", "34", "36", "38", "40"])}
+                  className="px-2.5 py-1 text-[10px] font-bold rounded-lg border border-base-content/10 bg-base-100 hover:bg-base-200 text-base-content transition-colors"
+                >
+                  Waist / Numeric (28 - 40)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applySizePreset(["2Y", "4Y", "6Y", "8Y", "10Y", "12Y"])}
+                  className="px-2.5 py-1 text-[10px] font-bold rounded-lg border border-base-content/10 bg-base-100 hover:bg-base-200 text-base-content transition-colors"
+                >
+                  Kids Wear (2Y - 12Y)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => applySizePreset(["7", "8", "9", "10", "11", "12"])}
+                  className="px-2.5 py-1 text-[10px] font-bold rounded-lg border border-base-content/10 bg-base-100 hover:bg-base-200 text-base-content transition-colors"
+                >
+                  Footwear (7 - 12)
+                </button>
+              </div>
+            </div>
+            
+            <div className="pt-3 border-t border-base-content/5 flex flex-wrap items-center gap-3">
+              <div className="flex flex-col gap-1 grow max-w-xs">
+                <span className="text-[9px] uppercase tracking-wider font-semibold text-base-content/50">Add Individual Custom Size</span>
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    placeholder="e.g., One Size, 5XL, 32L" 
+                    className="px-3 py-1.5 rounded-lg border border-base-content/10 bg-base-100 outline-none text-xs font-semibold text-base-content focus:border-[var(--primary)] grow"
+                    value={customSizeName}
+                    onChange={(e) => setCustomSizeName(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCustomSize())}
+                  />
+                  <button 
+                    type="button"
+                    onClick={handleAddCustomSize}
+                    className="btn btn-xs bg-[var(--primary)] text-white hover:brightness-110 border-transparent rounded-lg px-3 py-2 h-auto min-h-0 text-[10px] font-bold"
+                  >
+                    Add Size
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
             <p className="text-[10px] text-base-content/40 uppercase font-bold tracking-widest">Select supported variations:</p>
             <div className="flex flex-wrap gap-3">
@@ -275,7 +537,7 @@ export default function ProductDetailsSection({ form, setField, errors }) {
              </div>
              
              {form.sizeChart?.length > 0 ? (
-                <div className="overflow-x-auto rounded-xl border border-base-content/10">
+                <div className="overflow-x-auto rounded-xl border border-base-content/10 shadow-sm bg-base-100">
                    <table className="table table-xs w-full">
                       <thead className="bg-base-200 text-[9px] uppercase tracking-widest">
                          <tr>
@@ -283,15 +545,38 @@ export default function ProductDetailsSection({ form, setField, errors }) {
                             <th>Chest</th>
                             <th>Length</th>
                             <th>Sleeve</th>
+                            <th className="text-right">Actions</th>
                          </tr>
                       </thead>
                        <tbody className="bg-base-100">
                          {form.sizeChart.map((row, idx) => (
-                            <tr key={idx} className="border-b border-base-content/5">
-                               <td><input type="text" value={row.size} readOnly className="w-full bg-transparent outline-none font-bold text-xs" /></td>
+                            <tr key={idx} className="border-b border-base-content/5 hover:bg-base-200/20 transition-colors">
+                               <td>
+                                 <input 
+                                   type="text" 
+                                   value={row.size} 
+                                   onChange={(e) => updateSizeChartRow(idx, "size", e.target.value)} 
+                                   className="w-full bg-transparent outline-none font-bold text-xs border-b border-dashed border-base-content/20 focus:border-[var(--primary)] text-base-content px-1" 
+                                 />
+                               </td>
                                <td><input type="text" value={row.chest} onChange={(e) => updateSizeChartRow(idx, "chest", e.target.value)} className="w-full bg-transparent outline-none text-xs text-base-content" placeholder="--" /></td>
                                <td><input type="text" value={row.length} onChange={(e) => updateSizeChartRow(idx, "length", e.target.value)} className="w-full bg-transparent outline-none text-xs text-base-content" placeholder="--" /></td>
                                <td><input type="text" value={row.sleeve} onChange={(e) => updateSizeChartRow(idx, "sleeve", e.target.value)} className="w-full bg-transparent outline-none text-xs text-base-content" placeholder="--" /></td>
+                               <td className="text-right">
+                                  <button 
+                                    type="button" 
+                                    onClick={() => {
+                                       const sizeToRemove = row.size;
+                                       const currentSizes = form.sizes ? form.sizes.split(" ") : [];
+                                       setField("sizes", currentSizes.filter(s => s !== sizeToRemove).join(" ").trim());
+                                       setField("sizeChart", form.sizeChart.filter((_, i) => i !== idx));
+                                    }}
+                                    className="p-1 hover:text-error transition-colors rounded-full"
+                                    title="Delete Size"
+                                  >
+                                     <X className="w-3.5 h-3.5 text-base-content/40 hover:text-error" />
+                                  </button>
+                               </td>
                             </tr>
                          ))}
                       </tbody>
