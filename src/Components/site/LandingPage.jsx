@@ -173,7 +173,7 @@ export default function HeroSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.9, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             className="h-font font-extrabold tracking-tight leading-[1.1] mb-6 max-w-7xl"
-            style={{ fontSize: 'clamp(36px, 5vw, 60px)' }}
+            style={{ fontSize: 'clamp(50px, 6vw,65px)' }}
           >
             <span className="text-slate-900">Manufacture Custom Clothing,</span>
             <br />
