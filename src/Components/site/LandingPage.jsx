@@ -463,8 +463,8 @@ export default function HeroSection() {
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Sialkot Factory Floor</span>
                       <div className="flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-                        <span className="text-[8px] font-bold text-rose-500 uppercase tracking-wider">Live Webcam</span>
+                        
+                        
                       </div>
                     </div>
                     

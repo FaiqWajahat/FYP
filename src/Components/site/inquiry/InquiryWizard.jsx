@@ -138,36 +138,47 @@ export default function InquiryWizard() {
   const [showResetModal, setShowResetModal] = useState(false);
   const searchParams = useSearchParams();
 
-  // Auto-Hydrate from URL Parameters (Bridge from Product Details)
+  // Auto-Hydrate from URL Parameters (Bridge from Product Details / Catalog)
   useEffect(() => {
     const category = searchParams.get('category');
     const subCategory = searchParams.get('subCategory');
     const imageUrl = searchParams.get('imageUrl');
     const name = searchParams.get('productName');
 
-    if ((category || subCategory) && imageUrl) {
-      // Robust matching: Check for exact ID, exact Name, or if names contain each other (handles plurals)
+    // Category matching runs whenever a category or subCategory param exists (imageUrl is NOT required)
+    if (category || subCategory) {
+      // Robust matching: exact ID, exact name, prefix match, plural handling
       const matchedCategory = PRODUCT_CATEGORIES.find(c => {
-        const lowerCat = (category || '').toLowerCase();
-        const lowerSub = (subCategory || '').toLowerCase();
+        const lowerCat = (category || '').toLowerCase().trim();
+        const lowerSub = (subCategory || '').toLowerCase().trim();
         const lowerName = c.name.toLowerCase();
         const lowerId = c.id.toLowerCase();
-        
-        return lowerCat === lowerName || 
-               lowerCat === lowerId || 
-               lowerSub === lowerName ||
-               lowerSub === lowerId ||
-               lowerCat.startsWith(lowerName) || 
-               lowerName.startsWith(lowerCat) ||
-               lowerSub.startsWith(lowerName) ||
-               (lowerCat.endsWith('s') && lowerCat.slice(0, -1) === lowerName) ||
-               (lowerSub.endsWith('s') && lowerSub.slice(0, -1) === lowerName);
+
+        return (
+          lowerCat === lowerName ||
+          lowerCat === lowerId ||
+          lowerSub === lowerName ||
+          lowerSub === lowerId ||
+          lowerCat.startsWith(lowerName) ||
+          lowerName.startsWith(lowerCat) ||
+          lowerSub.startsWith(lowerName) ||
+          lowerName.startsWith(lowerSub) ||
+          // plural handling: "hoodies" → "hoodie", "t-shirts" → "t-shirt"
+          (lowerCat.endsWith('s') && lowerCat.slice(0, -1) === lowerName) ||
+          (lowerSub.endsWith('s') && lowerSub.slice(0, -1) === lowerName) ||
+          // word-in-name check: "jackets" contains "jacket"
+          lowerName.split(' ').some(word => lowerCat.includes(word) && word.length > 3) ||
+          lowerCat.split(' ').some(word => lowerName.includes(word) && word.length > 3)
+        );
       });
-      
+
       if (matchedCategory) {
         store.setCategoryId(matchedCategory.id);
       }
-      
+    }
+
+    // Only set the uploaded design if an actual image URL was provided
+    if (imageUrl) {
       store.setUploadedDesign(imageUrl, name || 'Selected Design');
     }
   }, [searchParams]);

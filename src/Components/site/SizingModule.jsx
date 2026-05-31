@@ -91,11 +91,21 @@ export default function SizingModule({
                     <div key={row.id} className="flex gap-2 items-center">
                         <input type="text" value={row.name} onChange={(e) => handleUpdateCustomRow(row.id, 'name', e.target.value)} placeholder="e.g. XL-Tall" className="flex-1 text-sm border border-slate-200 rounded-lg p-2.5 font-bold text-slate-700 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" />
                         <div className="flex items-center border border-slate-200 rounded-lg bg-white">
-                          <button onClick={() => handleUpdateCustomRow(row.id, 'qty', Math.max(0, row.qty - 10))} className="p-2.5 hover:bg-slate-50"><Minus size={14}/></button>
-                          <span className="w-12 text-center text-sm font-bold">{row.qty}</span>
-                          <button onClick={() => handleUpdateCustomRow(row.id, 'qty', row.qty + 10)} className="p-2.5 hover:bg-slate-50"><Plus size={14}/></button>
+                          <button type="button" onClick={() => handleUpdateCustomRow(row.id, 'qty', Math.max(0, row.qty - 10))} className="p-2.5 hover:bg-slate-50 shrink-0"><Minus size={14}/></button>
+                          <input 
+                            type="number" 
+                            min="0"
+                            value={row.qty || ""}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value);
+                              handleUpdateCustomRow(row.id, 'qty', isNaN(val) ? 0 : val);
+                            }}
+                            placeholder="0"
+                            className="w-12 text-center text-sm font-bold text-slate-700 bg-transparent border-0 focus:ring-0 p-0 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                          />
+                          <button type="button" onClick={() => handleUpdateCustomRow(row.id, 'qty', row.qty + 10)} className="p-2.5 hover:bg-slate-50 shrink-0"><Plus size={14}/></button>
                         </div>
-                        <button onClick={() => handleDeleteCustomRow(row.id)} className="p-2 text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={18}/></button>
+                        <button type="button" onClick={() => handleDeleteCustomRow(row.id)} className="p-2 text-slate-400 hover:text-red-500 transition-colors"><Trash2 size={18}/></button>
                     </div>
                   ))}
                 </div>

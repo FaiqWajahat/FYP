@@ -25,7 +25,7 @@ function renderMarkdown(text) {
 
   // Combined regex: matches markdown links [label](url) OR **bold**
   // Processed left-to-right so plain text between tokens gets escaped safely.
-  const COMBINED = /\[([^\]]+)\]\(((?:https?:\/\/|\/)[^\s)]*)\)|\*\*(.*?)\*\*/g;
+  const COMBINED = /\[([^\]]+)\]\s*\(((?:https?:\/\/|\/)[^\s)]*)\)|\*\*(.*?)\*\*/g;
 
   let html = "";
   let lastIndex = 0;
@@ -76,7 +76,7 @@ const WELCOME_MSG = {
 
 export default function ChatWidget() {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { isChatOpen: isOpen, setIsChatOpen: setIsOpen, chatContext, setChatContext } = useConfigStore();
   const [msg, setMsg] = useState("");
   const [messages, setMessages] = useState([]);
@@ -87,7 +87,7 @@ export default function ChatWidget() {
   const [isLoading, setIsLoading] = useState(false);
 
   // AI Copilot States
-  const [aiMode, setAiMode] = useState(false);
+  const [aiMode, setAiMode] = useState(true);
   const [aiMessages, setAiMessages] = useState([WELCOME_MSG]);
   const [aiLoading, setAiLoading] = useState(false);
 
@@ -107,14 +107,12 @@ export default function ChatWidget() {
     }
   }, [isOpen, chatContext]);
 
-  // ── Anonymous sign-in ───────────────────────────────────────────────────────
+  // ── Reset to AI Mode for Guest Users ───────────────────────────────────────
   useEffect(() => {
-    if (isOpen && !user) {
-      supabase.auth.signInAnonymously().catch((err) =>
-        console.error("Anon sign in failed", err)
-      );
+    if (!loading && !user) {
+      setAiMode(true);
     }
-  }, [isOpen, user]);
+  }, [user, loading]);
 
   // ── Load AI messages from Supabase (per user) ──────────────────────────────
   useEffect(() => {
@@ -418,21 +416,7 @@ export default function ChatWidget() {
             </div>
             <div className="flex flex-col">
               <span className="font-bold text-sm tracking-wide">Factory Flow Support</span>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="text-[9px] text-blue-100 uppercase tracking-wider">
-                  {aiMode ? "🤖 AI Copilot Active" : "💬 Live Chat Mode"}
-                </span>
-                <span className="text-blue-300/40">|</span>
-                <label className="flex items-center gap-1 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="toggle toggle-xs bg-white checked:bg-emerald-400 checked:border-emerald-400 cursor-pointer"
-                    checked={aiMode}
-                    onChange={(e) => setAiMode(e.target.checked)}
-                  />
-                  <span className="text-[9px] font-black text-blue-200 uppercase tracking-wider">AI Mode</span>
-                </label>
-              </div>
+              <span className="text-[10px] text-blue-100 font-semibold tracking-wide">Typically replies instantly</span>
             </div>
           </div>
 
@@ -441,6 +425,34 @@ export default function ChatWidget() {
             className="p-2 hover:bg-white/20 rounded-full transition-colors"
           >
             <X size={20} className="text-white" />
+          </button>
+        </div>
+
+        {/* --- NAVIGATION TABS --- */}
+        <div className="bg-white border-b border-gray-200 flex flex-row shrink-0 z-10 shadow-sm">
+          <button
+            type="button"
+            onClick={() => setAiMode(true)}
+            className={`flex-1 py-3 text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-2 border-b-2 transition-all duration-200 cursor-pointer
+              ${aiMode
+                ? "border-blue-600 text-blue-600 bg-blue-50/30"
+                : "border-transparent text-gray-400 hover:text-gray-600 hover:bg-gray-50/50"
+              }
+            `}
+          >
+            <span className="text-sm">🤖</span> AI Copilot
+          </button>
+          <button
+            type="button"
+            onClick={() => setAiMode(false)}
+            className={`flex-1 py-3 text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-2 border-b-2 transition-all duration-200 cursor-pointer
+              ${!aiMode
+                ? "border-blue-600 text-blue-600 bg-blue-50/30"
+                : "border-transparent text-gray-400 hover:text-gray-600 hover:bg-gray-50/50"
+              }
+            `}
+          >
+            <span className="text-sm">💬</span> Live Agent
           </button>
         </div>
 
@@ -457,6 +469,22 @@ export default function ChatWidget() {
               <div className="flex justify-start">
                 <div className="w-[60%] bg-slate-200 h-12 rounded-2xl rounded-bl-none"></div>
               </div>
+            </div>
+          ) : (!aiMode && !user) ? (
+            <div className="flex flex-col items-center justify-center min-h-[300px] text-center p-6 bg-white rounded-2xl border border-gray-200 shadow-sm my-auto">
+              <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 mb-3 shrink-0">
+                <MessageCircle size={24} />
+              </div>
+              <h3 className="font-bold text-gray-800 text-sm mb-1 uppercase tracking-wide">Live Chat Requires B2B Identity</h3>
+              <p className="text-xs text-gray-500 mb-4 max-w-[240px] leading-relaxed">
+                Please sign in to your registered corporate account to initiate a live support session.
+              </p>
+              <a
+                href="/login"
+                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-xs font-bold transition-all shadow-md shadow-blue-600/10 hover:shadow-blue-600/20 active:scale-95"
+              >
+                Sign In
+              </a>
             </div>
           ) : (aiMode ? aiMessages : messages).length === 0 ? (
             <div className="text-center text-gray-400 text-sm mt-10">
@@ -476,12 +504,13 @@ export default function ChatWidget() {
                 <div key={m.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
                   <div
                     className={`
-                      max-w-[80%] rounded-2xl px-4 py-2.5 text-sm shadow-sm
+                      max-w-[80%] rounded-2xl px-4 py-2.5 text-sm shadow-sm break-words
                       ${isMine
                         ? "bg-blue-600 text-white rounded-br-none"
                         : "bg-white text-gray-800 border border-gray-200 rounded-bl-none"
                       }
                     `}
+                    style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
                   >
                     {m.file_url ? (
                       <div className="mb-2">
@@ -531,8 +560,8 @@ export default function ChatWidget() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-            disabled={isSending}
+            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isSending || (!aiMode && !user)}
           >
             <Paperclip size={20} />
           </button>
@@ -546,23 +575,24 @@ export default function ChatWidget() {
                 handleSend(new Event("submit"));
               }
             }}
+            disabled={isSending || (!aiMode && !user)}
           />
 
           <input
             type="text"
-            className="flex-1 bg-gray-100 text-gray-800 text-sm rounded-full px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all"
-            placeholder={aiMode ? "Ask the AI copilot..." : "Type your message..."}
+            className="flex-1 bg-gray-100 text-gray-800 text-sm rounded-full px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:bg-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            placeholder={aiMode ? "Ask the AI copilot..." : (!user ? "Live chat requires signing in..." : "Type your message...")}
             value={msg}
             onChange={(e) => setMsg(e.target.value)}
-            disabled={isSending}
+            disabled={isSending || (!aiMode && !user)}
           />
 
           <button
             type="submit"
-            disabled={(!msg.trim() && !fileInputRef.current?.files[0]) || isSending}
+            disabled={(!msg.trim() && !fileInputRef.current?.files[0]) || isSending || (!aiMode && !user)}
             className={`
               p-2.5 rounded-full transition-all duration-200 flex items-center justify-center
-              ${msg.trim() || fileInputRef.current?.files[0]
+              ${(msg.trim() || fileInputRef.current?.files[0]) && !(!aiMode && !user)
                 ? "bg-blue-600 text-white shadow-lg hover:bg-blue-700 transform hover:scale-105"
                 : "bg-gray-100 text-gray-300 cursor-not-allowed"
               }
