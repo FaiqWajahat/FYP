@@ -3,16 +3,14 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Mail, Lock, User, ArrowRight, Chrome, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useConfigStore } from '@/store/useConfigStore';
 import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/store/AuthContext';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 
 export default function SignupForm() {
   const { projectName } = useConfigStore();
-  const { signInWithGoogle } = useAuth();
   const router = useRouter();
 
   const [fullName, setFullName] = useState('');
@@ -43,14 +41,6 @@ export default function SignupForm() {
       toast.error(err.message || "Failed to create account");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const onGoogleSignup = async () => {
-    try {
-      await signInWithGoogle();
-    } catch (err) {
-      toast.error("Failed to initiate Google Signup");
     }
   };
 
@@ -164,26 +154,6 @@ export default function SignupForm() {
             </motion.button>
           </motion.div>
         </form>
-
-        <motion.div variants={itemVariants} className="mt-8 relative flex items-center justify-center">
-          <div className="absolute inset-x-0 h-px bg-slate-100" />
-          <span className="relative z-10 bg-white px-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-            Or register with email
-          </span>
-        </motion.div>
-
-        <motion.div variants={itemVariants} className="mt-6">
-          <motion.button
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={onGoogleSignup}
-            type="button"
-            className="w-full py-3 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-semibold flex items-center justify-center gap-3 hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm shadow-slate-100 cursor-pointer"
-          >
-            <Chrome size={18} className="text-blue-500" />
-            Sign up with Google
-          </motion.button>
-        </motion.div>
 
         <motion.p variants={itemVariants} className="mt-6 text-center text-[10px] font-medium text-slate-400 leading-relaxed">
           By signing up, you agree to our{' '}
